@@ -1,12 +1,12 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'FYPHekla',
-  webDir: 'dist',
+  appId: "com.fyp.app",
+  appName: "LibraryMate",
+  webDir: "dist",
   server: {
-    androidScheme: 'https'
-  }
+    androidScheme: "https",
+  },
 };
 
 export default config;
