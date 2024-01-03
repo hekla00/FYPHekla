@@ -1,0 +1,7 @@
+{
+  "name": "FYPHekla",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
