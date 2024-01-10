@@ -1,8 +1,11 @@
-import { Redirect, Route } from "react-router-dom";
 import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
+import { Route, Redirect, Switch } from "react-router-dom";
 import { IonReactRouter } from "@ionic/react-router";
-import Home from "./pages/Home";
-
+import React, { useState } from "react";
+// Importing pages
+import LoginPage from "./pages/LoginPage";
+import AppTabs from "./AppTabs";
+import { authContext } from "./authentication";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -21,22 +24,49 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+import NotFoundPage from "./pages/NotFoundPage";
 
 setupIonicReact();
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/home" />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
-);
+const App: React.FC = () => {
+  const [loggedIn, setIsLoggedIn] = useState(false);
+  console.log(loggedIn);
 
+  return (
+    <IonApp>
+      {/* Making the AuthContext available accross the app */}
+      <authContext.Provider value={{ loggedIn }}>
+        <IonReactRouter>
+          {/* Swith always renders a single route even if there
+          are multiple rautes that match the requested path */}
+          <Switch>
+            <Route
+              path="/login"
+              exact={true}
+              render={(props) => (
+                <LoginPage
+                  {...props}
+                  loggedIn={loggedIn}
+                  onLogin={() => setIsLoggedIn(true)}
+                />
+              )}
+            />
+            {/* path prop is set to "/my" and thus when the URL
+            matches it will return/render the AppTabs component */}
+            <Route path="/my">
+              <AppTabs />
+            </Route>
+            <Redirect exact path="/" to="/my/home" />
+            {/* Route that does not specify a path 
+            So if no route matches the paths above the NotFoundPage 
+            will be rendered*/}
+            <Route>
+              <NotFoundPage />
+            </Route>
+          </Switch>
+        </IonReactRouter>
+      </authContext.Provider>
+    </IonApp>
+  );
+};
 export default App;
