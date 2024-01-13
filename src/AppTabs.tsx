@@ -21,6 +21,7 @@ import Home from "./pages/Home";
 import Library from "./pages/Library";
 import BookPage from "./pages/BookPage";
 import { useAuth } from "./authentication";
+import SettingsPage from "./pages/SettingsPage";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -60,6 +61,7 @@ const AppTabs: React.FC = () => {
         <Route path="/my/home" exact={true} component={Home} />
         <Route path="/my/library" component={Library} exact={true} />
         <Route path="/my/book/:id" component={BookPage} exact={true} />
+        <Route path="/my/settings" component={SettingsPage} exact={true} />
         <Route exact path="/" render={() => <Redirect to="/my/home" />} />
       </IonRouterOutlet>
       {/* Setting the tab bar at the bottom of the page */}
@@ -83,7 +85,7 @@ const AppTabs: React.FC = () => {
           <IonIcon icon={SearchIcon} />
           <IonLabel>Search</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="" href="">
+        <IonTabButton tab="SettingsPage" href="/my/settings">
           <IonIcon icon={MoreIcon} />
           <IonLabel>More</IonLabel>
         </IonTabButton>

@@ -1,11 +1,11 @@
-import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
+import { IonApp, IonLoading, setupIonicReact } from "@ionic/react";
 import { Route, Redirect, Switch } from "react-router-dom";
 import { IonReactRouter } from "@ionic/react-router";
-import React, { useState } from "react";
+import React from "react";
 // Importing pages
 import LoginPage from "./pages/LoginPage";
 import AppTabs from "./AppTabs";
-import { authContext } from "./authentication";
+import { authContext, useAuthInit } from "./authentication";
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
@@ -25,32 +25,31 @@ import "@ionic/react/css/display.css";
 /* Theme variables */
 import "./theme/variables.css";
 import NotFoundPage from "./pages/NotFoundPage";
+import RegisterPage from "./pages/RegisterPage";
 
 setupIonicReact();
 
 const App: React.FC = () => {
-  const [loggedIn, setIsLoggedIn] = useState(false);
-  console.log(loggedIn);
+  const { loading, auth } = useAuthInit();
+  console.log("auth: ", auth);
 
+  if (loading) {
+    return <IonLoading isOpen />;
+  }
   return (
     <IonApp>
       {/* Making the AuthContext available accross the app */}
-      <authContext.Provider value={{ loggedIn }}>
+      <authContext.Provider value={auth}>
         <IonReactRouter>
           {/* Swith always renders a single route even if there
           are multiple rautes that match the requested path */}
           <Switch>
-            <Route
-              path="/login"
-              exact={true}
-              render={(props) => (
-                <LoginPage
-                  {...props}
-                  loggedIn={loggedIn}
-                  onLogin={() => setIsLoggedIn(true)}
-                />
-              )}
-            />
+            <Route exact path="/login">
+              <LoginPage />
+            </Route>
+            <Route exact path="/register">
+              <RegisterPage />
+            </Route>
             {/* path prop is set to "/my" and thus when the URL
             matches it will return/render the AppTabs component */}
             <Route path="/my">

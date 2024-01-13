@@ -18,17 +18,20 @@ import { useAuth } from "../authentication";
 import { auth } from "../firebase";
 import { useState } from "react";
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
   const { loggedIn } = useAuth();
   //state variables for login form
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState({ loading: false, error: false });
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     try {
       setStatus({ loading: true, error: false });
-      const credential = await auth.signInWithEmailAndPassword(email, password);
+      const credential = await auth.createUserWithEmailAndPassword(
+        email,
+        password
+      );
       console.log("credential: ", credential);
       // setStatus({ loading: false, error: true });
       // this is done to let the app know that the user is logged in
@@ -48,7 +51,7 @@ const LoginPage: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Login</IonTitle>
+          <IonTitle>Register</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
@@ -74,15 +77,12 @@ const LoginPage: React.FC = () => {
           </IonItem>
         </IonList>
         {/* display error message if the user enters wrong credentials */}
-        {status.error && (
-          <IonText color="danger">Invalid email or password</IonText>
-        )}
-        <IonButton expand="block" onClick={handleLogin}>
-          Login
+        {status.error && <IonText color="danger">Registration failed</IonText>}
+        <IonButton expand="block" onClick={handleRegister}>
+          Create an account
         </IonButton>
-        {/* If the user does not have an account they are redirected to the register page */}
-        <IonButton expand="block" fill="clear" routerLink="/register">
-          Don't have an account?
+        <IonButton expand="block" fill="clear" routerLink="/login">
+          Already have an account?
         </IonButton>
         <IonLoading isOpen={status.loading} />
       </IonContent>
@@ -90,4 +90,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
