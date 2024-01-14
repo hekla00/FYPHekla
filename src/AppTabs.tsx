@@ -40,6 +40,7 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+import ManuallyAddBookPage from "./pages/ManuallyAddBookPage";
 
 setupIonicReact();
 
@@ -60,7 +61,12 @@ const AppTabs: React.FC = () => {
         {/* my is used in front for pages that only authenticated users can access */}
         <Route path="/my/home" exact={true} component={Home} />
         <Route path="/my/library" component={Library} exact={true} />
-        <Route path="/my/book/:id" component={BookPage} exact={true} />
+        <Route path="/my/books/view/:id" component={BookPage} exact={true} />
+        <Route
+          path="/my/books/add"
+          component={ManuallyAddBookPage}
+          exact={true}
+        />
         <Route path="/my/settings" component={SettingsPage} exact={true} />
         <Route exact path="/" render={() => <Redirect to="/my/home" />} />
       </IonRouterOutlet>
@@ -77,7 +83,7 @@ const AppTabs: React.FC = () => {
           <IonLabel>Library</IonLabel>
         </IonTabButton>
         {/* TODO */}
-        <IonTabButton tab="" href="">
+        <IonTabButton tab="add" href="/my/books/add">
           <IonIcon icon={AddIcon} />
           <IonLabel>Add</IonLabel>
         </IonTabButton>
