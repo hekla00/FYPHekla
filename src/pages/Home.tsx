@@ -24,9 +24,13 @@ const Home: React.FC = () => {
           <IonTitle>Home</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonLabel className='ion-padding'>Welcome to your library</IonLabel>
-      <IonText className='ion-padding'>TODO</IonText>
       <IonGrid>
+        <IonRow>
+          <IonLabel className='ion-padding'>Welcome to your library</IonLabel>
+        </IonRow>
+        <IonRow>
+          <IonText className='ion-padding'>TODO</IonText>
+        </IonRow>
         <IonRow>
           <IonCol size='6'>
             <IonCard>

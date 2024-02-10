@@ -6,31 +6,44 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-} from "@ionic/react";
-import "./Library.css";
+} from '@ionic/react';
+import './Library.css';
 // import { dummyBooks } from "../dummydata";
-import { firestore } from "../firebase";
-import { useEffect, useState } from "react";
-import { Book, toBook } from "../models";
-import { useAuth } from "../authentication";
+import { firestore } from '../firebase';
+import { useEffect, useState } from 'react';
+import { Book, toBook } from '../models';
+import { useAuth } from '../authentication';
+import firebase from 'firebase/app';
 
 const Library: React.FC = () => {
   const { userID } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
-  // fetch books from firestore
+
   useEffect(() => {
-    // reference to the Books collection and the user's books
-    const bookRef = firestore
-      .collection("users")
-      .doc(userID)
-      .collection("books");
-    // retrieve the data from the Books collection
-    bookRef.get().then(({ docs }) =>
-      // map the data to the book object
-      // set the books state to the mapped data
-      setBooks(docs.map(toBook))
-    );
-  }, [userID]);
+    // Get current user
+    const currentUser = firebase.auth().currentUser;
+
+    if (currentUser) {
+      // Reference to the 'userBooks' collection
+      const userBooksRef = firestore.collection('userBooks');
+
+      // Query the 'userBooks' collection where 'userID' field matches the current user's ID
+      return userBooksRef
+        .where('userID', '==', currentUser.uid)
+        .onSnapshot(({ docs }) => {
+          // For each document in the query result, get the corresponding book from the 'books' collection
+          const bookPromises = docs.map((doc) =>
+            firestore.collection('books').doc(doc.data().bookID).get()
+          );
+          Promise.all(bookPromises).then((bookDocs) => {
+            // Set the 'books' state to the mapped data
+            setBooks(bookDocs.map(toBook));
+          });
+        });
+    } else {
+      console.log('No user is signed in');
+    }
+  }, []);
   return (
     <IonPage>
       <IonHeader>
@@ -38,7 +51,7 @@ const Library: React.FC = () => {
           <IonTitle>Library</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className='ion-padding'>
         <IonList>
           {books.map((book) => (
             <IonItem
@@ -46,7 +59,7 @@ const Library: React.FC = () => {
               key={book.id}
               routerLink={`/my/books/view/${book.id}`}
             >
-              {book.title}
+              {book?.title}
             </IonItem>
           ))}
         </IonList>

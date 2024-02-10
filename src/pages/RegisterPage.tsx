@@ -4,25 +4,25 @@ import {
   IonHeader,
   IonInput,
   IonItem,
-  IonLabel,
   IonList,
   IonLoading,
   IonPage,
   IonText,
   IonTitle,
   IonToolbar,
-} from "@ionic/react";
-import "./Home.css";
-import { Redirect } from "react-router";
-import { useAuth } from "../authentication";
-import { auth } from "../firebase";
-import { useState } from "react";
+} from '@ionic/react';
+import './Home.css';
+import { Redirect } from 'react-router';
+import { useAuth } from '../authentication';
+import { auth } from '../firebase';
+import { useState } from 'react';
+import { firestore } from '../firebase';
 
 const RegisterPage: React.FC = () => {
   const { loggedIn } = useAuth();
   //state variables for login form
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [status, setStatus] = useState({ loading: false, error: false });
 
   const handleRegister = async () => {
@@ -32,20 +32,26 @@ const RegisterPage: React.FC = () => {
         email,
         password
       );
-      console.log("credential: ", credential);
+      console.log('credential: ', credential);
       // setStatus({ loading: false, error: true });
       // this is done to let the app know that the user is logged in
       // onLogin();
+      // Save the user credential information to the 'users' collection
+      const userRef = firestore.collection('users').doc(credential.user.uid);
+      await userRef.set({
+        email: credential.user.email,
+        // Add any other user properties you want to save here
+      });
     } catch (error) {
       // if the user enters wrong credentials, the error is set to true
       setStatus({ loading: false, error: true });
-      console.log("error: ", error);
+      console.log('error: ', error);
     }
     // console.log("email: ", email);
     // console.log("password: ", password);
   };
   if (loggedIn) {
-    return <Redirect to="/my/home" />;
+    return <Redirect to='/my/home' />;
   }
   return (
     <IonPage>
@@ -54,34 +60,34 @@ const RegisterPage: React.FC = () => {
           <IonTitle>Register</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className='ion-padding'>
         {/* Creating login form */}
         <IonList>
           <IonItem>
             <IonInput
-              label="Email"
-              labelPlacement="stacked"
-              type="email"
+              label='Email'
+              labelPlacement='stacked'
+              type='email'
               value={email}
               onIonChange={(event) => setEmail(event.detail.value)}
             />
           </IonItem>
           <IonItem>
             <IonInput
-              label="Password"
-              labelPlacement="stacked"
-              type="password"
+              label='Password'
+              labelPlacement='stacked'
+              type='password'
               value={password}
               onIonChange={(event) => setPassword(event.detail.value)}
             />
           </IonItem>
         </IonList>
         {/* display error message if the user enters wrong credentials */}
-        {status.error && <IonText color="danger">Registration failed</IonText>}
-        <IonButton expand="block" onClick={handleRegister}>
+        {status.error && <IonText color='danger'>Registration failed</IonText>}
+        <IonButton expand='block' onClick={handleRegister}>
           Create an account
         </IonButton>
-        <IonButton expand="block" fill="clear" routerLink="/login">
+        <IonButton expand='block' fill='clear' routerLink='/login'>
           Already have an account?
         </IonButton>
         <IonLoading isOpen={status.loading} />

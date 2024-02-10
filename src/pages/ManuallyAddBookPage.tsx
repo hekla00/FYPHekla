@@ -12,12 +12,13 @@ import {
   IonList,
   IonLabel,
   IonTextarea,
+  IonSelect,
 } from '@ionic/react';
 import React, { useState } from 'react';
 import { firestore } from '../firebase';
 import { useAuth } from '../authentication';
 import { useHistory } from 'react-router';
-
+import firebase from 'firebase/app';
 const ManuallyAddBookPage: React.FC = () => {
   const { userID } = useAuth();
   const [title, setTitle] = useState('');
@@ -39,11 +40,38 @@ const ManuallyAddBookPage: React.FC = () => {
   const [edition, setEdition] = useState('');
   const [notes, setNotes] = useState('');
 
+  const currentUser = firebase.auth().currentUser;
+  console.log('currentUser: ', currentUser);
+  const handleAddBook2 = async () => {
+    firebase.firestore().collection('books');
+  };
+  // const handleAddBook = async () => {
+  //   const booksRef = firestore
+  //     .collection('users')
+  //     .doc(userID)
+  //     .collection('books');
+  //   const newBookRef = {
+  //     title,
+  //     author,
+  //     location,
+  //     categories,
+  //     tags,
+  //     languages,
+  //     publisher,
+  //     description,
+  //     review,
+  //     pages,
+  //     releaseDate,
+  //     purchaseDate,
+  //     edition,
+  //     notes,
+  //   };
+  //   const bookRef = await booksRef.add(newBookRef);
+  //   console.log('bookRef: ', bookRef);
+  //   history.goBack();
+  // };
   const handleAddBook = async () => {
-    const booksRef = firestore
-      .collection('users')
-      .doc(userID)
-      .collection('books');
+    const booksRef = firestore.collection('books');
     const newBookRef = {
       title,
       author,
@@ -61,6 +89,16 @@ const ManuallyAddBookPage: React.FC = () => {
       notes,
     };
     const bookRef = await booksRef.add(newBookRef);
+
+    const newUserBooksRef = {
+      userID,
+      bookID: bookRef.id,
+    };
+    // write function that adds the books to the userBooks collection for the current user
+    const userBooksRefa = firestore.collection('userBooks');
+    const userBookRefb = await userBooksRefa.add(newUserBooksRef);
+    // firebase.firestore().collection('userBooks').add(userBooksRef);
+
     console.log('bookRef: ', bookRef);
     history.goBack();
   };
@@ -180,6 +218,7 @@ const ManuallyAddBookPage: React.FC = () => {
             onIonChange={(event) => setLocation(event.detail.value)}
           ></IonInput>
         </IonItem>
+
         <IonItem>
           <IonInput
             label='Categories'
@@ -261,6 +300,7 @@ const ManuallyAddBookPage: React.FC = () => {
             onIonChange={(event) => setNotes(event.detail.value)}
           ></IonTextarea>
         </IonItem>
+
         <IonList>
           {data?.docs?.map((author) => (
             <IonItem key={author.key}>
