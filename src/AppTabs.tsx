@@ -12,7 +12,7 @@ import {
   library as LibraryIcon,
   home as HomeIcon,
   add as AddIcon,
-  search as SearchIcon,
+  people as GroupsIcon,
   apps as MoreIcon,
 } from 'ionicons/icons';
 import React from 'react';
@@ -41,8 +41,10 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import ManuallyAddBookPage from './pages/ManuallyAddBookPage';
-import LoanBorrowTrackingPage from './pages/LoanBorrowTracking';
 import LoanBorrowTracking from './pages/LoanBorrowTracking';
+import GroupsPage from './pages/GroupsPage';
+import GroupCreationPage from './pages/GroupCreationPage';
+import AddMemberPage from './pages/AddMemberPage';
 
 setupIonicReact();
 
@@ -75,6 +77,14 @@ const AppTabs: React.FC = () => {
           component={LoanBorrowTracking}
           exact={true}
         />
+        <Route path='/my/groups' component={GroupsPage} exact={true} />
+        <Route path='/my/groups/:id' component={GroupsPage} exact={true} />
+        <Route
+          path='/my/groupcreation'
+          component={GroupCreationPage}
+          exact={true}
+        />
+        <Route path='/my/addmember' component={AddMemberPage} exact={true} />
         <Route exact path='/' render={() => <Redirect to='/my/home' />} />
       </IonRouterOutlet>
       {/* Setting the tab bar at the bottom of the page */}
@@ -94,9 +104,9 @@ const AppTabs: React.FC = () => {
           <IonIcon icon={AddIcon} />
           <IonLabel>Add</IonLabel>
         </IonTabButton>
-        <IonTabButton tab='' href=''>
-          <IonIcon icon={SearchIcon} />
-          <IonLabel>Search</IonLabel>
+        <IonTabButton tab='GroupsPage' href='/my/groups'>
+          <IonIcon icon={GroupsIcon} />
+          <IonLabel>Groups</IonLabel>
         </IonTabButton>
         <IonTabButton tab='SettingsPage' href='/my/settings'>
           <IonIcon icon={MoreIcon} />

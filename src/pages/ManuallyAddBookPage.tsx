@@ -41,7 +41,7 @@ const ManuallyAddBookPage: React.FC = () => {
   const [notes, setNotes] = useState('');
 
   const currentUser = firebase.auth().currentUser;
-  console.log('currentUser: ', currentUser);
+  // console.log('currentUser: ', currentUser);
   const handleAddBook2 = async () => {
     firebase.firestore().collection('books');
   };

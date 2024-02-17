@@ -7,7 +7,6 @@ import {
   IonList,
   IonItem,
   IonLabel,
-  IonToggle,
   IonButton,
   IonIcon,
 } from '@ionic/react';
