@@ -13,8 +13,6 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import { useAuth } from '../authentication';
-import { authContext } from '../authentication';
-import { add } from 'ionicons/icons';
 import { useEffect } from 'react';
 interface GroupCreationFormProps {
   // userUid: string;

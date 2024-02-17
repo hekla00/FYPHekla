@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   IonPage,
   IonHeader,
@@ -11,11 +11,35 @@ import {
 import firebase from 'firebase/app';
 import AddMemberForm from '../components/AddMemberForm';
 
-const AddMemberPage = ({ userUid }) => {
+const AddMemberPage = () => {
   const firestore = firebase.firestore();
-
-  // State variable for group ID
   const [groupId, setGroupId] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGroupId = async () => {
+      const userUid = firebase.auth().currentUser.uid;
+
+      // Query the 'groups' collection where the 'members' array contains the current user's ID
+      const groupSnapshot = await firestore
+        .collection('groups')
+        .where('members', 'array-contains', userUid)
+        .get();
+
+      if (!groupSnapshot.empty) {
+        // If the user is part of multiple groups, this will get the ID of the first group in the query results
+        const groupId = groupSnapshot.docs[0].id;
+        setGroupId(groupId);
+        setLoading(false);
+      }
+    };
+
+    fetchGroupId();
+  }, [firestore]);
+
+  if (loading) {
+    return <div>Loading...</div>; // Or your preferred loading UI
+  }
 
   return (
     <IonPage>
@@ -28,6 +52,7 @@ const AddMemberPage = ({ userUid }) => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
+        {/* Pass the groupId to the AddMemberForm */}
         <AddMemberForm groupId={groupId} firestore={firestore} />
       </IonContent>
     </IonPage>

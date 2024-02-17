@@ -11,12 +11,12 @@ import {
 } from '@ionic/react';
 import GroupCreationForm from '../components/GroupCreationForm';
 import firebase from 'firebase/app';
-import AddMemberForm from '../components/AddMemberForm';
 
 const GroupCreationPage = ({ userUid }) => {
   const firestore = firebase.firestore();
 
   // State variable for group ID
+
   const [groupId, setGroupId] = useState(null);
 
   return (

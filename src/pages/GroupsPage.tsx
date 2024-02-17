@@ -14,19 +14,30 @@ import {
   IonList,
   IonItem,
   IonContent,
+  IonFab,
+  IonFabButton,
+  IonFabList,
+  IonIcon,
 } from '@ionic/react';
 import { Redirect } from 'react-router';
-
+import { useHistory } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
+import { chevronUpCircle, personAdd, exit, settings } from 'ionicons/icons';
+
 const GroupsPage: React.FC = () => {
   const [groups, setGroups] = useState([]);
-
   const userId = firebase.auth().currentUser?.uid;
   const [loading, setLoading] = useState(true);
+
+  const history = useHistory();
+
+  const handleAddMemberClick = () => {
+    history.push('/my/addmember');
+  };
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -60,7 +71,7 @@ const GroupsPage: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Groups</IonTitle>
+          <IonTitle>{groups[0].groupName}</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>
@@ -70,54 +81,30 @@ const GroupsPage: React.FC = () => {
               Welcome to the Groups Page
             </IonLabel>
           </IonRow>
-          <IonRow>
-            <IonCol size='6'>
-              <IonCard>
-                <IonCardHeader>
-                  <IonButton fill='clear' routerLink='/my/books/add'>
-                    <IonCardTitle className='small-font'>
-                      Join a Group
-                    </IonCardTitle>
-                  </IonButton>
-                </IonCardHeader>
-              </IonCard>
-            </IonCol>
-            <IonCol size='6'>
-              <IonCard>
-                <IonCardHeader>
-                  <IonButton fill='clear' routerLink='/my/groupcreation'>
-                    <IonCardTitle className='small-font'>
-                      Create a Group
-                    </IonCardTitle>
-                  </IonButton>
-                </IonCardHeader>
-              </IonCard>
-            </IonCol>
-            <IonCol size='12'>
-              <IonCard>
-                <IonCardHeader>
-                  <IonButton fill='clear' routerLink='/my/addmember'>
-                    <IonCardTitle className='small-font'>
-                      Add a Member to a Group
-                    </IonCardTitle>
-                  </IonButton>
-                </IonCardHeader>
-              </IonCard>
-            </IonCol>
-          </IonRow>
-          <IonRow>
-            <IonCol>
-              <IonTitle>Your Groups</IonTitle>
-            </IonCol>
-          </IonRow>
-          <IonList lines='full'>
+          {/* <IonList lines='full'>
             {groups.map((item, index) => (
               <IonItem key={index}>
                 <IonLabel>{item.groupName}</IonLabel>
               </IonItem>
             ))}
-          </IonList>
+          </IonList> */}
         </IonGrid>
+        <IonFab vertical='bottom' horizontal='end' slot='fixed'>
+          <IonFabButton>
+            <IonIcon icon={chevronUpCircle}></IonIcon>
+          </IonFabButton>
+          <IonFabList side='top'>
+            <IonFabButton>
+              <IonIcon icon={settings}></IonIcon>
+            </IonFabButton>
+            <IonFabButton onClick={handleAddMemberClick}>
+              <IonIcon icon={personAdd}></IonIcon>
+            </IonFabButton>
+            <IonFabButton>
+              <IonIcon icon={exit}></IonIcon>
+            </IonFabButton>
+          </IonFabList>
+        </IonFab>
       </IonContent>
     </IonPage>
   );
