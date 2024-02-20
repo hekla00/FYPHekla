@@ -1,8 +1,4 @@
 import {
-  IonButton,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
   IonHeader,
   IonPage,
   IonTitle,
@@ -18,6 +14,8 @@ import {
   IonFabButton,
   IonFabList,
   IonIcon,
+  IonListHeader,
+  IonAvatar,
 } from '@ionic/react';
 import { Redirect } from 'react-router';
 import { useHistory } from 'react-router-dom';
@@ -25,15 +23,18 @@ import { useEffect, useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import LeaveGroup from '../components/LeaveGroup';
 
-import { chevronUpCircle, personAdd, exit, settings } from 'ionicons/icons';
+import { chevronUpCircle, personAdd } from 'ionicons/icons';
 
 const GroupsPage: React.FC = () => {
   const [groups, setGroups] = useState([]);
-  const userId = firebase.auth().currentUser?.uid;
+  const currentUserId = firebase.auth().currentUser?.uid;
+  console.log('currentUserId', currentUserId);
   const [loading, setLoading] = useState(true);
-
+  const [membersData, setMembersData] = useState([]);
   const history = useHistory();
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   const handleAddMemberClick = () => {
     history.push('/my/addmember');
@@ -41,37 +42,68 @@ const GroupsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchGroups = async () => {
-      setLoading(true);
       const db = firebase.firestore();
-      const snapshot = await db
-        .collection('groups')
-        .where('members', 'array-contains', userId)
-        .get();
-
-      const groups = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setGroups(groups);
-      setLoading(false);
+      console.log('currentUserId', currentUserId);
+      db.collection('groups')
+        .where('members', 'array-contains', currentUserId)
+        .get()
+        .then((snapshot) => {
+          const groups = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          console.log('groups', groups);
+          setGroups(groups);
+          console.log('groups after', groups);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching groups:', error);
+        });
     };
 
     fetchGroups();
-  }, [userId]);
+  }, [currentUserId]);
 
-  if (loading) {
-    return <div>Loading...</div>; // or return a loading spinner
+  useEffect(() => {
+    const fetchMembersData = async () => {
+      const db = firebase.firestore();
+
+      // Fetch user data for each member
+      const membersDataPromises = groups[0].members.map((memberId) =>
+        db.collection('publicUsers').doc(memberId).get()
+      );
+      const membersSnapshots = await Promise.all(membersDataPromises);
+
+      // Map over the snapshots to get the user data
+      const membersData = membersSnapshots.map((snapshot) => ({
+        id: snapshot.id,
+        ...snapshot.data(),
+      }));
+
+      setMembersData(membersData);
+    };
+
+    // Only fetch member data if the groups have been loaded
+    if (groups.length > 0) {
+      fetchMembersData();
+    }
+  }, [groups]);
+
+  if (groups.length === 0 && !loading) {
+    console.log('Redirecting to /my/groupcreation');
+    return <Redirect to='/my/groupcreation' />;
   }
 
-  if (groups.length === 0) {
-    return <Redirect to='/my/groupcreation' />;
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>{groups[0].groupName}</IonTitle>
+          <IonTitle>{groups[0].name}</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>
@@ -81,28 +113,36 @@ const GroupsPage: React.FC = () => {
               Welcome to the Groups Page
             </IonLabel>
           </IonRow>
-          {/* <IonList lines='full'>
-            {groups.map((item, index) => (
-              <IonItem key={index}>
-                <IonLabel>{item.groupName}</IonLabel>
-              </IonItem>
-            ))}
-          </IonList> */}
+          <IonRow>
+            <IonCol>
+              <IonListHeader>
+                <IonLabel>Members</IonLabel>
+              </IonListHeader>
+              <IonList lines='full'>
+                {membersData.map((member, index) => (
+                  <IonItem key={index}>
+                    <IonAvatar slot='start'>
+                      <img src={member.profile || '/placeholder1.jpg'} />
+                    </IonAvatar>
+                    <IonLabel>{member.email}</IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
+            </IonCol>
+          </IonRow>
         </IonGrid>
         <IonFab vertical='bottom' horizontal='end' slot='fixed'>
           <IonFabButton>
             <IonIcon icon={chevronUpCircle}></IonIcon>
           </IonFabButton>
           <IonFabList side='top'>
-            <IonFabButton>
+            {/* <IonFabButton>
               <IonIcon icon={settings}></IonIcon>
-            </IonFabButton>
+            </IonFabButton> */}
             <IonFabButton onClick={handleAddMemberClick}>
               <IonIcon icon={personAdd}></IonIcon>
             </IonFabButton>
-            <IonFabButton>
-              <IonIcon icon={exit}></IonIcon>
-            </IonFabButton>
+            <LeaveGroup groupId={groups[0].id} />
           </IonFabList>
         </IonFab>
       </IonContent>

@@ -1,16 +1,8 @@
-import React, { useState } from 'react';
-import {
-  IonInput,
-  IonButton,
-  IonItem,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonText,
-} from '@ionic/react';
+import React, { useState, useEffect } from 'react';
+import { IonGrid, IonRow, IonCol, IonToast } from '@ionic/react';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
-import { useAuth } from '../authentication';
+import UserSearchAndAdd from './UserSearchAndAdd';
 
 interface AddMemberFormProps {
   firestore: firebase.firestore.Firestore;
@@ -21,68 +13,110 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({
   firestore,
   groupId,
 }) => {
-  const [newUserEmail, setNewUserEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [emails, setEmails] = useState([]);
-  const currentUser = firebase.auth().currentUser;
-  // console.log('Current user ID:', currentUser?.uid);
-  const addUser = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const [showSearchResults, setShowSearchResults] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
+  const [members, setMembers] = useState<string[]>([]);
 
-    console.log(newUserEmail);
-    try {
-      const userSnapshot = await firestore
-        .collection('publicUsers')
-        .where('email', '==', newUserEmail)
+  useEffect(() => {
+    const fetchGroupMembers = async () => {
+      const groupSnapshot = await firestore
+        .collection('groups')
+        .doc(groupId)
         .get();
-
-      if (!userSnapshot.empty) {
-        const userId = userSnapshot.docs[0].id;
-        // Add the new user to the group in Firestore
-        await firestore
-          .collection('groups')
-          .doc(groupId)
-          .update({
-            members: firebase.firestore.FieldValue.arrayUnion(userId),
-          });
-        setSuccessMessage(
-          `User with email ${newUserEmail} was successfully added to the group.`
-        );
-        setErrorMessage('');
-      } else {
-        setErrorMessage(`No user found with email: ${newUserEmail}`);
+      const groupData = groupSnapshot.data();
+      if (groupData && groupData.members) {
+        setMembers(groupData.members);
       }
+    };
+
+    fetchGroupMembers();
+  }, [firestore, groupId]);
+
+  const onUserRemove = async (userId) => {
+    setIsAdding(true);
+    try {
+      // Remove the user from the group in Firestore
+      await firestore
+        .collection('groups')
+        .doc(groupId)
+        .update({
+          members: firebase.firestore.FieldValue.arrayRemove(userId),
+        });
+      setSuccessMessage(`User was successfully removed from the group.`);
+      setErrorMessage('');
     } catch (error) {
-      setErrorMessage(`Error adding user to group: ${error.message}`);
+      console.error('Error removing user from group:', error);
+      setErrorMessage(`Error removing user from group: ${error.message}`);
     }
-
-    // setNewUserEmail(''); // Clear the new user email input field
+    setIsAdding(false);
   };
-
   return (
-    <form onSubmit={addUser}>
+    <form>
       <IonGrid>
         <IonRow>
           <IonCol>
-            <IonItem>
-              <IonInput
-                label='Add User Email'
-                labelPlacement='floating'
-                value={newUserEmail}
-                onIonChange={(e) => setNewUserEmail(e.detail.value || '')}
+            {showSearchResults && (
+              <UserSearchAndAdd
+                onUserAdd={async (userId, userEmail) => {
+                  setIsAdding(true);
+                  try {
+                    // Fetch the group data from Firestore
+                    const groupSnapshot = await firestore
+                      .collection('groups')
+                      .doc(groupId)
+                      .get();
+                    const groupData = groupSnapshot.data();
+
+                    // Check if the user is already a member of the group
+                    if (groupData && groupData.members.includes(userId)) {
+                      // The user is already a member of the group, so set an error message
+                      setErrorMessage(
+                        `User with email ${userEmail} is already a member of the group.`
+                      );
+                    } else {
+                      // The user is not a member of the group, so add them
+                      await firestore
+                        .collection('groups')
+                        .doc(groupId)
+                        .update({
+                          members:
+                            firebase.firestore.FieldValue.arrayUnion(userId),
+                        });
+                      setSuccessMessage(
+                        `User with email ${userEmail} was successfully added to the group.`
+                      );
+                      setErrorMessage('');
+                    }
+                  } catch (error) {
+                    console.error('Error adding user to group:', error);
+                    setErrorMessage(
+                      `Error adding user to group: ${error.message}`
+                    );
+                  }
+                  setIsAdding(false);
+                }}
               />
-            </IonItem>
-            <IonButton expand='full' type='submit'>
-              Add User
-            </IonButton>
-            {successMessage && (
-              <IonText color='success'>{successMessage}</IonText>
-            )}{' '}
-            {errorMessage && <IonText color='danger'>{errorMessage}</IonText>}
+            )}
           </IonCol>
         </IonRow>
       </IonGrid>
+
+      <IonToast
+        isOpen={!!successMessage}
+        onDidDismiss={() => setSuccessMessage('')}
+        message={successMessage}
+        duration={2000}
+        color='success'
+      />
+      <IonToast
+        isOpen={!!errorMessage}
+        onDidDismiss={() => setErrorMessage('')}
+        message={errorMessage}
+        duration={2000}
+        color='danger'
+      />
     </form>
   );
 };

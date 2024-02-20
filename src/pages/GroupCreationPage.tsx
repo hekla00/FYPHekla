@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   IonPage,
   IonHeader,
   IonToolbar,
   IonTitle,
   IonContent,
-  IonGrid,
   IonBackButton,
   IonButtons,
 } from '@ionic/react';
@@ -14,30 +13,20 @@ import firebase from 'firebase/app';
 
 const GroupCreationPage = ({ userUid }) => {
   const firestore = firebase.firestore();
-
-  // State variable for group ID
-
   const [groupId, setGroupId] = useState(null);
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonButtons slot='start'>
+          {/* <IonButtons slot='start'>
             <IonBackButton defaultHref='/my/groups' />
-          </IonButtons>
+          </IonButtons> */}
           <IonTitle>Create Group</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        {/* GroupCreationForm sets the group ID once created */}
-        <GroupCreationForm
-          //   userUid={userUid}
-          firestore={firestore}
-          setGroupId={setGroupId}
-        />
-        {/* AddMemberForm uses the group ID to add members */}
-        {/* <AddMemberForm groupId={groupId} firestore={firestore} /> */}
+        <GroupCreationForm firestore={firestore} setGroupId={setGroupId} />
       </IonContent>
     </IonPage>
   );

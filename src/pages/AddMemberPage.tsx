@@ -38,7 +38,7 @@ const AddMemberPage = () => {
   }, [firestore]);
 
   if (loading) {
-    return <div>Loading...</div>; // Or your preferred loading UI
+    return <div>Loading...</div>;
   }
 
   return (
@@ -52,7 +52,6 @@ const AddMemberPage = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        {/* Pass the groupId to the AddMemberForm */}
         <AddMemberForm groupId={groupId} firestore={firestore} />
       </IonContent>
     </IonPage>
