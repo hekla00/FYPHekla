@@ -12,20 +12,21 @@ import {
   IonList,
   IonLabel,
   IonTextarea,
-  IonSelect,
+  IonIcon,
 } from '@ionic/react';
-import React, { useState } from 'react';
+import { search } from 'ionicons/icons';
+import React, { useState, useRef } from 'react';
 import { firestore } from '../firebase';
 import { useAuth } from '../authentication';
 import { useHistory } from 'react-router';
 import firebase from 'firebase/app';
+import SearchResultModal from '../components/SearchResultModal';
 const ManuallyAddBookPage: React.FC = () => {
   const { userID } = useAuth();
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [data, setData] = useState(null);
   const [isbnData, setIsbnData] = useState('');
-  const [openlibraryData, setOpenlibraryData] = useState(null);
   const history = useHistory();
   const [location, setLocation] = useState('');
   const [categories, setCategory] = useState('');
@@ -39,37 +40,13 @@ const ManuallyAddBookPage: React.FC = () => {
   const [purchaseDate, setPurchaseDate] = useState('');
   const [edition, setEdition] = useState('');
   const [notes, setNotes] = useState('');
-
+  const isbnDataRef = useRef('');
+  const [modalData, setModalData] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [books, setBooks] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const currentUser = firebase.auth().currentUser;
-  // console.log('currentUser: ', currentUser);
-  const handleAddBook2 = async () => {
-    firebase.firestore().collection('books');
-  };
-  // const handleAddBook = async () => {
-  //   const booksRef = firestore
-  //     .collection('users')
-  //     .doc(userID)
-  //     .collection('books');
-  //   const newBookRef = {
-  //     title,
-  //     author,
-  //     location,
-  //     categories,
-  //     tags,
-  //     languages,
-  //     publisher,
-  //     description,
-  //     review,
-  //     pages,
-  //     releaseDate,
-  //     purchaseDate,
-  //     edition,
-  //     notes,
-  //   };
-  //   const bookRef = await booksRef.add(newBookRef);
-  //   console.log('bookRef: ', bookRef);
-  //   history.goBack();
-  // };
+
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
     const newBookRef = {
@@ -100,13 +77,14 @@ const ManuallyAddBookPage: React.FC = () => {
     // firebase.firestore().collection('userBooks').add(userBooksRef);
 
     console.log('bookRef: ', bookRef);
-    history.goBack();
+    // history.goBack();
+    history.push('/my/library');
   };
 
   // create function that calls an Restful API that has a query parameter q and returns a JSON response
   const handleAuthorSearch = async (author) => {
     const response = await fetch(
-      `https://openlibrary.org/search/authors.json?q=${encodeURIComponent(
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
         author
       )}`
     );
@@ -120,34 +98,60 @@ const ManuallyAddBookPage: React.FC = () => {
     }
   };
 
-  //
-  // const handleISBNSearch = async (isbn) => {
-  //   console.log('isbn: ', isbn);
+  const handleISBNSearch = async (isbn) => {
+    console.log('isbn1: ', isbn);
+    setShowModal(false);
+    // Setting loading to true when the search starts
+    setIsLoading(true);
+    const response = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=isbn+${encodeURIComponent(
+        isbn
+      )}`
+    );
+    const data = await response.json();
 
-  //   const response = await fetch(
-  //     `https://openlibrary.org/isbn/${encodeURIComponent(isbn)}`,
-  //     // `https://openlibrary.org/isbn/978-0590353427`,
-  //     { mode: 'no-cors' }
-  //   );
-  //   const data = await response.json();
-  //   setIsbnData(data);
-
-  //   console.log('isbnData: ', isbnData);
-  // };
-  const handleISBNSearch = async () => {
-    // console.log('isbn: ', isbn);
-    console.log('isbnData: ', isbnData);
-    if (isbnData) {
-      // const url = `/isbn/${encodeURIComponent(isbnData)}`;
-      const url = `https://cors-anywhere.herokuapp.com/https://openlibrary.org/isbn/${encodeURIComponent(
-        isbnData
-      )}`;
-      console.log('url: ', url);
-      const response = await fetch(url);
-      const data = await response.json();
-      setOpenlibraryData(data);
+    // Setting loading to false when the search ends
+    setIsLoading(false);
+    setData(data);
+    console.log('data: ', data);
+    console.log('isbn: ', isbn);
+    // check if author is found in the data and assign the author to the author state
+    if (data?.isbnData) {
+      setIsbnData(data.isbn);
     }
-    console.log('Open data: ', openlibraryData);
+
+    const books = data.items.map((item) => item.volumeInfo);
+    console.log('books: ', books);
+    setBooks(books);
+    if (data.items.length === 1) {
+      const book = data.items[0].volumeInfo;
+      console.log('book: ', book);
+      setTitle(book.title);
+      setAuthor(book.authors);
+      setDescription(book.description);
+      setPublisher(book.publisher);
+      setPages(book.pageCount);
+      setReleaseDate(book.publishedDate);
+      setShowModal(false);
+    } else if (data.items.length > 1) {
+      // inject data into modal
+      setModalData(data.items);
+      // show model to select book
+      setShowModal(true);
+    } else {
+      // If no book is found, show a message to the user
+    }
+  };
+
+  // setting the book data to the different states based on the book selected
+  const handleBookSelect = (book) => {
+    setTitle(book.volumeInfo.title);
+    setAuthor(book.volumeInfo.authors);
+    setDescription(book.volumeInfo.description);
+    setPublisher(book.volumeInfo.publisher);
+    setPages(book.volumeInfo.pageCount);
+    setReleaseDate(book.volumeInfo.publishedDate);
+    setShowModal(false);
   };
 
   return (
@@ -166,10 +170,24 @@ const ManuallyAddBookPage: React.FC = () => {
             label='ISBN'
             labelPlacement='stacked'
             value={isbnData}
-            onIonChange={(event) => setIsbnData(event.detail.value)}
-            onIonBlur={(event) => handleISBNSearch()}
+            onIonChange={(event) => {
+              setIsbnData(event.detail.value);
+              isbnDataRef.current = event.detail.value;
+            }}
           />
+          <IonButton
+            slot='end'
+            onClick={() => handleISBNSearch(isbnDataRef.current)}
+          >
+            <IonIcon icon={search} />
+          </IonButton>
         </IonItem>
+        <SearchResultModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          books={modalData}
+          onBookSelect={handleBookSelect}
+        />
         <IonItem>
           <IonInput
             label='Title'
@@ -308,13 +326,6 @@ const ManuallyAddBookPage: React.FC = () => {
             </IonItem>
           ))}
         </IonList>
-        {/* <IonList>
-          {isbnData?.docs?.map((isbn) => (
-            <IonItem key={isbn.isbn_13}>
-              <IonLabel>{isbn.isbn_13}</IonLabel>
-            </IonItem>
-          ))}
-        </IonList> */}
         <IonButton expand='block' onClick={handleAddBook}>
           Add Book
         </IonButton>
