@@ -26,29 +26,71 @@ const RegisterPage: React.FC = () => {
   const [status, setStatus] = useState({ loading: false, error: false });
 
   const handleRegister = async () => {
+    //   try {
+    //     setStatus({ loading: true, error: false });
+    //     const credential = await auth.createUserWithEmailAndPassword(
+    //       email,
+    //       password
+    //     );
+    //     console.log('credential: ', credential);
+    //     // setStatus({ loading: false, error: true });
+    //     // this is done to let the app know that the user is logged in
+    //     // onLogin();
+    //     // Save the user credential information to the 'users' collection
+    //     const userRef = firestore.collection('users').doc(credential.user.uid);
+    //     await userRef.set({
+    //       email: credential.user.email,
+    //       // Add any other user properties you want to save here
+    //     });
+    //     // Save the user's email and ID to the 'publicUsers' collection
+    //     const publicUserRef = firestore
+    //       .collection('publicUsers')
+    //       .doc(credential.user.uid);
+    //     await publicUserRef.set({
+    //       email: credential.user.email,
+    //       id: credential.user.uid,
+    //     });
+    //   } catch (error) {
+    //     // if the user enters wrong credentials, the error is set to true
+    //     setStatus({ loading: false, error: true });
+    //     console.log('error: ', error);
+    //   }
+    //   // console.log("email: ", email);
+    //   // console.log("password: ", password);
+    // };const handleRegister = async () => {
     try {
       setStatus({ loading: true, error: false });
+
+      // Validate password length
+      if (password.length < 6) {
+        setStatus({ loading: false, error: true });
+        console.log('Error: Password must be at least 6 characters long');
+        return;
+      }
+
       const credential = await auth.createUserWithEmailAndPassword(
         email,
         password
       );
       console.log('credential: ', credential);
-      // setStatus({ loading: false, error: true });
-      // this is done to let the app know that the user is logged in
-      // onLogin();
-      // Save the user credential information to the 'users' collection
+
       const userRef = firestore.collection('users').doc(credential.user.uid);
       await userRef.set({
         email: credential.user.email,
         // Add any other user properties you want to save here
       });
+
+      const publicUserRef = firestore
+        .collection('publicUsers')
+        .doc(credential.user.uid);
+      await publicUserRef.set({
+        email: credential.user.email,
+        id: credential.user.uid,
+      });
     } catch (error) {
-      // if the user enters wrong credentials, the error is set to true
       setStatus({ loading: false, error: true });
       console.log('error: ', error);
     }
-    // console.log("email: ", email);
-    // console.log("password: ", password);
   };
   if (loggedIn) {
     return <Redirect to='/my/home' />;

@@ -26,7 +26,6 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import NotFoundPage from './pages/NotFoundPage';
 import RegisterPage from './pages/RegisterPage';
-import ManuallyAddBookPage from './pages/ManuallyAddBookPage';
 
 setupIonicReact();
 
