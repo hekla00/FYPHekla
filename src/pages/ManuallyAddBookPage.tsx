@@ -13,14 +13,18 @@ import {
   IonLabel,
   IonTextarea,
   IonIcon,
+  IonThumbnail,
 } from '@ionic/react';
 import { search } from 'ionicons/icons';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { firestore } from '../firebase';
 import { useAuth } from '../authentication';
 import { useHistory } from 'react-router';
 import firebase from 'firebase/app';
 import SearchResultModal from '../components/SearchResultModal';
+import { add as AddIcon, bookSharp, star, starOutline } from 'ionicons/icons';
+import './ManuallyAddBookPage.css';
+
 const ManuallyAddBookPage: React.FC = () => {
   const { userID } = useAuth();
   const [title, setTitle] = useState('');
@@ -29,7 +33,7 @@ const ManuallyAddBookPage: React.FC = () => {
   const [isbnData, setIsbnData] = useState('');
   const history = useHistory();
   const [location, setLocation] = useState('');
-  const [categories, setCategory] = useState('');
+  const [categories, setCategory] = useState([]);
   const [tags, setTags] = useState('');
   const [languages, setLanguage] = useState('');
   const [publisher, setPublisher] = useState('');
@@ -46,6 +50,10 @@ const ManuallyAddBookPage: React.FC = () => {
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const currentUser = firebase.auth().currentUser;
+  const [newCategory, setNewCategory] = useState('');
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [bookSelected, setBookSelected] = useState(false);
+  const [rating, setRating] = useState(0);
 
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
@@ -64,6 +72,7 @@ const ManuallyAddBookPage: React.FC = () => {
       purchaseDate,
       edition,
       notes,
+      rating,
     };
     const bookRef = await booksRef.add(newBookRef);
 
@@ -132,7 +141,10 @@ const ManuallyAddBookPage: React.FC = () => {
       setPublisher(book.publisher);
       setPages(book.pageCount);
       setReleaseDate(book.publishedDate);
+      setCategory(book.categories);
+      setThumbnailUrl(book.imageLinks?.thumbnail);
       setShowModal(false);
+      setBookSelected(true);
     } else if (data.items.length > 1) {
       // inject data into modal
       setModalData(data.items);
@@ -151,7 +163,30 @@ const ManuallyAddBookPage: React.FC = () => {
     setPublisher(book.volumeInfo.publisher);
     setPages(book.volumeInfo.pageCount);
     setReleaseDate(book.volumeInfo.publishedDate);
+    setCategory(book.volumeInfo.categories);
+    setThumbnailUrl(book.volumeInfo.imageLinks?.thumbnail);
     setShowModal(false);
+    setBookSelected(true);
+  };
+
+  const handleAddCategory = (newCategory) => {
+    if (newCategory.trim() !== '') {
+      setCategory((prevCategories) => [...prevCategories, newCategory]);
+      console.log('categories: ', [...categories, newCategory]);
+      setNewCategory(''); // Clear the input field
+    }
+  };
+
+  const handleRemoveCategory = (categoryToRemove) => {
+    setCategory(categories.filter((category) => category !== categoryToRemove));
+  };
+
+  useEffect(() => {
+    console.log('categories2: ', categories);
+  }, [categories]);
+
+  const handleRatingChange = (newRating) => {
+    setRating(newRating);
   };
 
   return (
@@ -165,6 +200,23 @@ const ManuallyAddBookPage: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className='ion-padding'>
+        <div className='thumbnail-container'>
+          {bookSelected ? (
+            <img src={thumbnailUrl} className='full-thumbnail' />
+          ) : (
+            <IonIcon icon={bookSharp} className='book-icon' />
+          )}
+        </div>
+        <div className='rating-container'>
+          {[1, 2, 3, 4, 5].map((starNumber) => (
+            <IonIcon
+              key={starNumber}
+              icon={starNumber <= rating ? star : starOutline}
+              onClick={() => handleRatingChange(starNumber)}
+              className='rating-star'
+            />
+          ))}
+        </div>
         <IonItem>
           <IonInput
             label='ISBN'
@@ -237,7 +289,7 @@ const ManuallyAddBookPage: React.FC = () => {
           ></IonInput>
         </IonItem>
 
-        <IonItem>
+        {/* <IonItem>
           <IonInput
             label='Categories'
             labelPlacement='stacked'
@@ -245,7 +297,34 @@ const ManuallyAddBookPage: React.FC = () => {
             value={categories}
             onIonChange={(event) => setCategory(event.detail.value)}
           />
+        </IonItem> */}
+        <IonItem>
+          <IonInput
+            label='Categories'
+            labelPlacement='stacked'
+            // debounce={1000}
+            value={newCategory}
+            onIonChange={(event) => setNewCategory(event.detail.value)}
+            // onIonBlur={() => handleAddCategory(newCategory)}
+          />
+          <IonButton slot='end' onClick={() => handleAddCategory(newCategory)}>
+            <IonIcon icon={AddIcon} />
+          </IonButton>
         </IonItem>
+        <IonList>
+          {categories.map((category, index) => (
+            <IonItem key={index}>
+              <IonLabel>{category}</IonLabel>
+
+              <IonButton
+                // style={{ color: 'red' }}
+                onClick={() => handleRemoveCategory(category)}
+              >
+                Remove
+              </IonButton>
+            </IonItem>
+          ))}
+        </IonList>
         <IonItem>
           <IonInput
             label='Tags'
