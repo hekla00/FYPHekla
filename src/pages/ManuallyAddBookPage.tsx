@@ -394,15 +394,30 @@ const ManuallyAddBookPage: React.FC = () => {
                   onIonChange={(event) => setPages(event.detail.value)}
                 />
               </IonItem>
-              <IonItem>
+              <IonItem onClick={() => setShowPopover(true)}>
                 <IonInput
-                  label='Release Date'
                   labelPlacement='stacked'
-                  debounce={1000}
+                  label='Release Date'
                   value={releaseDate}
-                  onIonChange={(event) => setReleaseDate(event.detail.value)}
+                  readonly
                 />
               </IonItem>
+
+              <IonPopover
+                isOpen={showPopover}
+                onDidDismiss={() => setShowPopover(false)}
+              >
+                <IonDatetime
+                  presentation='date'
+                  value={releaseDate || undefined}
+                  onIonChange={(event) => {
+                    const date = new Date(event.detail.value as string);
+                    const formattedDate = date.toISOString().split('T')[0];
+                    setReleaseDate(formattedDate);
+                    setShowPopover(false);
+                  }}
+                />
+              </IonPopover>
               <IonItem>
                 <IonInput
                   label='Edition'
