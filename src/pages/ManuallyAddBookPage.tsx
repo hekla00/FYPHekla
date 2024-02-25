@@ -14,6 +14,10 @@ import {
   IonTextarea,
   IonIcon,
   IonThumbnail,
+  IonDatetime,
+  IonPopover,
+  IonAccordionGroup,
+  IonAccordion,
 } from '@ionic/react';
 import { search } from 'ionicons/icons';
 import React, { useState, useRef, useEffect } from 'react';
@@ -54,6 +58,7 @@ const ManuallyAddBookPage: React.FC = () => {
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [bookSelected, setBookSelected] = useState(false);
   const [rating, setRating] = useState(0);
+  const [showPopover, setShowPopover] = useState(false);
 
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
@@ -145,6 +150,7 @@ const ManuallyAddBookPage: React.FC = () => {
       setThumbnailUrl(book.imageLinks?.thumbnail);
       setShowModal(false);
       setBookSelected(true);
+      setLanguage(book.language);
     } else if (data.items.length > 1) {
       // inject data into modal
       setModalData(data.items);
@@ -165,6 +171,7 @@ const ManuallyAddBookPage: React.FC = () => {
     setReleaseDate(book.volumeInfo.publishedDate);
     setCategory(book.volumeInfo.categories);
     setThumbnailUrl(book.volumeInfo.imageLinks?.thumbnail);
+    setLanguage(book.volumeInfo.language);
     setShowModal(false);
     setBookSelected(true);
   };
@@ -196,7 +203,7 @@ const ManuallyAddBookPage: React.FC = () => {
           <IonButtons slot='start'>
             <IonBackButton />
           </IonButtons>
-          <IonTitle>Add Book</IonTitle>
+          <IonTitle>Add a Book</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className='ion-padding'>
@@ -262,16 +269,17 @@ const ManuallyAddBookPage: React.FC = () => {
           />
         </IonItem>
         <IonItem>
-          <IonTextarea
-            label='Description'
+          <IonInput
+            label='Location'
             labelPlacement='stacked'
             debounce={1000}
-            value={description}
-            onIonChange={(event) => setDescription(event.detail.value)}
-          ></IonTextarea>
+            value={location}
+            onIonChange={(event) => setLocation(event.detail.value)}
+          ></IonInput>
         </IonItem>
         <IonItem>
           <IonTextarea
+            rows={4}
             label='Review'
             labelPlacement='stacked'
             debounce={1000}
@@ -281,15 +289,64 @@ const ManuallyAddBookPage: React.FC = () => {
         </IonItem>
         <IonItem>
           <IonInput
-            label='Location'
+            label='Tags'
             labelPlacement='stacked'
             debounce={1000}
-            value={location}
-            onIonChange={(event) => setLocation(event.detail.value)}
-          ></IonInput>
+            value={tags}
+            onIonChange={(event) => setTags(event.detail.value)}
+          />
+        </IonItem>
+        <IonItem onClick={() => setShowPopover(true)}>
+          <IonInput
+            labelPlacement='stacked'
+            label='Purchase Date'
+            value={purchaseDate}
+            readonly
+          />
         </IonItem>
 
-        {/* <IonItem>
+        <IonPopover
+          isOpen={showPopover}
+          onDidDismiss={() => setShowPopover(false)}
+        >
+          <IonDatetime
+            presentation='date'
+            value={purchaseDate || undefined}
+            onIonChange={(event) => {
+              const date = new Date(event.detail.value as string);
+              const formattedDate = date.toISOString().split('T')[0];
+              setPurchaseDate(formattedDate);
+              setShowPopover(false);
+            }}
+          />
+        </IonPopover>
+        <IonItem>
+          <IonTextarea
+            rows={4}
+            label='Private Notes'
+            labelPlacement='stacked'
+            debounce={1000}
+            value={notes}
+            onIonChange={(event) => setNotes(event.detail.value)}
+          ></IonTextarea>
+        </IonItem>
+        <IonAccordionGroup>
+          <IonAccordion value='More'>
+            <IonItem slot='header'>
+              <IonLabel>Additional Information</IonLabel>
+            </IonItem>
+            <div slot='content'>
+              <IonItem>
+                <IonTextarea
+                  rows={10}
+                  label='Description'
+                  labelPlacement='stacked'
+                  debounce={1000}
+                  value={description}
+                  onIonChange={(event) => setDescription(event.detail.value)}
+                ></IonTextarea>
+              </IonItem>
+              {/* <IonItem>
           <IonInput
             label='Categories'
             labelPlacement='stacked'
@@ -298,113 +355,91 @@ const ManuallyAddBookPage: React.FC = () => {
             onIonChange={(event) => setCategory(event.detail.value)}
           />
         </IonItem> */}
-        <IonItem>
-          <IonInput
-            label='Categories'
-            labelPlacement='stacked'
-            // debounce={1000}
-            value={newCategory}
-            onIonChange={(event) => setNewCategory(event.detail.value)}
-            // onIonBlur={() => handleAddCategory(newCategory)}
-          />
-          <IonButton slot='end' onClick={() => handleAddCategory(newCategory)}>
-            <IonIcon icon={AddIcon} />
-          </IonButton>
-        </IonItem>
-        <IonList>
-          {categories.map((category, index) => (
-            <IonItem key={index}>
-              <IonLabel>{category}</IonLabel>
+              <IonItem>
+                <IonInput
+                  label='Categories'
+                  labelPlacement='stacked'
+                  // debounce={1000}
+                  value={newCategory}
+                  onIonChange={(event) => setNewCategory(event.detail.value)}
+                  // onIonBlur={() => handleAddCategory(newCategory)}
+                />
+                <IonButton
+                  slot='end'
+                  onClick={() => handleAddCategory(newCategory)}
+                >
+                  <IonIcon icon={AddIcon} />
+                </IonButton>
+              </IonItem>
+              <IonList>
+                {categories.map((category, index) => (
+                  <IonItem key={index}>
+                    <IonLabel>{category}</IonLabel>
 
-              <IonButton
-                // style={{ color: 'red' }}
-                onClick={() => handleRemoveCategory(category)}
-              >
-                Remove
-              </IonButton>
-            </IonItem>
-          ))}
-        </IonList>
-        <IonItem>
-          <IonInput
-            label='Tags'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={tags}
-            onIonChange={(event) => setTags(event.detail.value)}
-          />
-        </IonItem>
-        <IonItem>
-          <IonInput
-            label='Languages'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={languages}
-            onIonChange={(event) => setLanguage(event.detail.value)}
-          />
-        </IonItem>
-        <IonItem>
-          <IonInput
-            label='Publisher'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={publisher}
-            onIonChange={(event) => setPublisher(event.detail.value)}
-          />
-        </IonItem>
-        <IonItem>
-          <IonInput
-            label='Pages'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={pages}
-            onIonChange={(event) => setPages(event.detail.value)}
-          />
-        </IonItem>
-        <IonItem>
-          <IonInput
-            label='Release Date'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={releaseDate}
-            onIonChange={(event) => setReleaseDate(event.detail.value)}
-          />
-        </IonItem>
-        <IonItem>
-          <IonInput
-            label='Purchase Date'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={purchaseDate}
-            onIonChange={(event) => setPurchaseDate(event.detail.value)}
-          />
-        </IonItem>
-        <IonItem>
-          <IonInput
-            label='Edition'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={edition}
-            onIonChange={(event) => setEdition(event.detail.value)}
-          />
-        </IonItem>
-        <IonItem>
-          <IonTextarea
-            label='Notes'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={notes}
-            onIonChange={(event) => setNotes(event.detail.value)}
-          ></IonTextarea>
-        </IonItem>
-
-        <IonList>
-          {data?.docs?.map((author) => (
-            <IonItem key={author.key}>
-              <IonLabel>{author.name}</IonLabel>
-            </IonItem>
-          ))}
-        </IonList>
+                    <IonButton
+                      // style={{ color: 'red' }}
+                      onClick={() => handleRemoveCategory(category)}
+                    >
+                      Remove
+                    </IonButton>
+                  </IonItem>
+                ))}
+              </IonList>
+              <IonItem>
+                <IonInput
+                  label='Pages'
+                  labelPlacement='stacked'
+                  debounce={1000}
+                  value={pages}
+                  onIonChange={(event) => setPages(event.detail.value)}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label='Release Date'
+                  labelPlacement='stacked'
+                  debounce={1000}
+                  value={releaseDate}
+                  onIonChange={(event) => setReleaseDate(event.detail.value)}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label='Edition'
+                  labelPlacement='stacked'
+                  debounce={1000}
+                  value={edition}
+                  onIonChange={(event) => setEdition(event.detail.value)}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label='Publisher'
+                  labelPlacement='stacked'
+                  debounce={1000}
+                  value={publisher}
+                  onIonChange={(event) => setPublisher(event.detail.value)}
+                />
+              </IonItem>
+              <IonItem>
+                <IonInput
+                  label='Languages'
+                  labelPlacement='stacked'
+                  debounce={1000}
+                  value={languages}
+                  onIonChange={(event) => setLanguage(event.detail.value)}
+                />
+              </IonItem>
+              <IonList>
+                {data?.docs?.map((author) => (
+                  <IonItem key={author.key}>
+                    <IonLabel>{author.name}</IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
+            </div>
+          </IonAccordion>
+        </IonAccordionGroup>
         <IonButton expand='block' onClick={handleAddBook}>
           Add Book
         </IonButton>
