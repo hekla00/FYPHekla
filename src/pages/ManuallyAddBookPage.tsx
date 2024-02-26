@@ -18,6 +18,7 @@ import {
   IonPopover,
   IonAccordionGroup,
   IonAccordion,
+  IonToast,
 } from '@ionic/react';
 import { search } from 'ionicons/icons';
 import React, { useState, useRef, useEffect } from 'react';
@@ -28,6 +29,8 @@ import firebase from 'firebase/app';
 import SearchResultModal from '../components/SearchResultModal';
 import { add as AddIcon, bookSharp, star, starOutline } from 'ionicons/icons';
 import './ManuallyAddBookPage.css';
+import { v4 as uuidv4 } from 'uuid';
+// import CategoriesModal from '../components/CategoriesModal';
 
 const ManuallyAddBookPage: React.FC = () => {
   const { userID } = useAuth();
@@ -59,6 +62,8 @@ const ManuallyAddBookPage: React.FC = () => {
   const [bookSelected, setBookSelected] = useState(false);
   const [rating, setRating] = useState(0);
   const [showPopover, setShowPopover] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
 
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
@@ -158,6 +163,8 @@ const ManuallyAddBookPage: React.FC = () => {
       setShowModal(true);
     } else {
       // If no book is found, show a message to the user
+      // create a toast message to show the user that no book was found
+      setShowToast(true);
     }
   };
 
@@ -196,6 +203,42 @@ const ManuallyAddBookPage: React.FC = () => {
     setRating(newRating);
   };
 
+  const uploadPhoto = async (photo: string) => {
+    if (!currentUser) {
+      throw new Error('User is not authenticated');
+    }
+    try {
+      const response = await fetch(photo);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch the image');
+      }
+
+      const blob = await response.blob();
+      const fileType = blob.type.split('/')[1]; // Extract file type from MIME type
+
+      const storageRef = firebase.storage().ref();
+      const photoRef = storageRef.child(`bookImages/${uuidv4()}.${fileType}`);
+
+      const snapshot = await photoRef.put(blob);
+      const url = await snapshot.ref.getDownloadURL();
+      console.log('url: ', url);
+      return url;
+    } catch (error) {
+      console.error('Failed to upload the image: ', error);
+      throw error;
+    }
+  };
+
+  // const handleToggleChange = (categoryId: string, isChecked: boolean) => {
+  //   setCategories((prevCategories) =>
+  //     prevCategories.map((category) =>
+  //       category.id === categoryId
+  //         ? { ...category, selected: isChecked }
+  //         : category
+  //     )
+  //   );
+  // };
   return (
     <IonPage>
       <IonHeader>
@@ -207,13 +250,59 @@ const ManuallyAddBookPage: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className='ion-padding'>
-        <div className='thumbnail-container'>
+        {/* <div className='thumbnail-container'>
           {bookSelected ? (
             <img src={thumbnailUrl} className='full-thumbnail' />
           ) : (
             <IonIcon icon={bookSharp} className='book-icon' />
           )}
+        </div> */}
+        <div className='thumbnail-container'>
+          {uploadedPhoto ? (
+            <img src={uploadedPhoto} className='full-thumbnail' />
+          ) : bookSelected ? (
+            <img src={thumbnailUrl} className='full-thumbnail' />
+          ) : (
+            <IonIcon icon={bookSharp} className='book-icon' />
+          )}
         </div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <IonButton
+            onClick={() => {
+              document.getElementById('fileInput')?.click();
+            }}
+            size='small'
+          >
+            Edit Image
+          </IonButton>
+        </div>
+        <input
+          id='fileInput'
+          type='file'
+          accept='image/*'
+          style={{ display: 'none' }}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onloadend = async () => {
+                setUploadedPhoto(reader.result as string);
+                // Convert the data URL to a blob and upload it to Firebase Storage
+                const response = await fetch(reader.result as string);
+                const blob = await response.blob();
+                const url = await uploadPhoto(blob.toString());
+                console.log('Uploaded image URL: ', url);
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+        />
         <div className='rating-container'>
           {[1, 2, 3, 4, 5].map((starNumber) => (
             <IonIcon
@@ -251,6 +340,7 @@ const ManuallyAddBookPage: React.FC = () => {
           <IonInput
             label='Title'
             debounce={1000}
+            clearInput={true}
             labelPlacement='stacked'
             value={title}
             onIonChange={(event) => setTitle(event.detail.value)}
@@ -261,6 +351,7 @@ const ManuallyAddBookPage: React.FC = () => {
           <IonInput
             label='Author'
             labelPlacement='stacked'
+            clearInput={true}
             debounce={1000}
             value={author}
             onIonChange={(event) => setAuthor(event.detail.value)}
@@ -272,6 +363,7 @@ const ManuallyAddBookPage: React.FC = () => {
           <IonInput
             label='Location'
             labelPlacement='stacked'
+            clearInput={true}
             debounce={1000}
             value={location}
             onIonChange={(event) => setLocation(event.detail.value)}
@@ -291,6 +383,7 @@ const ManuallyAddBookPage: React.FC = () => {
           <IonInput
             label='Tags'
             labelPlacement='stacked'
+            clearInput={true}
             debounce={1000}
             value={tags}
             onIonChange={(event) => setTags(event.detail.value)}
@@ -359,6 +452,7 @@ const ManuallyAddBookPage: React.FC = () => {
                 <IonInput
                   label='Categories'
                   labelPlacement='stacked'
+                  clearInput={true}
                   // debounce={1000}
                   value={newCategory}
                   onIonChange={(event) => setNewCategory(event.detail.value)}
@@ -366,7 +460,10 @@ const ManuallyAddBookPage: React.FC = () => {
                 />
                 <IonButton
                   slot='end'
-                  onClick={() => handleAddCategory(newCategory)}
+                  onClick={() => {
+                    handleAddCategory(newCategory);
+                    // setShowModal(true);
+                  }}
                 >
                   <IonIcon icon={AddIcon} />
                 </IonButton>
@@ -459,6 +556,12 @@ const ManuallyAddBookPage: React.FC = () => {
           Add Book
         </IonButton>
       </IonContent>
+      <IonToast
+        isOpen={showToast}
+        onDidDismiss={() => setShowToast(false)}
+        message='No book was found.'
+        duration={2000}
+      />
     </IonPage>
   );
 };
