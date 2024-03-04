@@ -462,7 +462,7 @@ const ManuallyAddBookPage: React.FC = () => {
                   slot='end'
                   onClick={() => {
                     handleAddCategory(newCategory);
-                    // setShowModal(true);
+                    setShowModal(true);
                   }}
                 >
                   <IonIcon icon={AddIcon} />

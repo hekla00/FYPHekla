@@ -12,7 +12,7 @@ import {
   IonCheckbox,
 } from '@ionic/react';
 
-function Example() {
+function CategoriesModal() {
   const modal = useRef<HTMLIonModalElement>(null);
   const page = useRef(undefined);
 
@@ -30,52 +30,52 @@ function Example() {
   }
 
   return (
-    <IonPage ref={page}>
+    // <IonPage ref={page}>
+    //   <IonHeader>
+    //     <IonToolbar>
+    //       <IonTitle>App</IonTitle>
+    //     </IonToolbar>
+    //   </IonHeader>
+    //   <IonContent className='ion-padding'>
+    //     <IonButton id='open-modal' expand='block'>
+    //       Open
+    //     </IonButton>
+    <IonModal
+      ref={modal}
+      trigger='open-modal'
+      canDismiss={canDismiss}
+      presentingElement={presentingElement}
+    >
       <IonHeader>
         <IonToolbar>
-          <IonTitle>App</IonTitle>
+          <IonTitle>Modal</IonTitle>
+          <IonButtons slot='end'>
+            <IonButton onClick={() => dismiss()}>Close</IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
-      <IonContent className='ion-padding'>
-        <IonButton id='open-modal' expand='block'>
-          Open
-        </IonButton>
-        <IonModal
-          ref={modal}
-          trigger='open-modal'
-          canDismiss={canDismiss}
-          presentingElement={presentingElement}
-        >
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>Modal</IonTitle>
-              <IonButtons slot='end'>
-                <IonButton onClick={() => dismiss()}>Close</IonButton>
-              </IonButtons>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent>
-            <p className='ion-padding-horizontal'>
-              You must accept the terms and conditions to close this modal.
-            </p>
-            <IonItem>
-              <IonCheckbox
-                id='terms'
-                checked={canDismiss}
-                onIonChange={(ev) => {
-                  setCanDismiss(ev.detail.checked);
-                }}
-              >
-                <div className='ion-text-wrap'>
-                  Do you accept the terms and conditions?
-                </div>
-              </IonCheckbox>
-            </IonItem>
-          </IonContent>
-        </IonModal>
+      <IonContent>
+        <p className='ion-padding-horizontal'>
+          You must accept the terms and conditions to close this modal.
+        </p>
+        <IonItem>
+          <IonCheckbox
+            id='terms'
+            checked={canDismiss}
+            onIonChange={(ev) => {
+              setCanDismiss(ev.detail.checked);
+            }}
+          >
+            <div className='ion-text-wrap'>
+              Do you accept the terms and conditions?
+            </div>
+          </IonCheckbox>
+        </IonItem>
       </IonContent>
-    </IonPage>
+    </IonModal>
+    // </IonContent>
+    // </IonPage>
   );
 }
 
-export default Example;
+export default CategoriesModal;
