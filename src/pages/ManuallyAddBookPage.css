@@ -1,0 +1,31 @@
+ion-thumbnail {
+  --size: 140px;
+  --border-radius: 14px;
+}
+
+.thumbnail-container {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  width: 100%;
+}
+.full-thumbnail {
+  width: 40%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.book-icon {
+  font-size: 80px;
+}
+
+.rating-container {
+  display: flex;
+  justify-content: center;
+}
+
+.rating-star {
+  cursor: pointer;
+  font-size: 30px;
+}
