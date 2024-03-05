@@ -1,11 +1,13 @@
-import { CapacitorConfig } from "@capacitor/cli";
+import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: "com.fyp.app",
-  appName: "LibraryMate",
-  webDir: "dist",
+  appId: 'com.fyp.app',
+  appName: 'LibraryMate',
+  webDir: 'dist',
   server: {
-    androidScheme: "https",
+    androidScheme: 'https',
+    // Remove the follwoing line when the app is ready for production
+    url: 'http://127.0.0.1:8100',
   },
 };
 
