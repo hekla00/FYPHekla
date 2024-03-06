@@ -72,23 +72,38 @@ const ManuallyAddBookPage: React.FC = () => {
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
     const newBookRef = {
-      title,
-      author,
-      location,
-      categories,
-      tags,
-      languages,
-      publisher,
-      description,
-      review,
-      pages,
-      releaseDate,
-      purchaseDate,
-      edition,
-      notes,
-      rating,
+      title: title || '',
+      author: author || '',
+      location: location || '',
+      categories: categories || [],
+      tags: tags || [],
+      languages: languages || [],
+      publisher: publisher || '',
+      description: description || '',
+      review: review || '',
+      pages: pages || 0,
+      releaseDate: releaseDate || null,
+      purchaseDate: purchaseDate || null,
+      edition: edition || '',
+      notes: notes || '',
+      rating: rating || 0,
     };
     const bookRef = await booksRef.add(newBookRef);
+
+    const userID = firebase.auth().currentUser?.uid;
+    console.log('userID book: ', userID);
+    if (!userID) {
+      console.error('No user is currently logged in.');
+      return;
+    }
+    console.log('bookRef1: ', bookRef);
+
+    if (!bookRef || !bookRef.id) {
+      console.error(
+        'bookRef is not a document reference or bookRef.id is undefined.'
+      );
+      return;
+    }
 
     const newUserBooksRef = {
       userID,
@@ -101,7 +116,7 @@ const ManuallyAddBookPage: React.FC = () => {
 
     console.log('bookRef: ', bookRef);
     // history.goBack();
-    history.push('/my/library');
+    history.push('/my/insidelibrary');
   };
 
   // create function that calls an Restful API that has a query parameter q and returns a JSON response
@@ -534,14 +549,15 @@ const ManuallyAddBookPage: React.FC = () => {
                   slot='end'
                   onClick={() => {
                     handleAddCategory(newCategory);
-                    setShowModal(true);
+                    // setShowModal(true);
                   }}
                 >
                   <IonIcon icon={AddIcon} />
                 </IonButton>
               </IonItem>
               <IonList>
-                {categories.map((category, index) => (
+                {/* This is causing issues but not sure why! */}
+                {/* {categories.map((category, index) => (
                   <IonItem key={index}>
                     <IonLabel>{category}</IonLabel>
 
@@ -552,7 +568,7 @@ const ManuallyAddBookPage: React.FC = () => {
                       Remove
                     </IonButton>
                   </IonItem>
-                ))}
+                ))} */}
               </IonList>
               <IonItem>
                 <IonInput

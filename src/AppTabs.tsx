@@ -18,7 +18,7 @@ import {
 import React from 'react';
 // Importing pages
 import Home from './pages/Home';
-import Library from './pages/Library';
+import InsideLibrary from './pages/InsideLibrary';
 import BookPage from './pages/BookPage';
 import { useAuth } from './authentication';
 import SettingsPage from './pages/SettingsPage';
@@ -45,6 +45,7 @@ import LoanBorrowTracking from './pages/LoanBorrowTracking';
 import GroupsPage from './pages/GroupsPage';
 import GroupCreationPage from './pages/GroupCreationPage';
 import AddMemberPage from './pages/AddMemberPage';
+import LibraryPage from './pages/LibraryPage';
 
 setupIonicReact();
 
@@ -64,7 +65,12 @@ const AppTabs: React.FC = () => {
         {/* Setting the routes for the tabs */}
         {/* my is used in front for pages that only authenticated users can access */}
         <Route path='/my/home' exact={true} component={Home} />
-        <Route path='/my/library' component={Library} exact={true} />
+        <Route
+          path='/my/insidelibrary'
+          component={InsideLibrary}
+          exact={true}
+        />
+        <Route path='/my/library' component={LibraryPage} exact={true} />
         <Route path='/my/books/view/:id' component={BookPage} exact={true} />
         <Route
           path='/my/books/add'

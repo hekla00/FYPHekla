@@ -4,6 +4,7 @@ export interface Book {
   id: string;
   title: string;
   author: string;
+  location: string;
 }
 
 export function toBook(doc): Book {
