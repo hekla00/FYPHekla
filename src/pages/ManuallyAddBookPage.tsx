@@ -19,8 +19,10 @@ import {
   IonAccordionGroup,
   IonAccordion,
   IonToast,
+  IonActionSheet,
 } from '@ionic/react';
 import { search } from 'ionicons/icons';
+import { Camera, CameraResultType } from '@capacitor/camera';
 import React, { useState, useRef, useEffect } from 'react';
 import { firestore } from '../firebase';
 import { useAuth } from '../authentication';
@@ -31,6 +33,7 @@ import { add as AddIcon, bookSharp, star, starOutline } from 'ionicons/icons';
 import './ManuallyAddBookPage.css';
 import { v4 as uuidv4 } from 'uuid';
 // import CategoriesModal from '../components/CategoriesModal';
+import { isPlatform } from '@ionic/react';
 
 const ManuallyAddBookPage: React.FC = () => {
   const { userID } = useAuth();
@@ -64,6 +67,7 @@ const ManuallyAddBookPage: React.FC = () => {
   const [showPopover, setShowPopover] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
+  const [showActionSheet, setShowActionSheet] = useState(false);
 
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
@@ -239,6 +243,19 @@ const ManuallyAddBookPage: React.FC = () => {
   //     )
   //   );
   // };
+
+  const takePhoto = async () => {
+    const image = await Camera.getPhoto({
+      // quality: 50,
+      allowEditing: false,
+      resultType: CameraResultType.Uri,
+    });
+
+    // image.webPath will contain a path that can be set as an image src.
+    // You can access the original file using image.path, which can be
+    // used to read the file as data, or upload it using the fetch API.
+    console.log(image.webPath);
+  };
   return (
     <IonPage>
       <IonHeader>
@@ -273,16 +290,34 @@ const ManuallyAddBookPage: React.FC = () => {
             alignItems: 'center',
           }}
         >
-          <IonButton
+          {/* <IonButton
             onClick={() => {
               document.getElementById('fileInput')?.click();
             }}
             size='small'
           >
             Edit Image
+          </IonButton> */}
+          <IonButton
+            onClick={async () => {
+              console.log('Edit Image button clicked');
+              try {
+                await takePhoto();
+                console.log('takePhoto function called');
+              } catch (error) {
+                console.log(
+                  'Error taking photo, triggering file input click:',
+                  error
+                );
+                document.getElementById('fileInput')?.click();
+              }
+            }}
+            size='small'
+          >
+            Edit Image
           </IonButton>
         </div>
-        <input
+        {/* <input
           id='fileInput'
           type='file'
           accept='image/*'
@@ -300,6 +335,43 @@ const ManuallyAddBookPage: React.FC = () => {
                 console.log('Uploaded image URL: ', url);
               };
               reader.readAsDataURL(file);
+            }
+          }}
+        /> */}
+        <input
+          id='fileInput'
+          type='file'
+          accept='image/*'
+          style={{ display: 'none' }}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onloadend = async () => {
+                const arrayBuffer = reader.result as ArrayBuffer;
+                const blob = new Blob([arrayBuffer], { type: file.type });
+
+                // Create a URL for the blob and set the uploadedPhoto state
+                const url = URL.createObjectURL(blob);
+                setUploadedPhoto(url);
+
+                // Upload the blob to a server
+                const uploadResponse = await fetch(
+                  'https://your-server.com/upload',
+                  {
+                    method: 'POST',
+                    body: blob,
+                  }
+                );
+
+                if (!uploadResponse.ok) {
+                  console.error(
+                    'Error uploading image:',
+                    uploadResponse.statusText
+                  );
+                }
+              };
+              reader.readAsArrayBuffer(file);
             }
           }}
         />
@@ -458,7 +530,7 @@ const ManuallyAddBookPage: React.FC = () => {
                   onIonChange={(event) => setNewCategory(event.detail.value)}
                   // onIonBlur={() => handleAddCategory(newCategory)}
                 />
-                <IonButton
+                {/* <IonButton
                   slot='end'
                   onClick={() => {
                     handleAddCategory(newCategory);
@@ -466,9 +538,9 @@ const ManuallyAddBookPage: React.FC = () => {
                   }}
                 >
                   <IonIcon icon={AddIcon} />
-                </IonButton>
+                </IonButton> */}
               </IonItem>
-              <IonList>
+              {/* <IonList>
                 {categories.map((category, index) => (
                   <IonItem key={index}>
                     <IonLabel>{category}</IonLabel>
@@ -481,7 +553,7 @@ const ManuallyAddBookPage: React.FC = () => {
                     </IonButton>
                   </IonItem>
                 ))}
-              </IonList>
+              </IonList> */}
               <IonItem>
                 <IonInput
                   label='Pages'
