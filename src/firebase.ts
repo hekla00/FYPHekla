@@ -5,13 +5,13 @@ import 'firebase/storage';
 // import "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyAETbBmNHu6dwCRaAL43S3-ccx0iE3iLRo',
-  authDomain: 'fypsandbox-c9903.firebaseapp.com',
-  projectId: 'fypsandbox-c9903',
-  storageBucket: 'fypsandbox-c9903.appspot.com',
-  messagingSenderId: '245833706588',
-  appId: '1:245833706588:web:a7ac613409179b14118a99',
-  measurementId: 'G-C3PMXKQDKG',
+  apiKey: import.meta.env.VITE_APP_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_APP_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 // Will need to make this private

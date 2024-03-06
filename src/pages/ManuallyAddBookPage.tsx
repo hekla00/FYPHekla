@@ -545,7 +545,7 @@ const ManuallyAddBookPage: React.FC = () => {
                   onIonChange={(event) => setNewCategory(event.detail.value)}
                   // onIonBlur={() => handleAddCategory(newCategory)}
                 />
-                <IonButton
+                {/* <IonButton
                   slot='end'
                   onClick={() => {
                     handleAddCategory(newCategory);
@@ -553,11 +553,10 @@ const ManuallyAddBookPage: React.FC = () => {
                   }}
                 >
                   <IonIcon icon={AddIcon} />
-                </IonButton>
+                </IonButton> */}
               </IonItem>
-              <IonList>
-                {/* This is causing issues but not sure why! */}
-                {/* {categories.map((category, index) => (
+              {/* <IonList>
+                {categories.map((category, index) => (
                   <IonItem key={index}>
                     <IonLabel>{category}</IonLabel>
 
@@ -568,8 +567,8 @@ const ManuallyAddBookPage: React.FC = () => {
                       Remove
                     </IonButton>
                   </IonItem>
-                ))} */}
-              </IonList>
+                ))}
+              </IonList> */}
               <IonItem>
                 <IonInput
                   label='Pages'
