@@ -17,11 +17,19 @@ import { useAuth } from '../authentication';
 import firebase from 'firebase/app';
 import { useLocation } from 'react-router-dom';
 
-const InsideLibrary: React.FC = () => {
+interface InsideLibraryProps {
+  selectedFilter: string | null;
+  selectedValue: string | null;
+}
+
+const InsideLibrary: React.FC<InsideLibraryProps> = ({
+  selectedFilter,
+  selectedValue,
+}) => {
   const { userID } = useAuth();
   const location = useLocation();
-  const selectedFilter = (location as any).state?.filter;
-  const selectedValue = (location as any).state?.value;
+  // const selectedFilter = (location as any).state?.filter;
+  // const selectedValue = (location as any).state?.value;
   const [books, setBooks] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
@@ -82,7 +90,7 @@ const InsideLibrary: React.FC = () => {
           <IonTitle>{selectedValue}</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className='ion-padding'>
+      <IonContent>
         {Object.entries(books).map(([group, booksInGroup]) => (
           <div key={group}>
             <h2>

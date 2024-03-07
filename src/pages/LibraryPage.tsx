@@ -11,24 +11,40 @@ import {
   IonSegment,
   IonSegmentButton,
   IonIcon,
-  IonAccordionGroup,
-  IonAccordion,
   IonCard,
   IonCardHeader,
-  IonChip,
+  IonPopover,
+  IonCardContent,
+  IonCardTitle,
+  IonListHeader,
+  IonCheckbox,
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom';
-import { home, grid, pricetag } from 'ionicons/icons';
+import { filter, home, grid, pricetag } from 'ionicons/icons';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import { firestore } from '../firebase';
 
 const LibraryPage: React.FC = () => {
   const [selectedSegment, setSelectedSegment] = useState<string>('all');
-  const [locations, setLocations] = useState<{ [key: string]: any[] }>({});
-  const history = useHistory();
-  const [categories, setCategories] = useState({});
-  const [tags, setTags] = useState({});
-
+  const [locations, setLocations] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [allBooks, setAllBooks] = useState<any[]>([]);
+  const [showPopover, setShowPopover] = useState({
+    isOpen: false,
+    event: undefined,
+  });
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState([]);
+  const [selectedTag, setSelectedTag] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
+  const [showLocations, setShowLocations] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [showTags, setShowTags] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
   const handleSegmentChange = (event: CustomEvent) => {
     setSelectedSegment(event.detail.value);
   };
@@ -67,7 +83,7 @@ const LibraryPage: React.FC = () => {
         }
         locations[location].push(data);
       });
-      setLocations(locations);
+      setLocations(locations as any[]);
     } catch (error) {
       console.error('Error fetching locations: ', error);
     }
@@ -112,7 +128,7 @@ const LibraryPage: React.FC = () => {
         });
       });
       console.log('categories:', categories);
-      setCategories(categories);
+      setCategories(Object.values(categories));
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -143,20 +159,11 @@ const LibraryPage: React.FC = () => {
         db.collection('books').doc(ID).get()
       );
       const booksSnapshots = await Promise.all(booksPromises);
-      const categories = {};
       const tags = {};
       booksSnapshots.forEach((snapshot) => {
         const data = snapshot.data();
         console.log('book data:', data);
-        const bookCategories =
-          data && data.categories ? data.categories : ['Undefined'];
         const bookTags = data && data.tags ? data.tags : ['Undefined'];
-        bookCategories.forEach((category) => {
-          if (!categories[category]) {
-            categories[category] = [];
-          }
-          categories[category].push(data);
-        });
         bookTags.forEach((tag) => {
           if (!tags[tag]) {
             tags[tag] = [];
@@ -164,45 +171,193 @@ const LibraryPage: React.FC = () => {
           tags[tag].push(data);
         });
       });
-      console.log('categories:', categories);
-      console.log('tags:', tags);
-      setCategories(categories);
-      setTags(tags);
+      // console.log('tags:', tags);
+      setTags(Object.values(tags) as any[]);
     } catch (error) {
-      console.error('Error fetching categories and tags:', error);
+      console.error('Error fetching tags:', error);
     }
   };
 
+  const fetchAllBooks = async () => {
+    try {
+      const db = firebase.firestore();
+      const userId = firebase.auth().currentUser?.uid;
+      console.log('userId lib', userId);
+      if (!userId) {
+        console.error('No user is currently logged in.');
+        return;
+      }
+
+      // Fetch userBooks documents for the current user
+      const userBooksSnapshot = await db
+        .collection('userBooks')
+        .where('userID', '==', userId)
+        .get();
+
+      // Extract book IDs from the userBooks documents
+      const bookIds = userBooksSnapshot.docs.map((doc) => doc.data().bookID);
+      console.log('bookIds:', bookIds);
+
+      // Fetch books documents for the extracted book IDs
+      const booksPromises = bookIds.map((ID) =>
+        db.collection('books').doc(ID).get()
+      );
+      const booksSnapshots = await Promise.all(booksPromises);
+
+      // Extract book data from the books documents
+      // Important to define the id of the book otherwise it will be undefined and the book will not be displayed
+      const allBooks = booksSnapshots.map((snapshot) => ({
+        id: snapshot.id,
+        ...snapshot.data(),
+      }));
+      console.log('allBooks:', allBooks);
+
+      setAllBooks(allBooks as any[]);
+    } catch (error) {
+      console.error('Error fetching all books:', error);
+    }
+  };
   useEffect(() => {
     fetchLocations();
     fetchCategories();
     fetchTags();
-  }, []);
+    fetchAllBooks();
+  }, [selectedLocation, selectedCategory, selectedTag]);
 
-  const handleLocationClick = (location: string, books: any[]) => {
-    history.push('/my/insidelibrary', {
-      filter: 'location',
-      value: location,
-      books,
-    });
-  };
-  const handleCategoryClick = (category: string, books: any[]) => {
-    history.push('/my/insidelibrary', {
-      filter: 'categories',
-      value: category,
-      books,
-    });
+  useEffect(() => {
+    const nonNullBooks = allBooks.filter((book) => book !== null);
+    const filteredBooks = allBooks.filter(
+      (book) =>
+        (selectedLocation.length > 0
+          ? selectedLocation.includes(book.location)
+          : true) &&
+        (selectedCategory.length > 0
+          ? selectedCategory.includes(book.categories)
+          : true) &&
+        (selectedTag.length > 0 ? selectedTag.includes(book.tags) : true)
+    );
+
+    setFilteredBooks(filteredBooks);
+  }, [allBooks, selectedLocation, selectedCategory, selectedTag]);
+
+  const handleFilterClick = (filter: string, value: string) => {
+    setSelectedFilter(filter);
+    setSelectedValue(value);
+    setShowPopover({ isOpen: false, event: undefined });
   };
 
-  const handleTagClick = (tagName: string, books: any[]) => {
-    history.push('/my/insidelibrary', { filter: 'tags', value: tagName });
+  const handleLocationChange = (location) => {
+    setSelectedLocation((prevLocations) =>
+      prevLocations.includes(location)
+        ? prevLocations.filter((l) => l !== location)
+        : [...prevLocations, location]
+    );
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategories((prevCategories) =>
+      prevCategories.includes(category)
+        ? prevCategories.filter((c) => c !== category)
+        : [...prevCategories, category]
+    );
+  };
+
+  const handleTagChange = (tag) => {
+    setSelectedTags((prevTags) =>
+      prevTags.includes(tag)
+        ? prevTags.filter((t) => t !== tag)
+        : [...prevTags, tag]
+    );
   };
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Library</IonTitle>
+          <IonTitle slot='start'>Library</IonTitle>
+          <IonLabel
+            onClick={(e) =>
+              setShowPopover({ isOpen: true, event: e.nativeEvent })
+            }
+          >
+            <IonIcon icon={filter} />
+          </IonLabel>
+          <IonPopover
+            isOpen={showPopover.isOpen}
+            event={showPopover.event}
+            onDidDismiss={() =>
+              setShowPopover({ isOpen: false, event: undefined })
+            }
+          >
+            <IonList>
+              <IonListHeader>Filter By</IonListHeader>
+              <IonItem button onClick={() => setShowLocations(!showLocations)}>
+                Location
+              </IonItem>
+              {showLocations && (
+                <IonList>
+                  {Object.keys(locations).map((location, index) => (
+                    <IonItem key={index}>
+                      <IonCheckbox
+                        aria-label={location}
+                        slot='start'
+                        value={location}
+                        checked={selectedLocation.includes(location)}
+                        onIonChange={(e) =>
+                          handleLocationChange(e.detail.value)
+                        }
+                      />
+                      <IonLabel>{location}</IonLabel>
+                    </IonItem>
+                  ))}
+                </IonList>
+              )}
+              <IonItem
+                button
+                onClick={() => setShowCategories(!showCategories)}
+              >
+                Category
+              </IonItem>
+              {showCategories && (
+                <IonList>
+                  {Object.keys(categories).map((category, index) => (
+                    <IonItem key={index}>
+                      <IonCheckbox
+                        aria-label='category'
+                        slot='start'
+                        value={category}
+                        checked={selectedCategories.includes(category)}
+                        onIonChange={(e) =>
+                          handleCategoryChange(e.detail.value)
+                        }
+                      />
+                      <IonLabel>{category}</IonLabel>
+                    </IonItem>
+                  ))}
+                </IonList>
+              )}
+
+              <IonItem button onClick={() => setShowTags(!showTags)}>
+                Tags
+              </IonItem>
+              {showTags && (
+                <IonList>
+                  {Object.keys(tags).map((tag, index) => (
+                    <IonItem key={index}>
+                      <IonCheckbox
+                        aria-label='tag'
+                        slot='start'
+                        value={tag}
+                        checked={selectedTags.includes(tag)}
+                        onIonChange={(e) => handleTagChange(e.detail.value)}
+                      />
+                      <IonLabel>{tag}</IonLabel>
+                    </IonItem>
+                  ))}
+                </IonList>
+              )}
+            </IonList>
+          </IonPopover>
         </IonToolbar>
       </IonHeader>
       <IonContent className='ion-padding'>
@@ -224,64 +379,27 @@ const LibraryPage: React.FC = () => {
             <IonLabel>Group 2</IonLabel>
           </IonSegmentButton>
         </IonSegment>
-        <IonAccordionGroup>
-          <IonAccordion value='first'>
-            <IonItem slot='header'>
-              <IonLabel>Location</IonLabel>
-            </IonItem>
-            <div slot='content'>
-              {Object.entries(locations).map(([location, books], index) => (
-                <IonCard key={index}>
-                  <IonCardHeader
-                    onClick={() => handleLocationClick(location, books)}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <IonIcon icon={home} style={{ marginRight: '5px' }} />
-                      {location === 'Undefined' ? 'No Location' : location}
-                    </div>
-                  </IonCardHeader>
-                </IonCard>
-              ))}
-            </div>
-          </IonAccordion>
-          <IonAccordion value='second'>
-            <IonItem slot='header'>
-              <IonLabel>Categories</IonLabel>
-            </IonItem>
-            <div slot='content'>
-              {Object.entries(categories).map(([category, books], index) => (
-                <IonCard key={index}>
-                  <IonCardHeader
-                    onClick={() =>
-                      handleCategoryClick(category, books as any[])
-                    }
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <IonIcon icon={grid} style={{ marginRight: '5px' }} />
-                      {category === 'Undefined' ? 'No Category' : category}
-                    </div>
-                  </IonCardHeader>
-                </IonCard>
-              ))}
-            </div>
-          </IonAccordion>
-          <IonAccordion value='thrid'>
-            <IonItem slot='header'>
-              <IonLabel>Tags</IonLabel>
-            </IonItem>
-            <div slot='content'>
-              {Object.entries(tags).map(([tag, books], index) => (
-                <IonChip
-                  key={index}
-                  onClick={() => handleTagClick(tag, books as any[])}
-                >
-                  <IonIcon icon={pricetag} style={{ marginRight: '5px' }} />{' '}
-                  {tag === 'Undefined' ? 'No Tag' : tag}
-                </IonChip>
-              ))}
-            </div>
-          </IonAccordion>
-        </IonAccordionGroup>
+        {selectedSegment === 'all' &&
+          filteredBooks.map((book) => (
+            <IonCard
+              onClick={() => {
+                console.log('Clicked book ID:', book.id);
+              }}
+              className='book-card'
+              button
+              key={book.id}
+              routerLink={`/my/books/view/${book.id}`}
+            >
+              <IonCardHeader>
+                <IonCardTitle className='card-title'>
+                  {book?.title}
+                </IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent className='card-content'>
+                {book?.author}
+              </IonCardContent>
+            </IonCard>
+          ))}
       </IonContent>
     </IonPage>
   );
