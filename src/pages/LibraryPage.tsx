@@ -280,7 +280,7 @@ const LibraryPage: React.FC = () => {
               setShowPopover({ isOpen: true, event: e.nativeEvent })
             }
           >
-            <IonIcon icon={filter} />
+            <IonIcon slot='end' icon={filter} />
           </IonLabel>
           <IonPopover
             isOpen={showPopover.isOpen}

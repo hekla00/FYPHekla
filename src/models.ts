@@ -5,6 +5,19 @@ export interface Book {
   title: string;
   author: string;
   location: string;
+  categories: string[];
+  tags: string[];
+  edition: string;
+  isbn: string;
+  pages: number;
+  publisher: string;
+  languages: string[];
+  description: string;
+  notes: string;
+  purchaseDate: string;
+  rating: number;
+  releaseDate: string;
+  reviews: string[];
 }
 
 export function toBook(doc): Book {

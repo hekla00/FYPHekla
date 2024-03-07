@@ -2,10 +2,17 @@ import {
   IonBackButton,
   IonButton,
   IonButtons,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
   IonContent,
   IonHeader,
   IonIcon,
+  IonItem,
+  IonLabel,
   IonPage,
+  IonText,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
@@ -19,6 +26,7 @@ import { Book, toBook } from '../models';
 import { useAuth } from '../authentication';
 import { useHistory } from 'react-router';
 import firebase from 'firebase/app';
+import './BookPage.css';
 
 interface RouteParams {
   id: string;
@@ -80,7 +88,15 @@ const BookPage: React.FC = () => {
       .doc(userID)
       .collection('books')
       .doc(id);
+    const userBooksRef = firestore.collection('userBooks').doc(id);
+    bookRef.delete().then(() => {
+      console.log('Book successfully deleted from books collection');
+    });
+    userBooksRef.delete().then(() => {
+      console.log('Book successfully deleted from userBooks collection');
+    });
     await bookRef.delete();
+    await userBooksRef.delete();
     history.goBack();
   };
   return (
@@ -98,9 +114,86 @@ const BookPage: React.FC = () => {
           </IonButtons>
         </IonToolbar>
       </IonHeader>
-      <IonContent className='ion-padding'>Author: {book?.author}</IonContent>
-      {/* <IonContent className='ion-padding'>ID: {book?.id}</IonContent> */}
-      {/* <IonContent className='ion-padding'>Title: {book?.title}</IonContent> */}
+      <IonContent className='ion-padding'>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Title</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.title}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Pages</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.pages}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Author</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.author}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Rating</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.rating}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Description</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.description}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Location</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.location}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Edition</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.edition}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Categories</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.categories}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Tags</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.tags}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>ISBN</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.isbn}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Notes</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.notes}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Release Date</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.releaseDate}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Purchase Date</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.purchaseDate}
+          </IonCardContent>
+        </IonCard>
+      </IonContent>
     </IonPage>
   );
 };
