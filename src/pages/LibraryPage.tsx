@@ -18,12 +18,13 @@ import {
   IonCardTitle,
   IonListHeader,
   IonCheckbox,
-  IonImg,
+  IonSpinner,
 } from '@ionic/react';
 import { filter, home, grid, pricetag } from 'ionicons/icons';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import { firestore } from '../firebase';
+import { IonSearchbar } from '@ionic/react';
 
 const LibraryPage: React.FC = () => {
   const [selectedSegment, setSelectedSegment] = useState<string>('all');
@@ -46,6 +47,8 @@ const LibraryPage: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [showTags, setShowTags] = useState(false);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const handleSegmentChange = (event: CustomEvent) => {
     setSelectedSegment(event.detail.value);
   };
@@ -180,6 +183,7 @@ const LibraryPage: React.FC = () => {
   };
 
   const fetchAllBooks = async () => {
+    setIsLoading(true);
     try {
       const db = firebase.firestore();
       const userId = firebase.auth().currentUser?.uid;
@@ -216,6 +220,8 @@ const LibraryPage: React.FC = () => {
       setAllBooks(allBooks as any[]);
     } catch (error) {
       console.error('Error fetching all books:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
   useEffect(() => {
@@ -226,19 +232,23 @@ const LibraryPage: React.FC = () => {
   }, [selectedLocation, selectedCategory, selectedTag]);
 
   useEffect(() => {
-    const nonNullBooks = allBooks.filter((book) => book !== null);
+    console.log('searchQuery:', searchQuery);
     const filteredBooks = allBooks.filter(
       (book) =>
+        book &&
+        book.title &&
+        book.categories &&
         (selectedLocation.length > 0
           ? selectedLocation.includes(book.location)
           : true) &&
         (selectedTag.length > 0
           ? book.tags.some((tag) => selectedTag.includes(tag))
-          : true)
+          : true) &&
+        book.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     setFilteredBooks(filteredBooks);
-  }, [allBooks, selectedLocation, selectedCategory, selectedTag]);
+  }, [allBooks, selectedLocation, selectedCategory, selectedTag, searchQuery]);
 
   const handleFilterClick = (filter: string, value: string) => {
     setSelectedFilter(filter);
@@ -398,7 +408,37 @@ const LibraryPage: React.FC = () => {
             <IonLabel>Group 2</IonLabel>
           </IonSegmentButton>
         </IonSegment>
-        {selectedSegment === 'all' &&
+        <IonSearchbar
+          placeholder='Search for books'
+          value={searchQuery}
+          onIonInput={(e) => {
+            const term = e.detail.value || '';
+            setSearchQuery(term);
+            if (term) {
+              const nonNullBooks = allBooks.filter((book) => book !== null);
+              const newFilteredBooks = nonNullBooks.filter(
+                (book) =>
+                  book.title &&
+                  book.categories &&
+                  (selectedLocation.length > 0
+                    ? selectedLocation.includes(book.location)
+                    : true) &&
+                  (selectedTag.length > 0
+                    ? book.tags.some((tag) => selectedTag.includes(tag))
+                    : true) &&
+                  book.title.toLowerCase().includes(term.toLowerCase())
+              );
+              setFilteredBooks(newFilteredBooks);
+            } else {
+              setFilteredBooks(allBooks);
+            }
+          }}
+          onIonClear={() => setFilteredBooks(allBooks)}
+        />
+        {isLoading ? (
+          <IonSpinner />
+        ) : (
+          selectedSegment === 'all' &&
           filteredBooks.map((book) => (
             <IonCard
               onClick={() => {
@@ -418,7 +458,8 @@ const LibraryPage: React.FC = () => {
                 {book?.author}
               </IonCardContent>
             </IonCard>
-          ))}
+          ))
+        )}
       </IonContent>
     </IonPage>
   );
