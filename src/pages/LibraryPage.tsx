@@ -233,7 +233,8 @@ const LibraryPage: React.FC = () => {
 
   useEffect(() => {
     console.log('searchQuery:', searchQuery);
-    const filteredBooks = allBooks.filter(
+    const nonNullBooks = allBooks.filter((book) => book !== null);
+    const filteredBooks = nonNullBooks.filter(
       (book) =>
         book &&
         book.title &&
@@ -257,14 +258,17 @@ const LibraryPage: React.FC = () => {
   };
 
   const handleLocationChange = (location) => {
+    setIsLoading(true);
     setSelectedLocation((prevLocations) =>
       prevLocations.includes(location)
         ? prevLocations.filter((l) => l !== location)
         : [...prevLocations, location]
     );
+    setIsLoading(false);
   };
 
   const handleCategoryChange = (category) => {
+    setIsLoading(true);
     setSelectedCategories((prevCategories) => {
       const newCategories = prevCategories.includes(category)
         ? prevCategories.filter((c) => c !== category)
@@ -278,8 +282,10 @@ const LibraryPage: React.FC = () => {
 
       return newCategories;
     });
+    setIsLoading(false);
   };
   const handleTagChange = (tag) => {
+    setIsLoading(true);
     setSelectedTags((prevTags) => {
       const newTags = prevTags.includes(tag)
         ? prevTags.filter((t) => t !== tag)
@@ -293,6 +299,7 @@ const LibraryPage: React.FC = () => {
 
       return newTags;
     });
+    setIsLoading(false);
   };
 
   return (
@@ -301,11 +308,13 @@ const LibraryPage: React.FC = () => {
         <IonToolbar>
           <IonTitle slot='start'>Library</IonTitle>
           <IonLabel
+            className='ion-padding'
+            slot='end'
             onClick={(e) =>
               setShowPopover({ isOpen: true, event: e.nativeEvent })
             }
           >
-            <IonIcon slot='end' icon={filter} />
+            <IonIcon icon={filter} />
           </IonLabel>
           <IonPopover
             isOpen={showPopover.isOpen}
