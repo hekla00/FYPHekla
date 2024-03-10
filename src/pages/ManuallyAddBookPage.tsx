@@ -41,6 +41,8 @@ const ManuallyAddBookPage: React.FC = () => {
   const [author, setAuthor] = useState('');
   const [data, setData] = useState(null);
   const [isbnData, setIsbnData] = useState('');
+  const [titleData, setTitleData] = useState('');
+  const [authorData, setAuthorData] = useState('');
   const history = useHistory();
   const [location, setLocation] = useState('');
   const [categories, setCategory] = useState([]);
@@ -55,6 +57,8 @@ const ManuallyAddBookPage: React.FC = () => {
   const [edition, setEdition] = useState('');
   const [notes, setNotes] = useState('');
   const isbnDataRef = useRef('');
+  const titleDataRef = useRef('');
+  const authorDataRef = useRef('');
   const [modalData, setModalData] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [books, setBooks] = useState([]);
@@ -67,8 +71,8 @@ const ManuallyAddBookPage: React.FC = () => {
   const [showPopover, setShowPopover] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
-  const [showActionSheet, setShowActionSheet] = useState(false);
-
+  const [authorInput, setAuthorInput] = useState('');
+  const [key, setKey] = useState(0);
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
     const newBookRef = {
@@ -117,23 +121,6 @@ const ManuallyAddBookPage: React.FC = () => {
     console.log('bookRef: ', bookRef);
     // history.goBack();
     history.push('/my/insidelibrary');
-  };
-
-  // create function that calls an Restful API that has a query parameter q and returns a JSON response
-  const handleAuthorSearch = async (author) => {
-    const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
-        author
-      )}`
-    );
-    const data = await response.json();
-    setData(data);
-    console.log('data: ', data);
-    console.log('author: ', author);
-    // check if author is found in the data and assign the author to the author state
-    if (data?.author) {
-      setAuthor(data.author);
-    }
   };
 
   const handleISBNSearch = async (isbn) => {
@@ -221,6 +208,112 @@ const ManuallyAddBookPage: React.FC = () => {
   const handleRatingChange = (newRating) => {
     setRating(newRating);
   };
+  // Handler for title search
+  const handleTitleSearch = async (title) => {
+    console.log('title1: ', title);
+    setShowModal(false);
+    // Setting loading to true when the search starts
+    setIsLoading(true);
+    const response = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=isbn+${encodeURIComponent(
+        title
+      )}`
+    );
+    const data = await response.json();
+
+    // Setting loading to false when the search ends
+    setIsLoading(false);
+    setData(data);
+    console.log('data: ', data);
+    console.log('title: ', title);
+    // check if author is found in the data and assign the author to the author state
+    if (data?.titleData) {
+      setIsbnData(data.title);
+    }
+
+    const books = data.items.map((item) => item.volumeInfo);
+    console.log('books: ', books);
+    setBooks(books);
+    if (data.items.length === 1) {
+      const book = data.items[0].volumeInfo;
+      console.log('book: ', book);
+      setTitle(book.title);
+      setAuthor(book.authors);
+      setDescription(book.description);
+      setPublisher(book.publisher);
+      setPages(book.pageCount);
+      setReleaseDate(book.publishedDate);
+      setCategory(book.categories);
+      setThumbnailUrl(book.imageLinks?.thumbnail);
+      setShowModal(false);
+      setBookSelected(true);
+      setLanguage(book.language);
+    } else if (data.items.length > 1) {
+      // inject data into modal
+      setModalData(data.items);
+      // show model to select book
+      setShowModal(true);
+    } else {
+      // If no book is found, show a message to the user
+      // create a toast message to show the user that no book was found
+      setShowToast(true);
+    }
+  };
+
+  // Handler for author search
+  const handleAuthorSearch = async (author) => {
+    console.log('author1: ', author);
+    setShowModal(false);
+    // Setting loading to true when the search starts
+    setIsLoading(true);
+    const response = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=isbn+${encodeURIComponent(
+        author
+      )}`
+    );
+    const data = await response.json();
+
+    // Setting loading to false when the search ends
+    setIsLoading(false);
+    setData(data);
+    console.log('data: ', data);
+    console.log('author: ', author);
+    // check if author is found in the data and assign the author to the author state
+    if (data?.authorData) {
+      setIsbnData(data.author);
+    }
+
+    const books = data.items.map((item) => item.volumeInfo);
+    console.log('books: ', books);
+    setBooks(books);
+    if (data.items.length === 1) {
+      const book = data.items[0].volumeInfo;
+      console.log('book: ', book);
+      setTitle(book.title);
+      setAuthor(book.authors);
+      setDescription(book.description);
+      setPublisher(book.publisher);
+      setPages(book.pageCount);
+      setReleaseDate(book.publishedDate);
+      setCategory(book.categories);
+      setThumbnailUrl(book.imageLinks?.thumbnail);
+      setShowModal(false);
+      setBookSelected(true);
+      setLanguage(book.language);
+    } else if (data.items.length > 1) {
+      // inject data into modal
+      setModalData(data.items);
+      // show model to select book
+      setShowModal(true);
+    } else {
+      // If no book is found, show a message to the user
+      // create a toast message to show the user that no book was found
+      setShowToast(true);
+    }
+  };
+  // function handleISBNSearch(isbn) {
+  //   searchBooks(isbn, 'isbn');
+  // }
 
   const uploadPhoto = async (photo: string) => {
     if (!currentUser) {
@@ -282,13 +375,6 @@ const ManuallyAddBookPage: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className='ion-padding'>
-        {/* <div className='thumbnail-container'>
-          {bookSelected ? (
-            <img src={thumbnailUrl} className='full-thumbnail' />
-          ) : (
-            <IonIcon icon={bookSharp} className='book-icon' />
-          )}
-        </div> */}
         <div className='thumbnail-container'>
           {uploadedPhoto ? (
             <img src={uploadedPhoto} className='full-thumbnail' />
@@ -305,14 +391,6 @@ const ManuallyAddBookPage: React.FC = () => {
             alignItems: 'center',
           }}
         >
-          {/* <IonButton
-            onClick={() => {
-              document.getElementById('fileInput')?.click();
-            }}
-            size='small'
-          >
-            Edit Image
-          </IonButton> */}
           <IonButton
             onClick={async () => {
               console.log('Edit Image button clicked');
@@ -405,17 +483,17 @@ const ManuallyAddBookPage: React.FC = () => {
             label='ISBN'
             labelPlacement='stacked'
             value={isbnData}
+            clearInput={true}
             onIonChange={(event) => {
               setIsbnData(event.detail.value);
               isbnDataRef.current = event.detail.value;
             }}
           />
-          <IonButton
-            slot='end'
-            onClick={() => handleISBNSearch(isbnDataRef.current)}
-          >
-            <IonIcon icon={search} />
-          </IonButton>
+          {isbnData && (
+            <IonButton slot='end' onClick={() => handleISBNSearch(isbnData)}>
+              <IonIcon icon={search} />
+            </IonButton>
+          )}
         </IonItem>
         <SearchResultModal
           isOpen={showModal}
@@ -426,26 +504,52 @@ const ManuallyAddBookPage: React.FC = () => {
         <IonItem>
           <IonInput
             label='Title'
-            debounce={1000}
             clearInput={true}
             labelPlacement='stacked'
-            value={title}
-            onIonChange={(event) => setTitle(event.detail.value)}
-            onIonBlur={() => console.log('onIonBlur')}
+            value={titleData}
+            onIonChange={(event) => {
+              setTitleData(event.detail.value);
+              titleDataRef.current = event.detail.value;
+            }}
           />
+          {titleData && (
+            <IonButton slot='end' onClick={() => handleTitleSearch(titleData)}>
+              <IonIcon icon={search} />
+            </IonButton>
+          )}
         </IonItem>
+        <SearchResultModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          books={modalData}
+          onBookSelect={handleBookSelect}
+        />
         <IonItem>
           <IonInput
             label='Author'
             labelPlacement='stacked'
             clearInput={true}
-            debounce={1000}
-            value={author}
-            onIonChange={(event) => setAuthor(event.detail.value)}
-            // onIonChange={(event) => handleAuthorSearch(event.detail.value)}
-            onIonBlur={(event) => handleAuthorSearch(author)}
+            value={authorData}
+            onIonChange={(event) => {
+              setAuthorData(event.detail.value);
+              authorDataRef.current = event.detail.value;
+            }}
           />
+          {authorData && (
+            <IonButton
+              slot='end'
+              onClick={() => handleAuthorSearch(authorData)}
+            >
+              <IonIcon icon={search} />
+            </IonButton>
+          )}
         </IonItem>
+        <SearchResultModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          books={modalData}
+          onBookSelect={handleBookSelect}
+        />
         <IonItem>
           <IonInput
             label='Location'
