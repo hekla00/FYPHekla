@@ -1,0 +1,31 @@
+.IonItem {
+  background-color: #fff;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.IonCard {
+  background-color: #fff;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.IonCardHeader {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.IonCardContent {
+  font-size: 1em;
+}
+
+.IonButton {
+  background-color: #ff6347;
+  color: #fff;
+}
+
+.IonTitle {
+  color: #ff6347;
+}
