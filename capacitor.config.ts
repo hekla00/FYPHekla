@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.fyp.app',
-  appName: 'LibraryMate',
+  appName: 'LibraryVault',
   webDir: 'dist',
   server: {
     androidScheme: 'https',
