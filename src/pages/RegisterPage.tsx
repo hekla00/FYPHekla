@@ -17,6 +17,9 @@ import { useAuth } from '../authentication';
 import { auth } from '../firebase';
 import { useState } from 'react';
 import { firestore } from '../firebase';
+import logo from '../../images/logo.png';
+import logo2 from '../../images/logo2.png';
+import './Login.css';
 
 const RegisterPage: React.FC = () => {
   const { loggedIn } = useAuth();
@@ -24,6 +27,8 @@ const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState({ loading: false, error: false });
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
   const handleRegister = async () => {
     //   try {
@@ -77,7 +82,8 @@ const RegisterPage: React.FC = () => {
       const userRef = firestore.collection('users').doc(credential.user.uid);
       await userRef.set({
         email: credential.user.email,
-        // Add any other user properties you want to save here
+        firstName: firstName,
+        lastName: lastName,
       });
 
       const publicUserRef = firestore
@@ -86,6 +92,8 @@ const RegisterPage: React.FC = () => {
       await publicUserRef.set({
         email: credential.user.email,
         id: credential.user.uid,
+        firstName: firstName,
+        lastName: lastName,
       });
     } catch (error) {
       setStatus({ loading: false, error: true });
@@ -97,14 +105,38 @@ const RegisterPage: React.FC = () => {
   }
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Register</IonTitle>
-        </IonToolbar>
-      </IonHeader>
       <IonContent className='ion-padding'>
+        <img src={logo2} alt='logo2' />
         {/* Creating login form */}
         <IonList>
+          <IonItem lines='none'>
+            <IonText>
+              <h2 className='custom-margin'>Register</h2>
+            </IonText>
+          </IonItem>
+          <IonItem lines='none'>
+            <IonText>
+              <p>Please register to login</p>
+            </IonText>
+          </IonItem>
+          <IonItem>
+            <IonInput
+              label='First Name'
+              labelPlacement='stacked'
+              type='text'
+              value={firstName}
+              onIonChange={(event) => setFirstName(event.detail.value)}
+            />
+          </IonItem>
+          <IonItem>
+            <IonInput
+              label='Last Name'
+              labelPlacement='stacked'
+              type='text'
+              value={lastName}
+              onIonChange={(event) => setLastName(event.detail.value)}
+            />
+          </IonItem>
           <IonItem>
             <IonInput
               label='Email'
@@ -130,7 +162,8 @@ const RegisterPage: React.FC = () => {
           Create an account
         </IonButton>
         <IonButton expand='block' fill='clear' routerLink='/login'>
-          Already have an account?
+          Already have an account?{''}
+          <strong>Log in</strong>
         </IonButton>
         <IonLoading isOpen={status.loading} />
       </IonContent>

@@ -1,0 +1,39 @@
+:root {
+  --ion-background-color: #eeede7; /* The background color of the app */
+  --ion-color-primary: #334040; /* The primary colour, used for the button background */
+  --ion-color-primary-contrast: #ffffff; /* The contrast colour, used for the button text */
+  --ion-color-primary-contrast-rgb: 255, 255, 255; /* The contrast colour in RGB format, used for the button text */
+  --ion-color-primary-shade: #4a5c5c; /* The colour for when the button is pressed */
+  --ion-color-primary-tint: #4a5c5c; /* The button hover colour */
+}
+
+h1 {
+  color: var(--ion-color-primary);
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+h2 {
+  color: var(--ion-color-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+h3 {
+  color: var(--ion-color-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+h4 {
+  color: var(--ion-color-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+ion-text {
+  color: var(--ion-color-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
