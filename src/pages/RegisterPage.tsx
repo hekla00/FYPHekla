@@ -15,61 +15,36 @@ import './Home.css';
 import { Redirect } from 'react-router';
 import { useAuth } from '../authentication';
 import { auth } from '../firebase';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { firestore } from '../firebase';
 import logo from '../../images/logo.png';
 import logo2 from '../../images/logo2.png';
 import './Login.css';
 
 const RegisterPage: React.FC = () => {
+  const [status, setStatus] = useState({ loading: false, error: false });
   const { loggedIn } = useAuth();
   //state variables for login form
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState({ loading: false, error: false });
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-
-  const handleRegister = async () => {
-    //   try {
-    //     setStatus({ loading: true, error: false });
-    //     const credential = await auth.createUserWithEmailAndPassword(
-    //       email,
-    //       password
-    //     );
-    //     console.log('credential: ', credential);
-    //     // setStatus({ loading: false, error: true });
-    //     // this is done to let the app know that the user is logged in
-    //     // onLogin();
-    //     // Save the user credential information to the 'users' collection
-    //     const userRef = firestore.collection('users').doc(credential.user.uid);
-    //     await userRef.set({
-    //       email: credential.user.email,
-    //       // Add any other user properties you want to save here
-    //     });
-    //     // Save the user's email and ID to the 'publicUsers' collection
-    //     const publicUserRef = firestore
-    //       .collection('publicUsers')
-    //       .doc(credential.user.uid);
-    //     await publicUserRef.set({
-    //       email: credential.user.email,
-    //       id: credential.user.uid,
-    //     });
-    //   } catch (error) {
-    //     // if the user enters wrong credentials, the error is set to true
-    //     setStatus({ loading: false, error: true });
-    //     console.log('error: ', error);
-    //   }
-    //   // console.log("email: ", email);
-    //   // console.log("password: ", password);
-    // };const handleRegister = async () => {
+  useEffect(() => {
+    console.log('password1: ', password);
+    if (status.error) {
+      console.log('Error: Password must be at least 6 characters long');
+    }
+  }, [password, status]);
+  const handleRegister = async (event) => {
     try {
+      event.preventDefault();
+      // const passwordValue = password;
       setStatus({ loading: true, error: false });
 
       // Validate password length
       if (password.length < 6) {
         setStatus({ loading: false, error: true });
-        console.log('Error: Password must be at least 6 characters long');
+        // console.log('Error: Password must be at least 6 characters long');
         return;
       }
 
@@ -98,7 +73,10 @@ const RegisterPage: React.FC = () => {
     } catch (error) {
       setStatus({ loading: false, error: true });
       console.log('error: ', error);
+      return;
     }
+    setStatus({ loading: false, error: false });
+    console.log('handleRegister end');
   };
   if (loggedIn) {
     return <Redirect to='/my/home' />;
@@ -125,7 +103,7 @@ const RegisterPage: React.FC = () => {
               labelPlacement='stacked'
               type='text'
               value={firstName}
-              onIonChange={(event) => setFirstName(event.detail.value)}
+              onIonInput={(e) => setFirstName(e.detail.value)}
             />
           </IonItem>
           <IonItem>
@@ -134,7 +112,7 @@ const RegisterPage: React.FC = () => {
               labelPlacement='stacked'
               type='text'
               value={lastName}
-              onIonChange={(event) => setLastName(event.detail.value)}
+              onIonInput={(e) => setLastName(e.detail.value)}
             />
           </IonItem>
           <IonItem>
@@ -143,7 +121,7 @@ const RegisterPage: React.FC = () => {
               labelPlacement='stacked'
               type='email'
               value={email}
-              onIonChange={(event) => setEmail(event.detail.value)}
+              onIonInput={(e) => setEmail(e.detail.value)}
             />
           </IonItem>
           <IonItem>
@@ -152,15 +130,17 @@ const RegisterPage: React.FC = () => {
               labelPlacement='stacked'
               type='password'
               value={password}
-              onIonChange={(event) => setPassword(event.detail.value)}
+              onIonInput={(e) => setPassword(e.detail.value)}
             />
           </IonItem>
         </IonList>
         {/* display error message if the user enters wrong credentials */}
         {status.error && <IonText color='danger'>Registration failed</IonText>}
-        <IonButton expand='block' onClick={handleRegister}>
-          Create an account
-        </IonButton>
+        <form onSubmit={handleRegister}>
+          <IonButton expand='block' type='submit'>
+            Create an account
+          </IonButton>
+        </form>
         <IonButton expand='block' fill='clear' routerLink='/login'>
           Already have an account?{''}
           <strong>Log in</strong>

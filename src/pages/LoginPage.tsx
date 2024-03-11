@@ -26,8 +26,9 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState({ loading: false, error: false });
 
-  const handleLogin = async () => {
+  const handleLogin = async (event) => {
     try {
+      event.preventDefault();
       setStatus({ loading: true, error: false });
       const credential = await auth.signInWithEmailAndPassword(email, password);
       console.log('credential: ', credential);
@@ -68,7 +69,7 @@ const LoginPage: React.FC = () => {
               labelPlacement='stacked'
               type='email'
               value={email}
-              onIonChange={(event) => setEmail(event.detail.value)}
+              onIonInput={(e) => setEmail(e.detail.value)}
             />
           </IonItem>
           <IonItem className='custom-padding'>
@@ -78,7 +79,7 @@ const LoginPage: React.FC = () => {
               labelPlacement='stacked'
               type='password'
               value={password}
-              onIonChange={(event) => setPassword(event.detail.value)}
+              onIonInput={(e) => setPassword(e.detail.value)}
             />
           </IonItem>
         </IonList>
@@ -86,10 +87,16 @@ const LoginPage: React.FC = () => {
         {status.error && (
           <IonText color='danger'>Invalid email or password</IonText>
         )}
-        <IonButton className='ion-padding' expand='block' onClick={handleLogin}>
-          Log in
-        </IonButton>
-
+        <form onSubmit={handleLogin}>
+          <IonButton
+            className='ion-padding'
+            expand='block'
+            // onClick={handleLogin}
+            type='submit'
+          >
+            Log in
+          </IonButton>
+        </form>
         {/* If the user does not have an account they are redirected to the register page */}
         <IonButton expand='block' fill='clear' routerLink='/register'>
           Don't have an account?{''}
