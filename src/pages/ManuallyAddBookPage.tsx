@@ -26,7 +26,7 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import React, { useState, useRef, useEffect } from 'react';
 import { firestore } from '../firebase';
 import { useAuth } from '../authentication';
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 import firebase from 'firebase/app';
 import SearchResultModal from '../components/SearchResultModal';
 import { add as AddIcon, bookSharp, star, starOutline } from 'ionicons/icons';
@@ -73,6 +73,13 @@ const ManuallyAddBookPage: React.FC = () => {
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
   const [authorInput, setAuthorInput] = useState('');
   const [key, setKey] = useState(0);
+  const locationData = useLocation<{ isbn: string | null }>();
+  const isbn = locationData.state?.isbn;
+  useEffect(() => {
+    if (locationData.state?.isbn) {
+      handleISBNSearch(locationData.state.isbn);
+    }
+  }, [location]);
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
     const newBookRef = {
@@ -311,9 +318,6 @@ const ManuallyAddBookPage: React.FC = () => {
       setShowToast(true);
     }
   };
-  // function handleISBNSearch(isbn) {
-  //   searchBooks(isbn, 'isbn');
-  // }
 
   const uploadPhoto = async (photo: string) => {
     if (!currentUser) {
@@ -327,7 +331,7 @@ const ManuallyAddBookPage: React.FC = () => {
       }
 
       const blob = await response.blob();
-      const fileType = blob.type.split('/')[1]; // Extract file type from MIME type
+      const fileType = blob.type.split('/')[1];
 
       const storageRef = firebase.storage().ref();
       const photoRef = storageRef.child(`bookImages/${uuidv4()}.${fileType}`);
