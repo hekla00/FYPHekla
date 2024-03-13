@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 
 const SearchPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
-
   return (
     <IonPage>
       <IonHeader>

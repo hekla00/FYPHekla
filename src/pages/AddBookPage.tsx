@@ -42,6 +42,10 @@ const AddBookPage: React.FC = () => {
       <AddBookActionSheet
         isOpen={showActionSheet}
         onButtonClick={handleButtonClick}
+        onDidDismiss={() => {
+          setShowActionSheet(false);
+          history.go(-1);
+        }}
       />
     </IonPage>
   );

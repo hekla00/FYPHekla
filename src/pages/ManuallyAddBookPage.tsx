@@ -59,6 +59,7 @@ const ManuallyAddBookPage: React.FC = () => {
   const isbnDataRef = useRef('');
   const titleDataRef = useRef('');
   const authorDataRef = useRef('');
+  const editionDataRef = useRef<string | null>(null);
   const [modalData, setModalData] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [books, setBooks] = useState([]);
@@ -75,16 +76,18 @@ const ManuallyAddBookPage: React.FC = () => {
   const [key, setKey] = useState(0);
   const locationData = useLocation<{ isbn: string | null }>();
   const isbn = locationData.state?.isbn;
+
   useEffect(() => {
     if (locationData.state?.isbn) {
       handleISBNSearch(locationData.state.isbn);
     }
   }, [location]);
+
   const handleAddBook = async () => {
     const booksRef = firestore.collection('books');
     const newBookRef = {
-      title: title || '',
-      author: author || '',
+      title: titleData || title || '',
+      author: authorData || author || authorDataRef.current || '',
       location: location || '',
       categories: categories || [],
       tags: tags || [],
@@ -98,8 +101,25 @@ const ManuallyAddBookPage: React.FC = () => {
       edition: edition || '',
       notes: notes || '',
       rating: rating || 0,
+      isbn: isbnData || isbn || isbnDataRef.current || '',
     };
     const bookRef = await booksRef.add(newBookRef);
+    // Clearing the fields
+    // setTitle('');
+    // setAuthor('');
+    // setLocation('');
+    // setCategory([]);
+    // setTags('');
+    // setLanguage('');
+    // setPublisher('');
+    // setDescription('');
+    // setReview('');
+    // setPages('0');
+    // setReleaseDate(null);
+    // setPurchaseDate(null);
+    // setEdition('');
+    // setNotes('');
+    // setRating(0);
 
     const userID = firebase.auth().currentUser?.uid;
     console.log('userID book: ', userID);
@@ -127,7 +147,7 @@ const ManuallyAddBookPage: React.FC = () => {
 
     console.log('bookRef: ', bookRef);
     // history.goBack();
-    history.push('/my/insidelibrary');
+    history.push('/my/library');
   };
 
   const handleISBNSearch = async (isbn) => {
@@ -169,6 +189,7 @@ const ManuallyAddBookPage: React.FC = () => {
       setShowModal(false);
       setBookSelected(true);
       setLanguage(book.language);
+      setIsbnData(book.isbn);
     } else if (data.items.length > 1) {
       // inject data into modal
       setModalData(data.items);
@@ -183,17 +204,27 @@ const ManuallyAddBookPage: React.FC = () => {
 
   // setting the book data to the different states based on the book selected
   const handleBookSelect = (book) => {
-    setTitle(book.volumeInfo.title);
+    setAuthorData(book.volumeInfo.authors[0]);
+    setTitleData(book.volumeInfo.title);
     setAuthor(book.volumeInfo.authors);
+    setTitle(book.volumeInfo.title);
     setDescription(book.volumeInfo.description);
     setPublisher(book.volumeInfo.publisher);
     setPages(book.volumeInfo.pageCount);
     setReleaseDate(book.volumeInfo.publishedDate);
     setCategory(book.volumeInfo.categories);
+    setEdition(book.volumeInfo.edition);
     setThumbnailUrl(book.volumeInfo.imageLinks?.thumbnail);
     setLanguage(book.volumeInfo.language);
     setShowModal(false);
     setBookSelected(true);
+
+    const isbn13Obj = book.volumeInfo.industryIdentifiers?.find(
+      (identifier: any) => identifier.type === 'ISBN_13'
+    );
+    if (isbn13Obj) {
+      setIsbnData(isbn13Obj.identifier);
+    }
   };
 
   const handleAddCategory = (newCategory) => {
@@ -490,7 +521,7 @@ const ManuallyAddBookPage: React.FC = () => {
             clearInput={true}
             onIonChange={(event) => {
               setIsbnData(event.detail.value);
-              isbnDataRef.current = event.detail.value;
+              // isbnDataRef.current = event.detail.value;
             }}
           />
           {isbnData && (
@@ -536,7 +567,7 @@ const ManuallyAddBookPage: React.FC = () => {
             value={authorData}
             onIonChange={(event) => {
               setAuthorData(event.detail.value);
-              authorDataRef.current = event.detail.value;
+              // authorDataRef.current = event.detail.value;
             }}
           />
           {authorData && (
@@ -716,7 +747,10 @@ const ManuallyAddBookPage: React.FC = () => {
                   labelPlacement='stacked'
                   debounce={1000}
                   value={edition}
-                  onIonChange={(event) => setEdition(event.detail.value)}
+                  onIonChange={(event) => {
+                    setEdition(event.detail.value);
+                    editionDataRef.current = event.detail.value;
+                  }}
                 />
               </IonItem>
               <IonItem>

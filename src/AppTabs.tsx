@@ -39,6 +39,7 @@ import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
+import { useLocation } from 'react-router-dom';
 
 /* Theme variables */
 import './theme/variables.css';
@@ -48,7 +49,7 @@ import GroupsPage from './pages/GroupsPage';
 import GroupCreationPage from './pages/GroupCreationPage';
 import AddMemberPage from './pages/AddMemberPage';
 import LibraryPage from './pages/LibraryPage';
-import BarcodeScannerPage from './pages/BarcodeScannerPage';
+import BarcodeScannerPage from './pages/barcodeScannerPage';
 import AddBookActionSheet from './components/AddBookActionSheet';
 import { useHistory } from 'react-router-dom';
 import AddBookPage from './pages/AddBookPage';
@@ -59,6 +60,7 @@ setupIonicReact();
 const AppTabs: React.FC = () => {
   const [showActionSheet, setShowActionSheet] = useState(false);
   const history = useHistory();
+  const location = useLocation();
   // Assiging the loggedIn value from the authContext to the loggedIn variable
   // calling the useAuth hook
   const { loggedIn } = useAuth();
@@ -68,6 +70,11 @@ const AppTabs: React.FC = () => {
   }
   const handleButtonClick = (path: string) => {
     history.push(path);
+    setShowActionSheet(false);
+  };
+
+  const handleActionSheetDismiss = () => {
+    history.push(location.pathname);
     setShowActionSheet(false);
   };
   return (
@@ -125,7 +132,6 @@ const AppTabs: React.FC = () => {
           <IonIcon icon={LibraryIcon} />
           <IonLabel>Library</IonLabel>
         </IonTabButton>
-        {/* TODO */}
         <IonTabButton tab='add' href='/my/add'>
           <IonIcon icon={AddIcon} />
           <IonLabel>Add</IonLabel>
@@ -141,7 +147,7 @@ const AppTabs: React.FC = () => {
       </IonTabBar>
       <AddBookActionSheet
         isOpen={showActionSheet}
-        // onDidDismiss={() => setShowActionSheet(false)}
+        onDidDismiss={handleActionSheetDismiss}
         onButtonClick={handleButtonClick}
       />
     </IonTabs>

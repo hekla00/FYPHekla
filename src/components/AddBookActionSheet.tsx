@@ -4,15 +4,18 @@ import React from 'react';
 interface AddBookActionSheetProps {
   isOpen: boolean;
   onButtonClick: (path: string) => void;
+  onDidDismiss: () => void;
 }
 
 const AddBookActionSheet: React.FC<AddBookActionSheetProps> = ({
   isOpen,
   onButtonClick,
+  onDidDismiss,
 }) => {
   return (
     <IonActionSheet
       isOpen={isOpen}
+      onDidDismiss={onDidDismiss}
       buttons={[
         {
           text: 'Manually Insert',
