@@ -44,7 +44,10 @@ const AddBookPage: React.FC = () => {
         onButtonClick={handleButtonClick}
         onDidDismiss={() => {
           setShowActionSheet(false);
-          history.go(-1);
+          //   history.goBack();
+          if (location.pathname === '/my/add') {
+            history.push('/my/home');
+          }
         }}
       />
     </IonPage>
