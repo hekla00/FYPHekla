@@ -15,6 +15,7 @@
     "start:ios": "ionic cap run ios -livereload --external --public-host=127.0.0.1"
   },
   "dependencies": {
+    "@capacitor-mlkit/barcode-scanning": "^5.4.0",
     "@capacitor/app": "5.0.6",
     "@capacitor/camera": "^5.0.9",
     "@capacitor/core": "^5.7.1",

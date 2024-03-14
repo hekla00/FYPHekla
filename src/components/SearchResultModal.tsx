@@ -10,8 +10,11 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonIcon,
 } from '@ionic/react';
 import { OverlayEventDetail } from '@ionic/core/components';
+import { bookSharp } from 'ionicons/icons';
+import '../pages/SearchPage.css';
 interface SearchResultModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -54,11 +57,30 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
             books.map((book, index) => (
               <IonItem key={index} button onClick={() => onBookSelect(book)}>
                 <IonLabel>
-                  <h2>{book.volumeInfo.title}</h2>
-                  <p>
-                    {book.volumeInfo.authors &&
-                      book.volumeInfo.authors.join(', ')}
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {book.volumeInfo.imageLinks?.thumbnail ? (
+                      <img
+                        className='full-thumbnail'
+                        src={book.volumeInfo.imageLinks.thumbnail}
+                        alt='Book thumbnail'
+                        style={{ marginRight: '10px' }}
+                      />
+                    ) : (
+                      <IonIcon
+                        slot='start'
+                        icon={bookSharp}
+                        className='book-icon'
+                        style={{ marginRight: '10px' }}
+                      />
+                    )}
+                    <div>
+                      <h1>{book.volumeInfo.title}</h1>
+                      <p>
+                        {book.volumeInfo.authors &&
+                          book.volumeInfo.authors.join(', ')}
+                      </p>
+                    </div>
+                  </div>
                 </IonLabel>
               </IonItem>
             ))}

@@ -51,5 +51,7 @@
 	<string>Your app requires access to the photo library to save photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Your app requires access to the photo library to select photos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The app enables the scanning of various barcodes.</string>
 </dict>
 </plist>

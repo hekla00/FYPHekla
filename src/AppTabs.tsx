@@ -6,6 +6,8 @@ import {
   IonTabs,
   setupIonicReact,
   IonLabel,
+  IonActionSheet,
+  IonButton,
 } from '@ionic/react';
 import { Route, Redirect } from 'react-router-dom';
 import {
@@ -15,7 +17,7 @@ import {
   people as GroupsIcon,
   apps as MoreIcon,
 } from 'ionicons/icons';
-import React from 'react';
+import React, { useState } from 'react';
 // Importing pages
 import Home from './pages/Home';
 import InsideLibrary from './pages/InsideLibrary';
@@ -37,6 +39,7 @@ import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
+import { useLocation } from 'react-router-dom';
 
 /* Theme variables */
 import './theme/variables.css';
@@ -46,10 +49,18 @@ import GroupsPage from './pages/GroupsPage';
 import GroupCreationPage from './pages/GroupCreationPage';
 import AddMemberPage from './pages/AddMemberPage';
 import LibraryPage from './pages/LibraryPage';
+import BarcodeScannerPage from './pages/barcodeScannerPage';
+import AddBookActionSheet from './components/AddBookActionSheet';
+import { useHistory } from 'react-router-dom';
+import AddBookPage from './pages/AddBookPage';
+import SearchPage from './pages/SearchPage';
 
 setupIonicReact();
 
 const AppTabs: React.FC = () => {
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  const history = useHistory();
+  const location = useLocation();
   // Assiging the loggedIn value from the authContext to the loggedIn variable
   // calling the useAuth hook
   const { loggedIn } = useAuth();
@@ -57,6 +68,15 @@ const AppTabs: React.FC = () => {
   if (!loggedIn) {
     return <Redirect to='/login' />;
   }
+  const handleButtonClick = (path: string) => {
+    history.push(path);
+    setShowActionSheet(false);
+  };
+
+  const handleActionSheetDismiss = () => {
+    history.push(location.pathname);
+    setShowActionSheet(false);
+  };
   return (
     <IonTabs>
       {/* By using IonRouterOutlet there will be animations when
@@ -91,6 +111,13 @@ const AppTabs: React.FC = () => {
           exact={true}
         />
         <Route path='/my/addmember' component={AddMemberPage} exact={true} />
+        <Route
+          path='/my/barcodeScanner'
+          component={BarcodeScannerPage}
+          exact={true}
+        />
+        <Route path='/my/add' component={AddBookPage} exact />
+        <Route path='/my/search' component={SearchPage} exact />
         <Route exact path='/' render={() => <Redirect to='/my/home' />} />
       </IonRouterOutlet>
       {/* Setting the tab bar at the bottom of the page */}
@@ -105,8 +132,7 @@ const AppTabs: React.FC = () => {
           <IonIcon icon={LibraryIcon} />
           <IonLabel>Library</IonLabel>
         </IonTabButton>
-        {/* TODO */}
-        <IonTabButton tab='add' href='/my/books/add'>
+        <IonTabButton tab='add' href='/my/add'>
           <IonIcon icon={AddIcon} />
           <IonLabel>Add</IonLabel>
         </IonTabButton>
@@ -119,6 +145,11 @@ const AppTabs: React.FC = () => {
           <IonLabel>More</IonLabel>
         </IonTabButton>
       </IonTabBar>
+      <AddBookActionSheet
+        isOpen={showActionSheet}
+        onDidDismiss={handleActionSheetDismiss}
+        onButtonClick={handleButtonClick}
+      />
     </IonTabs>
   );
 };

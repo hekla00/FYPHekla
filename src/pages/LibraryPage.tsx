@@ -275,7 +275,11 @@ const LibraryPage: React.FC = () => {
         : [...prevCategories, category];
 
       const filteredBooks = allBooks.filter((book) =>
-        newCategories.every((category) => book.categories.includes(category))
+        book.categories
+          ? newCategories.every((category) =>
+              book.categories.includes(category)
+            )
+          : false
       );
 
       setFilteredBooks(filteredBooks);
@@ -292,7 +296,7 @@ const LibraryPage: React.FC = () => {
         : [...prevTags, tag];
 
       const filteredBooks = allBooks.filter((book) =>
-        newTags.every((tag) => book.tags.includes(tag))
+        book.tags ? newTags.every((tag) => book.tags.includes(tag)) : false
       );
 
       setFilteredBooks(filteredBooks);
@@ -302,6 +306,14 @@ const LibraryPage: React.FC = () => {
     setIsLoading(false);
   };
 
+  // Group identical categories together
+  const allCategories = Array.from(
+    new Set(allBooks.flatMap((book) => book.categories || []))
+  );
+
+  const allTags = Array.from(
+    new Set(allBooks.flatMap((book) => book.tags || []))
+  );
   return (
     <IonPage>
       <IonHeader>
@@ -352,10 +364,10 @@ const LibraryPage: React.FC = () => {
               >
                 Category
               </IonItem>
-              {showCategories && (
+              {/* {showCategories && (
                 <IonList>
                   {allBooks.map((book, index) =>
-                    book.categories.map((category, index) => (
+                    allCategories.map((category, index) => (
                       <IonItem key={index}>
                         <IonCheckbox
                           aria-label='category'
@@ -371,27 +383,64 @@ const LibraryPage: React.FC = () => {
                     ))
                   )}
                 </IonList>
+              )} */}
+              {showCategories && (
+                <IonList>
+                  {allCategories.map((category, index) => (
+                    <IonItem key={index}>
+                      <IonCheckbox
+                        aria-label='category'
+                        slot='start'
+                        value={category}
+                        checked={selectedCategories.includes(category)}
+                        onIonChange={(e) =>
+                          handleCategoryChange(e.detail.value)
+                        }
+                      />
+                      <IonLabel>{category}</IonLabel>
+                    </IonItem>
+                  ))}
+                </IonList>
               )}
-
               <IonItem button onClick={() => setShowTags(!showTags)}>
                 Tags
               </IonItem>
-              {showTags && (
+              {/* {showTags && (
                 <IonList>
                   {allBooks.map((book, index) =>
-                    book.tags.map((tag, index) => (
-                      <IonItem key={index}>
-                        <IonCheckbox
-                          aria-label='tag'
-                          slot='start'
-                          value={tag}
-                          checked={selectedTags.includes(tag)}
-                          onIonChange={(e) => handleTagChange(e.detail.value)}
-                        />
-                        <IonLabel>{tag}</IonLabel>
-                      </IonItem>
-                    ))
+                    book.tags
+                      ? book.tags.map((tag, index) => (
+                          <IonItem key={index}>
+                            <IonCheckbox
+                              aria-label='tag'
+                              slot='start'
+                              value={tag}
+                              checked={selectedTags.includes(tag)}
+                              onIonChange={(e) =>
+                                handleTagChange(e.detail.value)
+                              }
+                            />
+                            <IonLabel>{tag}</IonLabel>
+                          </IonItem>
+                        ))
+                      : null
                   )}
+                </IonList>
+              )} */}
+              {showTags && (
+                <IonList>
+                  {allTags.map((tag, index) => (
+                    <IonItem key={index}>
+                      <IonCheckbox
+                        aria-label='tag'
+                        slot='start'
+                        value={tag}
+                        checked={selectedTags.includes(tag)}
+                        onIonChange={(e) => handleTagChange(e.detail.value)}
+                      />
+                      <IonLabel>{tag}</IonLabel>
+                    </IonItem>
+                  ))}
                 </IonList>
               )}
             </IonList>

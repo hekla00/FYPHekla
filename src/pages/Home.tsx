@@ -52,6 +52,17 @@ const Home: React.FC = () => {
               </IonCardHeader>
             </IonCard>
           </IonCol>
+          <IonCol size='6'>
+            <IonCard>
+              <IonCardHeader>
+                <IonButton fill='clear' routerLink='/my/barcodeScanner'>
+                  <IonCardTitle className='small-font'>
+                    Barcode Scanner
+                  </IonCardTitle>
+                </IonButton>
+              </IonCardHeader>
+            </IonCard>
+          </IonCol>
         </IonRow>
         <IonRow>
           <IonLabel className='ion-padding'>Recommendations</IonLabel>
