@@ -16,10 +16,10 @@ const handleAuthorSearch = async (
   setBookSelected,
   setLanguage,
   setShowToast,
-  setNotes,
+  // setNotes,
   setPurchaseDate,
-  setRating,
-  setReview,
+  // setRating,
+  // setReview,
   setModalData
 ) => {
   console.log('author1: ', author);
@@ -66,10 +66,10 @@ const handleAuthorSearch = async (
     setThumbnailUrl(book.imageLinks?.thumbnail);
     setShowModal(false);
     setBookSelected(true);
-    setNotes(book.notes);
+    // setNotes(book.notes);
     setPurchaseDate(book.purchaseDate);
-    setRating(book.rating);
-    setReview(book.review);
+    // setRating(book.rating);
+    // setReview(book.review);
     setLanguage(book.language);
   } else if (data.items.length > 1) {
     // inject data into modal

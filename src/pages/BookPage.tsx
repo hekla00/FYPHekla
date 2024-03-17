@@ -15,8 +15,17 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
+  IonFab,
+  IonFabButton,
+  IonFabList,
+  IonModal,
 } from '@ionic/react';
-import { trash as trashIcon } from 'ionicons/icons';
+import {
+  add,
+  chevronUpCircle,
+  pencil,
+  trash as trashIcon,
+} from 'ionicons/icons';
 import './Home.css';
 import { useParams, useRouteMatch } from 'react-router';
 // import { dummyBooks } from "../dummydata";
@@ -27,7 +36,8 @@ import { useAuth } from '../authentication';
 import { useHistory } from 'react-router';
 import firebase from 'firebase/app';
 import './BookPage.css';
-
+import RatingsReviews from '../components/RatingsReviews';
+import { fetchReview, fetchNotes } from '../functions/RatingsReviewHelper';
 interface RouteParams {
   id: string;
 }
@@ -38,6 +48,11 @@ const BookPage: React.FC = () => {
   const { id } = match.params;
   const [book, setBook] = useState<Book>();
   const history = useHistory();
+  const currentUser = firebase.auth().currentUser;
+  const [showModal, setShowModal] = useState(false);
+  const [review, setReview] = useState('');
+  const [notes, setNotes] = useState('');
+  const [rating, setRating] = useState(0);
 
   // useEffect(() => {
   //   const bookRef = firestore
@@ -54,7 +69,8 @@ const BookPage: React.FC = () => {
   useEffect(() => {
     // Get current user
     const currentUser = firebase.auth().currentUser;
-
+    fetchReview(currentUser?.uid, id, setRating, setReview);
+    fetchNotes(currentUser?.uid, id, setNotes);
     if (currentUser) {
       // Reference to the 'userBooks' collection
       const userBooksRef = firestore.collection('userBooks');
@@ -99,6 +115,7 @@ const BookPage: React.FC = () => {
     await userBooksRef.delete();
     history.goBack();
   };
+
   return (
     <IonPage>
       <IonHeader>
@@ -135,9 +152,11 @@ const BookPage: React.FC = () => {
         </IonCard>
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Rating</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.rating}
-          </IonCardContent>
+          <IonCardContent className='IonCardContent'>{rating}</IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Review</IonCardHeader>
+          <IonCardContent className='IonCardContent'>{review}</IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Description</IonCardHeader>
@@ -177,9 +196,7 @@ const BookPage: React.FC = () => {
         </IonCard>
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Notes</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.notes}
-          </IonCardContent>
+          <IonCardContent className='IonCardContent'>{notes}</IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Release Date</IonCardHeader>
@@ -193,6 +210,31 @@ const BookPage: React.FC = () => {
             {book?.purchaseDate}
           </IonCardContent>
         </IonCard>
+        <IonFab vertical='bottom' horizontal='end' slot='fixed'>
+          <IonFabButton>
+            <IonIcon icon={chevronUpCircle}></IonIcon>
+          </IonFabButton>
+          <IonFabList side='top'>
+            {/* <IonFabButton>
+                <IonIcon icon={settings}></IonIcon>
+              </IonFabButton> */}
+            <IonFabButton onClick={() => setShowModal(true)}>
+              <IonIcon icon={add}></IonIcon>
+            </IonFabButton>
+            <IonFabButton>
+              <IonIcon icon={pencil}></IonIcon>
+            </IonFabButton>
+          </IonFabList>
+        </IonFab>
+        <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+          <RatingsReviews
+            showModal={showModal}
+            setShowModal={setShowModal}
+            userID={currentUser?.uid}
+            book={book}
+          />
+          {/* <p>Hello, world!</p> */}
+        </IonModal>
       </IonContent>
     </IonPage>
   );

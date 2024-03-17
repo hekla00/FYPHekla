@@ -15,10 +15,10 @@ const handleISBNSearch = async (
   setThumbnailUrl,
   setBookSelected,
   setLanguage,
-  setNotes,
+  // setNotes,
   setPurchaseDate,
-  setRating,
-  setReview,
+  // setRating,
+  // setReview,
   setShowToast,
   setModalData
 ) => {
@@ -68,10 +68,10 @@ const handleISBNSearch = async (
     setBookSelected(true);
     setLanguage(book.language);
     setIsbnData(book.isbn);
-    setNotes(book.notes);
+    // setNotes(book.notes);
     setPurchaseDate(book.purchaseDate);
-    setRating(book.rating);
-    setReview(book.review);
+    // setRating(book.rating);
+    // setReview(book.review);
   } else if (data.items.length > 1) {
     // inject data into modal
     setModalData(data.items);
