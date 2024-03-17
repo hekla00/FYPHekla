@@ -222,6 +222,7 @@ const ManuallyAddBookPage: React.FC = () => {
     const newUserBooksRef = {
       userID,
       bookID: bookRef.id,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     };
     // write function that adds the books to the userBooks collection for the current user
     const userBooksRefa = firestore.collection('userBooks');

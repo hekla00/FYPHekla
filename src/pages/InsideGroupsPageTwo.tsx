@@ -25,16 +25,22 @@ import {
   IonCardContent,
   IonRouterLink,
 } from '@ionic/react';
-import { chevronUpCircle, personAdd, star, starOutline } from 'ionicons/icons';
-import LeaveGroup from '../components/LeaveGroup';
 import {
-  fetchReview,
-  fetchReviewSimple,
-} from '../functions/RatingsReviewHelper';
+  chevronUpCircle,
+  personAdd,
+  star,
+  starOutline,
+  book,
+} from 'ionicons/icons';
+import LeaveGroup from '../components/LeaveGroup';
 import { fetchBookBasedOnBookID } from '../functions/BooksHelper';
 import { fetchGroup, fetchMembersData } from '../functions/GroupsHelper';
 import 'firebase/performance';
 import './Groups.css';
+import {
+  fetchThumbnailByISBN,
+  fetchThumbnailByTitle,
+} from '../functions/APIHelper';
 
 const InsideGroupsPageTwo: React.FC = () => {
   const { id: groupId } = useParams<{ id: string }>();
@@ -47,6 +53,7 @@ const InsideGroupsPageTwo: React.FC = () => {
   const [reviewsData, setReviewsData] = useState([]);
   const perf = firebase.performance();
   const db = firebase.firestore();
+  const [thumbnails, setThumbnails] = useState({});
 
   useEffect(() => {
     fetchGroup(groupId, setGroup, setLoading);
@@ -94,23 +101,54 @@ const InsideGroupsPageTwo: React.FC = () => {
               (review: { id: string; bookID: string }) =>
                 review.bookID === userBookData.bookID
             );
-            const book = await fetchBookBasedOnBookID(userBookData.bookID);
-            console.log('book', book);
+            const book = (await fetchBookBasedOnBookID(
+              userBookData.bookID
+            )) as { isbn?: string; title?: string };
+            // console.log('book', book);
+            let thumbnail;
+            try {
+              thumbnail = await fetchThumbnailByISBN(book?.isbn);
+            } catch (error) {
+              thumbnail = await fetchThumbnailByTitle(book?.title);
+            }
             return {
               ...userBookData,
               review,
               user: userData,
               book,
+              thumbnail,
             };
           })
         );
 
-        console.log('userBooksData', userBooksData);
+        // console.log('userBooksData', userBooksData);
         return userBooksData;
       });
 
       const resolvedReviewsData = await Promise.all(reviewsDataPromises);
+      const newThumbnails = {};
+      const fetchedTitles = new Set();
+      let thumbnailCount = 0;
 
+      for (const userBooksData of resolvedReviewsData) {
+        for (const userBookData of userBooksData) {
+          if (thumbnailCount >= 5) {
+            break;
+          }
+
+          if (!fetchedTitles.has(userBookData.book.title)) {
+            newThumbnails[userBookData.book.title] = userBookData.thumbnail;
+            fetchedTitles.add(userBookData.book.title);
+            thumbnailCount++;
+          }
+        }
+
+        if (thumbnailCount >= 5) {
+          break;
+        }
+      }
+      //   console.log('newThumbnails', newThumbnails);
+      setThumbnails(newThumbnails);
       setReviewsData(resolvedReviewsData);
       trace.stop();
     };
@@ -165,6 +203,7 @@ const InsideGroupsPageTwo: React.FC = () => {
                                 <IonCardTitle className='small-title'>
                                   {review.book?.title}
                                 </IonCardTitle>
+
                                 <div className='rating-container'>
                                   {[1, 2, 3, 4, 5].map((starNumber) => (
                                     <IonIcon
@@ -179,6 +218,10 @@ const InsideGroupsPageTwo: React.FC = () => {
                                   ))}
                                 </div>
                               </div>
+
+                              <IonCardTitle className='username'>
+                                {review.user?.firstName || review.user?.email}
+                              </IonCardTitle>
                               <IonCardContent className='card-content'>
                                 {review.review?.review}
                               </IonCardContent>
@@ -191,9 +234,6 @@ const InsideGroupsPageTwo: React.FC = () => {
               ) : (
                 <p>No reviews available</p>
               )}
-              {/* <IonCard>
-                <IonCardContent></IonCardContent>
-              </IonCard> */}
             </IonCol>
           </IonRow>
           <IonRow>
@@ -203,6 +243,24 @@ const InsideGroupsPageTwo: React.FC = () => {
                   Recently Added Books
                 </IonLabel>
               </IonListHeader>
+              <div className='thumbnail-container'>
+                {reviewsData.map((userBooksData) =>
+                  userBooksData.map((userBookData) => (
+                    <div key={userBookData.book.title} className='thumbnail'>
+                      <IonRouterLink
+                        routerLink={`/my/books/view/${userBookData.book.id}`}
+                        key={userBookData.book.title}
+                      >
+                        {userBookData.thumbnail ? (
+                          <img src={userBookData.thumbnail} />
+                        ) : (
+                          <IonIcon icon={book} />
+                        )}
+                      </IonRouterLink>
+                    </div>
+                  ))
+                )}
+              </div>
             </IonCol>
           </IonRow>
           <IonRow>

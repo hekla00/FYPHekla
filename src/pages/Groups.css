@@ -24,3 +24,45 @@
 .small-title {
   font-size: 1.2em;
 }
+
+.username {
+  font-size: 1em;
+  font-weight: bold;
+  padding: 0.1rem 1.25rem;
+}
+/* .thumbnail {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+} */
+.thumbnail {
+  display: inline-block;
+  flex: 1 0 auto;
+  max-width: 30%;
+}
+
+.thumbnail img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  padding-left: 0.75rem;
+}
+.thumbnail-container {
+  display: flex;
+  justify-content: space-between;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.7) transparent;
+}
+
+.thumbnail:first-child {
+  align-self: flex-start;
+}
+
+.thumbnail:last-child {
+  align-self: flex-end;
+}
+.thumbnail img:hover {
+  transform: scale(1.1); /* adjust as needed */
+  transition: transform 0.3s ease-in-out;
+}
