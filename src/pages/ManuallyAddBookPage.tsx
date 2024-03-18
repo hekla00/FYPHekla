@@ -337,13 +337,13 @@ const ManuallyAddBookPage: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className='ion-padding'>
-        <div className='thumbnail-container'>
+        <div className='thumbnail-container-addBook'>
           {uploadedPhoto ? (
-            <img src={uploadedPhoto} className='full-thumbnail' />
+            <img src={uploadedPhoto} className='full-thumbnail-addBook' />
           ) : bookSelected ? (
-            <img src={thumbnailUrl} className='full-thumbnail' />
+            <img src={thumbnailUrl} className='full-thumbnail-addBook' />
           ) : (
-            <IonIcon icon={bookSharp} className='book-icon' />
+            <IonIcon icon={bookSharp} className='book-icon-addBook' />
           )}
         </div>
         <div

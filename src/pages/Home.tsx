@@ -13,10 +13,44 @@ import {
   IonCol,
   IonLabel,
   IonText,
+  IonIcon,
+  IonBadge,
+  IonCardSubtitle,
+  IonCardContent,
+  IonImg,
+  IonList,
+  IonItem,
 } from '@ionic/react';
 import './Home.css';
+import { book, people, arrowRedo, arrowUndo } from 'ionicons/icons';
+import { useEffect, useState } from 'react';
+import firebase from 'firebase/app';
+import { fetchNumBooks, fetchNumGroups } from '../functions/UserHelper';
+import { fetchBooks } from '../functions/RecommendationsHelper';
+import { bookSharp, star, starOutline, starHalf } from 'ionicons/icons';
 
 const Home: React.FC = () => {
+  const [numBooks, setNumBooks] = useState(0);
+  const [numGroups, setNumGroups] = useState(0);
+  const [numBorrowed, setNumBorrowed] = useState(0);
+  const [numLoaned, setNumLoaned] = useState(0);
+  const [books, setBooks] = useState([]);
+
+  const getBooks = async () => {
+    const allBooks = await fetchBooks();
+
+    // Randomly select 5 books
+    const selectedBooks = allBooks.sort(() => 0.5 - Math.random()).slice(0, 5);
+
+    setBooks(selectedBooks);
+  };
+
+  useEffect(() => {
+    fetchNumBooks(setNumBooks);
+    fetchNumGroups(setNumGroups);
+    getBooks();
+  }, []);
+
   return (
     <IonPage>
       <IonHeader>
@@ -24,53 +58,130 @@ const Home: React.FC = () => {
           <IonTitle>Home</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonGrid>
-        <IonRow>
-          <IonLabel className='ion-padding'>Welcome to your library</IonLabel>
-        </IonRow>
-        <IonRow>
-          <IonText className='ion-padding'>TODO</IonText>
-        </IonRow>
-        <IonRow>
-          <IonCol size='6'>
-            <IonCard>
-              <IonCardHeader>
-                <IonButton fill='clear' routerLink='/my/books/add'>
-                  <IonCardTitle className='small-font'>Add Books</IonCardTitle>
-                </IonButton>
-              </IonCardHeader>
-            </IonCard>
-          </IonCol>
-          <IonCol size='6'>
-            <IonCard>
-              <IonCardHeader>
-                <IonButton fill='clear' routerLink='/my/bookTracking'>
-                  <IonCardTitle className='small-font'>
-                    Loan & <br /> Borrow Tracking
-                  </IonCardTitle>
-                </IonButton>
-              </IonCardHeader>
-            </IonCard>
-          </IonCol>
-          <IonCol size='6'>
-            <IonCard>
-              <IonCardHeader>
-                <IonButton fill='clear' routerLink='/my/barcodeScanner'>
-                  <IonCardTitle className='small-font'>
-                    Barcode Scanner
-                  </IonCardTitle>
-                </IonButton>
-              </IonCardHeader>
-            </IonCard>
-          </IonCol>
-        </IonRow>
-        <IonRow>
-          <IonLabel className='ion-padding'>Recommendations</IonLabel>
-        </IonRow>
-        <IonRow>
-          <IonText className='ion-padding'>TODO</IonText>
-        </IonRow>
-      </IonGrid>
+      <IonContent>
+        <IonGrid>
+          <IonRow>
+            <IonTitle className='ion-padding'>Welcome to your library</IonTitle>
+          </IonRow>
+          <IonRow>
+            <IonCol size='6'>
+              <IonCard href='/my/library'>
+                <IonCardHeader className='card-header-home'>
+                  <div className='card-top-home'>
+                    <IonIcon icon={book} />
+                    <div className='card-badge-home'>
+                      <IonBadge>{numBooks}</IonBadge>
+                    </div>
+                  </div>
+                  <div className='card-content-home'>
+                    <IonCardTitle className='small-font-home'>
+                      Books
+                    </IonCardTitle>
+                  </div>
+                </IonCardHeader>
+              </IonCard>
+            </IonCol>
+            <IonCol size='6'>
+              <IonCard href='/my/groups'>
+                <IonCardHeader className='card-header'>
+                  <IonIcon icon={people} />
+                  <div className='title-container-home'>
+                    <IonCardTitle className='small-font-home'>
+                      Groups
+                    </IonCardTitle>
+                  </div>
+                  <IonBadge>{numGroups}</IonBadge>
+                </IonCardHeader>
+              </IonCard>
+            </IonCol>
+            <IonCol size='6'>
+              <IonCard href='/my/bookTracking'>
+                <IonCardHeader className='card-header-home'>
+                  <div className='card-top-home'>
+                    <IonIcon icon={arrowRedo} />
+                    <div className='card-badge-home'>
+                      <IonBadge>{numBorrowed > 0 ? numBorrowed : 0}</IonBadge>
+                    </div>
+                  </div>
+                  <div className='card-content-home'>
+                    <IonCardTitle className='small-font-home'>
+                      Borrowed Books
+                    </IonCardTitle>
+                  </div>
+                </IonCardHeader>
+              </IonCard>
+            </IonCol>
+            <IonCol size='6'>
+              <IonCard href='/my/bookTracking'>
+                <IonCardHeader className='card-header'>
+                  <IonBadge>{numLoaned > 0 ? numLoaned : 0}</IonBadge>
+                  <div className='title-container-home'>
+                    <IonCardTitle className='small-font-home'>
+                      Loaned Books
+                    </IonCardTitle>
+                  </div>
+                  <IonIcon icon={arrowUndo} />
+                </IonCardHeader>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+
+          <IonTitle className='ion-padding'>Recommendations</IonTitle>
+          <IonList>
+            {books.map((book, index) => (
+              <IonItem key={index}>
+                <IonLabel>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {book.volumeInfo.imageLinks?.thumbnail ? (
+                      <img
+                        className='full-thumbnail'
+                        src={book.volumeInfo.imageLinks.thumbnail}
+                        alt='Book thumbnail'
+                        style={{ marginRight: '10px' }}
+                      />
+                    ) : (
+                      <IonIcon
+                        slot='start'
+                        icon={bookSharp}
+                        className='book-icon'
+                        style={{ marginRight: '10px' }}
+                      />
+                    )}
+                    <div className='book-details-home'>
+                      <div>
+                        {[1, 2, 3, 4, 5].map((starNumber) => {
+                          const rating =
+                            Math.round(book.volumeInfo.averageRating * 2) / 2;
+                          let icon;
+                          if (starNumber <= rating) {
+                            icon = star;
+                          } else if (starNumber - 0.5 === rating) {
+                            icon = starHalf;
+                          } else {
+                            icon = starOutline;
+                          }
+                          return (
+                            <IonIcon
+                              key={starNumber}
+                              icon={icon}
+                              className='rating-star'
+                            />
+                          );
+                        })}
+                      </div>
+                      <h1>{book.volumeInfo.title}</h1>
+                      <p>
+                        {book.volumeInfo.authors &&
+                          book.volumeInfo.authors.join(', ')}
+                      </p>
+                    </div>
+                  </div>
+                </IonLabel>
+              </IonItem>
+            ))}
+          </IonList>
+        </IonGrid>
+      </IonContent>
     </IonPage>
   );
 };

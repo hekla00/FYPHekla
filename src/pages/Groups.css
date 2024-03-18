@@ -25,6 +25,11 @@
   font-size: 1.2em;
 }
 
+.small-font-groups {
+  font-size: 16px;
+  align-items: center;
+}
+
 .username {
   font-size: 1em;
   font-weight: bold;
