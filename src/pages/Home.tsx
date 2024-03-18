@@ -1,5 +1,4 @@
 import {
-  IonButton,
   IonCard,
   IonCardHeader,
   IonCardTitle,
@@ -15,16 +14,13 @@ import {
   IonText,
   IonIcon,
   IonBadge,
-  IonCardSubtitle,
-  IonCardContent,
-  IonImg,
   IonList,
   IonItem,
+  IonLoading,
 } from '@ionic/react';
 import './Home.css';
 import { book, people, arrowRedo, arrowUndo } from 'ionicons/icons';
 import { useEffect, useState } from 'react';
-import firebase from 'firebase/app';
 import { fetchNumBooks, fetchNumGroups } from '../functions/UserHelper';
 import { fetchBooks } from '../functions/RecommendationsHelper';
 import { bookSharp, star, starOutline, starHalf } from 'ionicons/icons';
@@ -35,14 +31,17 @@ const Home: React.FC = () => {
   const [numBorrowed, setNumBorrowed] = useState(0);
   const [numLoaned, setNumLoaned] = useState(0);
   const [books, setBooks] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getBooks = async () => {
+    setIsLoading(true);
     const allBooks = await fetchBooks();
 
     // Randomly select 5 books
     const selectedBooks = allBooks.sort(() => 0.5 - Math.random()).slice(0, 5);
 
     setBooks(selectedBooks);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -60,9 +59,6 @@ const Home: React.FC = () => {
       </IonHeader>
       <IonContent>
         <IonGrid>
-          <IonRow>
-            <IonTitle className='ion-padding'>Welcome to your library</IonTitle>
-          </IonRow>
           <IonRow>
             <IonCol size='6'>
               <IonCard href='/my/library'>
@@ -126,7 +122,8 @@ const Home: React.FC = () => {
             </IonCol>
           </IonRow>
 
-          <IonTitle className='ion-padding'>Recommendations</IonTitle>
+          <IonText className='ion-padding'>Recommendations</IonText>
+          <IonLoading isOpen={isLoading} message={'Loading...'} />
           <IonList>
             {books.map((book, index) => (
               <IonItem key={index}>
