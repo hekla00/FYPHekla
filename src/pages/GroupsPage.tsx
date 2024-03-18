@@ -7,12 +7,9 @@ import {
   IonRow,
   IonCol,
   IonLabel,
-  IonList,
-  IonItem,
   IonContent,
   IonFab,
   IonFabButton,
-  IonFabList,
   IonIcon,
   IonButton,
   IonCard,
@@ -22,18 +19,13 @@ import {
   IonText,
 } from '@ionic/react';
 import { Redirect } from 'react-router';
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
-import LeaveGroup from '../components/LeaveGroup';
-
-import { chevronUpCircle, personAdd, addCircle, people } from 'ionicons/icons';
-import {
-  fetchMembersData,
-  fetchGroupCurrentUser,
-} from '../functions/GroupsHelper';
+import { people, add } from 'ionicons/icons';
+import { fetchMembersData } from '../functions/GroupsHelper';
 
 const GroupsPage: React.FC = () => {
   const [groups, setGroups] = useState([]);
@@ -42,7 +34,6 @@ const GroupsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [membersData, setMembersData] = useState([]);
   const history = useHistory();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   const handleCreateGroup = () => {
     history.push('/my/groupcreation');
@@ -76,58 +67,15 @@ const GroupsPage: React.FC = () => {
         });
     };
     fetchGroups();
-    const fetchMembersData = async () => {
-      const db = firebase.firestore();
+  }, [groups]);
 
-      // Fetch user data for each member
-      const membersDataPromises = groups[0].members.map((memberId) =>
-        db.collection('publicUsers').doc(memberId).get()
-      );
-      const membersSnapshots = await Promise.all(membersDataPromises);
-
-      // Map over the snapshots to get the user data
-      const membersData = membersSnapshots.map((snapshot) => ({
-        id: snapshot.id,
-        ...snapshot.data(),
-      }));
-
-      setMembersData(membersData);
-    };
-
-    // Only fetch member data if the groups have been loaded
+  useEffect(() => {
     if (groups.length > 0) {
-      fetchMembersData();
+      fetchMembersData(groups[0], setMembersData);
+    } else {
+      return;
     }
-    // fetchGroupCurrentUser(setGroups, setLoading);
-    // if (groups.length > 0) {
-    //   fetchMembersData(groups, setMembersData);
-    // }
-  }, [currentUserId, groups]);
-
-  // useEffect(() => {
-  //   const fetchMembersData = async () => {
-  //     const db = firebase.firestore();
-
-  //     // Fetch user data for each member
-  //     const membersDataPromises = groups[0].members.map((memberId) =>
-  //       db.collection('publicUsers').doc(memberId).get()
-  //     );
-  //     const membersSnapshots = await Promise.all(membersDataPromises);
-
-  //     // Map over the snapshots to get the user data
-  //     const membersData = membersSnapshots.map((snapshot) => ({
-  //       id: snapshot.id,
-  //       ...snapshot.data(),
-  //     }));
-
-  //     setMembersData(membersData);
-  //   };
-
-  //   // Only fetch member data if the groups have been loaded
-  //   if (groups.length > 0) {
-  //     fetchMembersData();
-  //   }
-  // }, [groups]);
+  }, [currentUserId]);
 
   if (groups.length === 0 && !loading) {
     console.log('Redirecting to /my/groupcreation');
@@ -156,20 +104,11 @@ const GroupsPage: React.FC = () => {
             <IonCol size='6' key={index}>
               <IonCard>
                 <IonCardHeader>
-                  {/* <Link
-                    to={{
-                      pathname: `/my/insideGroups/${group.id}`,
-                      state: { group: group },
-                    }}
-                    onClick={() => console.log('Link clicked')}
-                  > */}
                   <IonButton
                     fill='clear'
                     routerLink={`/my/insideGroupsTwo/${group.id}`}
                     routerDirection='forward'
                     onClick={() => console.log('Button clicked')}
-                    // routerLink={`/my/insideGroups/${group.id}`}
-                    // onClick={() => handleInsideGroup(group.id)}
                   >
                     <div
                       style={{
@@ -198,22 +137,17 @@ const GroupsPage: React.FC = () => {
                       </IonText>
                     </div>
                   </IonButton>
-                  {/* </Link> */}
                 </IonCardHeader>
               </IonCard>
             </IonCol>
           ))}
         </IonRow>
         <IonGrid>
-          <IonRow>
-            {/* <IonLabel className='ion-padding'>
-              <h1>My Groups</h1>
-            </IonLabel> */}
-          </IonRow>
+          <IonRow></IonRow>
         </IonGrid>
         <IonFab vertical='bottom' horizontal='end' slot='fixed'>
           <IonFabButton onClick={handleCreateGroup}>
-            <IonIcon icon={addCircle}></IonIcon>
+            <IonIcon icon={add}></IonIcon>
           </IonFabButton>
         </IonFab>
       </IonContent>

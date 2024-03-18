@@ -3,10 +3,6 @@ const db = firebase.firestore();
 const currentUserId = firebase.auth().currentUser?.uid;
 
 export const fetchMembersData = async (group, setMembersData) => {
-  if (!group) {
-    return;
-  }
-
   // Fetch user data for each member
   const membersDataPromises = group.members.map((memberId) =>
     db.collection('publicUsers').doc(memberId).get()

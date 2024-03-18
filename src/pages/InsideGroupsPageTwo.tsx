@@ -24,6 +24,8 @@ import {
   IonCardTitle,
   IonCardContent,
   IonRouterLink,
+  IonBackButton,
+  IonButtons,
 } from '@ionic/react';
 import {
   chevronUpCircle,
@@ -173,6 +175,9 @@ const InsideGroupsPageTwo: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
+          <IonButtons slot='start'>
+            <IonBackButton defaultHref='/my/groups' />
+          </IonButtons>
           <IonTitle>{group ? group.name : 'Loading...'}</IonTitle>
         </IonToolbar>
       </IonHeader>
