@@ -48,17 +48,16 @@ const ManuallyAddBookPage: React.FC = () => {
   const history = useHistory();
   const [location, setLocation] = useState('');
   const [categories, setCategory] = useState([]);
-
   const [tags, setTags] = useState('');
   const [languages, setLanguage] = useState('');
   const [publisher, setPublisher] = useState('');
   const [description, setDescription] = useState('');
-  const [review, setReview] = useState('');
+  // const [review, setReview] = useState('');
   const [pages, setPages] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [edition, setEdition] = useState('');
-  const [notes, setNotes] = useState('');
+  // const [notes, setNotes] = useState('');
   const isbnDataRef = useRef('');
   const titleDataRef = useRef('');
   const authorDataRef = useRef('');
@@ -71,7 +70,7 @@ const ManuallyAddBookPage: React.FC = () => {
   const [newCategory, setNewCategory] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [bookSelected, setBookSelected] = useState(false);
-  const [rating, setRating] = useState(0);
+  // const [rating, setRating] = useState(0);
   const [showPopover, setShowPopover] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
@@ -104,12 +103,12 @@ const ManuallyAddBookPage: React.FC = () => {
     locationTitleData.state as { thumbnailUrl?: string }
   )?.thumbnailUrl;
   const language = (locationTitleData.state as { language?: string })?.language;
-  const notesSearch = (locationTitleData.state as { notes?: string })?.notes;
+  // const notesSearch = (locationTitleData.state as { notes?: string })?.notes;
   const purchaseDateSearch = (
     locationTitleData.state as { purchaseDate?: string }
   )?.purchaseDate;
-  const ratingSearch = (locationTitleData.state as { rating?: number })?.rating;
-  const reviewSearch = (locationTitleData.state as { review?: string })?.review;
+  // const ratingSearch = (locationTitleData.state as { rating?: number })?.rating;
+  // const reviewSearch = (locationTitleData.state as { review?: string })?.review;
 
   useEffect(() => {
     if (locationISBNData.state?.isbn) {
@@ -130,9 +129,9 @@ const ManuallyAddBookPage: React.FC = () => {
         setThumbnailUrl,
         setBookSelected,
         setLanguage,
-        setNotes,
-        setRating,
-        setReview,
+        // setNotes,
+        // setRating,
+        // setReview,
         setPurchaseDate,
         setShowToast,
         setModalData
@@ -153,10 +152,10 @@ const ManuallyAddBookPage: React.FC = () => {
       setEdition(editionSearch);
       setThumbnailUrl(thumbnailUrlSearch);
       setLanguage(language);
-      setNotes(notesSearch);
+      // setNotes(notesSearch);
       setPurchaseDate(purchaseDateSearch);
-      setRating(ratingSearch || 0);
-      setReview(reviewSearch);
+      // setRating(ratingSearch || 0);
+      // setReview(reviewSearch);
       setBookSelected(true);
       const isbn13Obj = selectedBook.industryIdentifiers?.find(
         (identifier: any) => identifier.type === 'ISBN_13'
@@ -178,13 +177,13 @@ const ManuallyAddBookPage: React.FC = () => {
       languages: languages || [],
       publisher: publisher || '',
       description: description || '',
-      review: review || '',
+      // review: review || '',
       pages: pages || 0,
       releaseDate: releaseDate || null,
       purchaseDate: purchaseDate || null,
       edition: edition || '',
-      notes: notes || '',
-      rating: rating || 0,
+      // notes: notes || '',
+      // rating: rating || 0,
       isbn: isbnData || isbn || isbnDataRef.current || '',
     };
     const bookRef = await booksRef.add(newBookRef);
@@ -223,6 +222,7 @@ const ManuallyAddBookPage: React.FC = () => {
     const newUserBooksRef = {
       userID,
       bookID: bookRef.id,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     };
     // write function that adds the books to the userBooks collection for the current user
     const userBooksRefa = firestore.collection('userBooks');
@@ -255,10 +255,10 @@ const ManuallyAddBookPage: React.FC = () => {
     setEdition(book.volumeInfo.edition);
     setThumbnailUrl(book.volumeInfo.imageLinks?.thumbnail);
     setLanguage(book.volumeInfo.language);
-    setNotes(book.volumeInfo.notes);
+    // setNotes(book.volumeInfo.notes);
     setPurchaseDate(book.volumeInfo.purchaseDate);
-    setRating(book.volumeInfo.rating);
-    setReview(book.volumeInfo.review);
+    // setRating(book.volumeInfo.rating);
+    // setReview(book.volumeInfo.review);
     setShowModal(false);
     setBookSelected(true);
 
@@ -286,9 +286,9 @@ const ManuallyAddBookPage: React.FC = () => {
     console.log('categories2: ', categories);
   }, [categories]);
 
-  const handleRatingChange = (newRating) => {
-    setRating(newRating);
-  };
+  // const handleRatingChange = (newRating) => {
+  //   setRating(newRating);
+  // };
 
   const uploadPhoto = async (photo: string) => {
     if (!currentUser) {
@@ -430,7 +430,7 @@ const ManuallyAddBookPage: React.FC = () => {
             }
           }}
         />
-        <div className='rating-container'>
+        {/* <div className='rating-container'>
           {[1, 2, 3, 4, 5].map((starNumber) => (
             <IonIcon
               key={starNumber}
@@ -439,7 +439,7 @@ const ManuallyAddBookPage: React.FC = () => {
               className='rating-star'
             />
           ))}
-        </div>
+        </div> */}
         <IonItem>
           <IonInput
             label='ISBN'
@@ -476,10 +476,10 @@ const ManuallyAddBookPage: React.FC = () => {
                   setBookSelected,
                   setLanguage,
                   setShowToast,
-                  setNotes,
+                  // setNotes,
                   setPurchaseDate,
-                  setRating,
-                  setReview,
+                  // setRating,
+                  // setReview,
                   setModalData
                 )
               }
@@ -527,10 +527,10 @@ const ManuallyAddBookPage: React.FC = () => {
                   setBookSelected,
                   setLanguage,
                   setShowToast,
-                  setNotes,
+                  // setNotes,
                   setPurchaseDate,
-                  setRating,
-                  setReview,
+                  // setRating,
+                  // setReview,
                   setModalData
                 )
               }
@@ -577,10 +577,10 @@ const ManuallyAddBookPage: React.FC = () => {
                   setThumbnailUrl,
                   setBookSelected,
                   setLanguage,
-                  setNotes,
+                  // setNotes,
                   setPurchaseDate,
-                  setRating,
-                  setReview,
+                  // setRating,
+                  // setReview,
                   setShowToast,
                   setModalData
                 )
@@ -606,7 +606,7 @@ const ManuallyAddBookPage: React.FC = () => {
             onIonChange={(event) => setLocation(event.detail.value)}
           ></IonInput>
         </IonItem>
-        <IonItem>
+        {/* <IonItem>
           <IonTextarea
             rows={4}
             label='Review'
@@ -615,7 +615,7 @@ const ManuallyAddBookPage: React.FC = () => {
             value={review}
             onIonChange={(event) => setReview(event.detail.value)}
           ></IonTextarea>
-        </IonItem>
+        </IonItem> */}
         <IonItem>
           <IonInput
             label='Tags'
@@ -650,7 +650,7 @@ const ManuallyAddBookPage: React.FC = () => {
             }}
           />
         </IonPopover>
-        <IonItem>
+        {/* <IonItem>
           <IonTextarea
             rows={4}
             label='Private Notes'
@@ -659,7 +659,7 @@ const ManuallyAddBookPage: React.FC = () => {
             value={notes}
             onIonChange={(event) => setNotes(event.detail.value)}
           ></IonTextarea>
-        </IonItem>
+        </IonItem> */}
         <IonAccordionGroup>
           <IonAccordion value='More'>
             <IonItem slot='header'>

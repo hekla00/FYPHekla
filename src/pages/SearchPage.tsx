@@ -143,10 +143,7 @@ export const SearchPage = () => {
           setLanguage,
           setShowToast,
           setNotes,
-          setPurchaseDate,
-          setRating,
-          setReview,
-          setModalData
+          setPurchaseDate
         );
         console.log('isbnResults: ', isbnResults);
         if (!isCancelled) {
@@ -175,10 +172,7 @@ export const SearchPage = () => {
           setLanguage,
           setNotes,
           setPurchaseDate,
-          setRating,
-          setReview,
-          setShowToast,
-          setModalData
+          setRating
         );
         const authorResultsPromise = await handleAuthorSearch(
           searchText,
@@ -203,10 +197,7 @@ export const SearchPage = () => {
           setLanguage,
           setNotes,
           setPurchaseDate,
-          setRating,
-          setReview,
-          setShowToast,
-          setModalData
+          setRating
         );
         const [titleResults, authorResults] = await Promise.all([
           titleResultsPromise,

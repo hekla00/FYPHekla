@@ -49,12 +49,13 @@ import GroupsPage from './pages/GroupsPage';
 import GroupCreationPage from './pages/GroupCreationPage';
 import AddMemberPage from './pages/AddMemberPage';
 import LibraryPage from './pages/LibraryPage';
-import BarcodeScannerPage from './pages/barcodeScannerPage';
+import BarcodeScannerPage from './pages/BarcodeScannerPage';
 import AddBookActionSheet from './components/AddBookActionSheet';
 import { useHistory } from 'react-router-dom';
 import AddBookPage from './pages/AddBookPage';
 import SearchPage from './pages/SearchPage';
-
+import InsideGroupsPage from './pages/InsideGroupsPage';
+import InsideGroupsPageTwo from './pages/InsideGroupsPageTwo';
 setupIonicReact();
 
 const AppTabs: React.FC = () => {
@@ -104,12 +105,28 @@ const AppTabs: React.FC = () => {
           exact={true}
         />
         <Route path='/my/groups' component={GroupsPage} exact={true} />
-        <Route path='/my/groups/:id' component={GroupsPage} exact={true} />
+
         <Route
           path='/my/groupcreation'
           component={GroupCreationPage}
           exact={true}
         />
+        <Route
+          path='/my/insideGroups/:id'
+          component={InsideGroupsPage}
+          exact={true}
+        />
+        <Route
+          path='/my/insideGroupsTwo/:id'
+          component={InsideGroupsPageTwo}
+          exact={true}
+        />
+        {/* <Route
+          path='/my/groups/:id'
+          component={InsideGroupsPage}
+          exact={true}
+        /> */}
+
         <Route path='/my/addmember' component={AddMemberPage} exact={true} />
         <Route
           path='/my/barcodeScanner'

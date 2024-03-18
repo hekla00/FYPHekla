@@ -18,6 +18,7 @@ export interface Book {
   rating: number;
   releaseDate: string;
   reviews: string[];
+  // thumbnailUrl: string;
 }
 
 export function toBook(doc): Book {
