@@ -3,20 +3,20 @@ ion-thumbnail {
   --border-radius: 14px;
 }
 
-.thumbnail-container {
+.thumbnail-container-addBook {
   display: flex;
   justify-content: center;
   align-items: start;
   width: 100%;
 }
-.full-thumbnail {
+.full-thumbnail-addBook {
   width: 40%;
   height: auto;
   object-fit: contain;
   margin-bottom: 10px;
 }
 
-.book-icon {
+.book-icon-addBook {
   font-size: 80px;
 }
 

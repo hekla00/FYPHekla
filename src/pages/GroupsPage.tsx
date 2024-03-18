@@ -125,7 +125,7 @@ const GroupsPage: React.FC = () => {
                           fontSize: 'larger',
                         }}
                       >
-                        <IonCardTitle className='small-font'>
+                        <IonCardTitle className='small-font-groups'>
                           {group.name}
                         </IonCardTitle>
                       </IonText>
