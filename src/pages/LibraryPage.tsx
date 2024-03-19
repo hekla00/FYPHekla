@@ -23,8 +23,11 @@ import {
 import { filter, home, grid, pricetag } from 'ionicons/icons';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
-import { firestore } from '../firebase';
 import { IonSearchbar } from '@ionic/react';
+import {
+  fetchAllUserAndGroupBooks,
+  fetchAllUserBooks,
+} from '../functions/UserHelper';
 
 const LibraryPage: React.FC = () => {
   const [selectedSegment, setSelectedSegment] = useState<string>('all');
@@ -49,6 +52,7 @@ const LibraryPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
   const handleSegmentChange = (event: CustomEvent) => {
     setSelectedSegment(event.detail.value);
   };
@@ -182,53 +186,18 @@ const LibraryPage: React.FC = () => {
     }
   };
 
-  const fetchAllBooks = async () => {
-    setIsLoading(true);
-    try {
-      const db = firebase.firestore();
-      const userId = firebase.auth().currentUser?.uid;
-      console.log('userId lib', userId);
-      if (!userId) {
-        console.error('No user is currently logged in.');
-        return;
-      }
-
-      // Fetch userBooks documents for the current user
-      const userBooksSnapshot = await db
-        .collection('userBooks')
-        .where('userID', '==', userId)
-        .get();
-
-      // Extract book IDs from the userBooks documents
-      const bookIds = userBooksSnapshot.docs.map((doc) => doc.data().bookID);
-      console.log('bookIds:', bookIds);
-
-      // Fetch books documents for the extracted book IDs
-      const booksPromises = bookIds.map((ID) =>
-        db.collection('books').doc(ID).get()
-      );
-      const booksSnapshots = await Promise.all(booksPromises);
-
-      // Extract book data from the books documents
-      // Important to define the id of the book otherwise it will be undefined and the book will not be displayed
-      const allBooks = booksSnapshots.map((snapshot) => ({
-        id: snapshot.id,
-        ...snapshot.data(),
-      }));
-      console.log('allBooks:', allBooks);
-
-      setAllBooks(allBooks as any[]);
-    } catch (error) {
-      console.error('Error fetching all books:', error);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (selectedSegment === 'mine') {
+      fetchAllUserBooks(setIsLoading, setAllBooks);
+    } else if (selectedSegment === 'all') {
+      fetchAllUserAndGroupBooks(setIsLoading, setAllBooks, setFilteredBooks);
     }
-  };
+  }, [setIsLoading, setAllBooks, setFilteredBooks, selectedSegment]);
+
   useEffect(() => {
     fetchLocations();
     fetchCategories();
     fetchTags();
-    fetchAllBooks();
   }, [selectedLocation, selectedCategory, selectedTag]);
 
   useEffect(() => {
@@ -493,6 +462,31 @@ const LibraryPage: React.FC = () => {
           }}
           onIonClear={() => setFilteredBooks(allBooks)}
         />
+        {isLoading ? (
+          <IonSpinner />
+        ) : (
+          selectedSegment === 'mine' &&
+          filteredBooks.map((book) => (
+            <IonCard
+              onClick={() => {
+                console.log('Clicked book ID:', book.id);
+              }}
+              className='book-card'
+              button
+              key={book.id}
+              routerLink={`/my/books/view/${book.id}`}
+            >
+              <IonCardHeader>
+                <IonCardTitle className='card-title'>
+                  {book?.title}
+                </IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent className='card-content'>
+                {book?.author}
+              </IonCardContent>
+            </IonCard>
+          ))
+        )}
         {isLoading ? (
           <IonSpinner />
         ) : (

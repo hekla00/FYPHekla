@@ -56,6 +56,7 @@ import AddBookPage from './pages/AddBookPage';
 import SearchPage from './pages/SearchPage';
 import InsideGroupsPage from './pages/InsideGroupsPage';
 import InsideGroupsPageTwo from './pages/InsideGroupsPageTwo';
+import RecommendationBookPage from './pages/RecommendationBookPage';
 setupIonicReact();
 
 const AppTabs: React.FC = () => {
@@ -119,6 +120,11 @@ const AppTabs: React.FC = () => {
         <Route
           path='/my/insideGroupsTwo/:id'
           component={InsideGroupsPageTwo}
+          exact={true}
+        />
+        <Route
+          path='/my/bookRecommendation/view/:id'
+          component={RecommendationBookPage}
           exact={true}
         />
         {/* <Route

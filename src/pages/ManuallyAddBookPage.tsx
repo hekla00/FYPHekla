@@ -167,12 +167,13 @@ const ManuallyAddBookPage: React.FC = () => {
   }, [location, selectedBook]);
 
   const handleAddBook = async () => {
+    console.log('handleAddBook function called');
     const booksRef = firestore.collection('books');
     const newBookRef = {
       title: titleData || title || '',
       author: authorData || author || authorDataRef.current || '',
       location: location || '',
-      categories: categories || [],
+      // categories: categories || [],
       tags: tags || [],
       languages: languages || [],
       publisher: publisher || '',
@@ -187,6 +188,7 @@ const ManuallyAddBookPage: React.FC = () => {
       isbn: isbnData || isbn || isbnDataRef.current || '',
     };
     const bookRef = await booksRef.add(newBookRef);
+    console.log('newBookRef: ', newBookRef);
     // Clearing the fields
     // setTitle('');
     // setAuthor('');
@@ -226,7 +228,13 @@ const ManuallyAddBookPage: React.FC = () => {
     };
     // write function that adds the books to the userBooks collection for the current user
     const userBooksRefa = firestore.collection('userBooks');
-    const userBookRefb = await userBooksRefa.add(newUserBooksRef);
+    // const userBookRefb = await userBooksRefa.add(newUserBooksRef);
+    try {
+      const userBookRefb = await userBooksRefa.add(newUserBooksRef);
+      console.log('userBookRefb: ', userBookRefb);
+    } catch (error) {
+      console.error('Error adding book: ', error);
+    }
     // firebase.firestore().collection('userBooks').add(userBooksRef);
 
     console.log('bookRef: ', bookRef);

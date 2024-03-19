@@ -46,3 +46,16 @@
 .book-details-home {
   text-align: left;
 }
+
+.thumbnail-home img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  padding-left: 1rem;
+}
+
+.thumbnail-home {
+  display: inline-block;
+  flex: 1 0 auto;
+  max-width: 30%;
+}

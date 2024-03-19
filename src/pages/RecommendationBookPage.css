@@ -1,0 +1,85 @@
+.rating-container-recom {
+  display: flex;
+  justify-content: center;
+}
+
+.rating-star-recom {
+  cursor: pointer;
+  font-size: 30px;
+}
+
+ion-thumbnail {
+  --size: 140px;
+  --border-radius: 14px;
+}
+
+.thumbnail-container-recom {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  width: 100%;
+}
+.full-thumbnail-recom {
+  width: 40%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.book-icon-recom {
+  font-size: 80px;
+}
+.book-title-recom {
+  font-size: 30px;
+  text-align: center;
+  padding: 5px;
+}
+
+.book-authors-recom {
+  font-size: 20px;
+  text-align: center;
+  padding-bottom: 5px;
+}
+
+.book-details-recom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 5px;
+}
+.book-details {
+  padding: 0 5px;
+  font-size: 18px;
+  font-weight: 500;
+  justify-content: center;
+  align-items: center;
+}
+
+.book-publication-year-recom {
+  font-size: 15px;
+  text-align: center;
+}
+
+.book-pages-recom {
+  font-size: 15px;
+  text-align: center;
+}
+.book-details-container-recom {
+  display: flex;
+  justify-content: center;
+  align-items: space-between;
+  text-align: center;
+}
+/* Option 1 */
+/* .button-wishlist {
+  display: block;
+  padding: 10px;
+} */
+/* Option 3 */
+.button-wishlist {
+  display: block;
+  margin: auto;
+  padding: 5px 10px;
+  max-width: 40%;
+}

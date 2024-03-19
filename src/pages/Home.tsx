@@ -17,13 +17,19 @@ import {
   IonList,
   IonItem,
   IonLoading,
+  IonSpinner,
+  IonListHeader,
+  IonRouterLink,
+  IonButton,
+  IonButtons,
 } from '@ionic/react';
 import './Home.css';
 import { book, people, arrowRedo, arrowUndo } from 'ionicons/icons';
 import { useEffect, useState } from 'react';
 import { fetchNumBooks, fetchNumGroups } from '../functions/UserHelper';
 import { fetchBooks } from '../functions/RecommendationsHelper';
-import { bookSharp, star, starOutline, starHalf } from 'ionicons/icons';
+import { bookSharp } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
 
 const Home: React.FC = () => {
   const [numBooks, setNumBooks] = useState(0);
@@ -32,6 +38,7 @@ const Home: React.FC = () => {
   const [numLoaned, setNumLoaned] = useState(0);
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const history = useHistory();
 
   const getBooks = async () => {
     setIsLoading(true);
@@ -50,6 +57,9 @@ const Home: React.FC = () => {
     getBooks();
   }, []);
 
+  const goToBookRecommendation = (book) => {
+    history.push(`/my/bookRecommendation/view/${book.id}`, { book });
+  };
   return (
     <IonPage>
       <IonHeader>
@@ -122,61 +132,28 @@ const Home: React.FC = () => {
             </IonCol>
           </IonRow>
 
-          <IonText className='ion-padding'>Recommendations</IonText>
-          <IonLoading isOpen={isLoading} message={'Loading...'} />
-          <IonList>
-            {books.map((book, index) => (
-              <IonItem key={index}>
-                <IonLabel>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {book.volumeInfo.imageLinks?.thumbnail ? (
-                      <img
-                        className='full-thumbnail'
-                        src={book.volumeInfo.imageLinks.thumbnail}
-                        alt='Book thumbnail'
-                        style={{ marginRight: '10px' }}
-                      />
-                    ) : (
-                      <IonIcon
-                        slot='start'
-                        icon={bookSharp}
-                        className='book-icon'
-                        style={{ marginRight: '10px' }}
-                      />
-                    )}
-                    <div className='book-details-home'>
-                      <div>
-                        {[1, 2, 3, 4, 5].map((starNumber) => {
-                          const rating =
-                            Math.round(book.volumeInfo.averageRating * 2) / 2;
-                          let icon;
-                          if (starNumber <= rating) {
-                            icon = star;
-                          } else if (starNumber - 0.5 === rating) {
-                            icon = starHalf;
-                          } else {
-                            icon = starOutline;
-                          }
-                          return (
-                            <IonIcon
-                              key={starNumber}
-                              icon={icon}
-                              className='rating-star'
-                            />
-                          );
-                        })}
-                      </div>
-                      <h1>{book.volumeInfo.title}</h1>
-                      <p>
-                        {book.volumeInfo.authors &&
-                          book.volumeInfo.authors.join(', ')}
-                      </p>
+          <IonCol>
+            <IonListHeader>
+              <IonLabel className='header-label'>Recommendations</IonLabel>
+            </IonListHeader>
+            <div className='thumbnail-container'>
+              {isLoading ? (
+                <IonSpinner />
+              ) : (
+                books.map((book, index) => (
+                  <div key={index} className='thumbnail-home'>
+                    <div onClick={() => goToBookRecommendation(book)}>
+                      {book.volumeInfo.imageLinks?.thumbnail ? (
+                        <img src={book.volumeInfo.imageLinks.thumbnail} />
+                      ) : (
+                        <IonIcon icon={bookSharp} />
+                      )}
                     </div>
                   </div>
-                </IonLabel>
-              </IonItem>
-            ))}
-          </IonList>
+                ))
+              )}
+            </div>
+          </IonCol>
         </IonGrid>
       </IonContent>
     </IonPage>
