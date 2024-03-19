@@ -1,5 +1,7 @@
 import firebase from 'firebase/app';
 const currentUserId = firebase.auth().currentUser?.uid;
+const db = firebase.firestore();
+// const currentUserId = firebase.auth().currentUser?.uid;
 
 // Fetching the number of books the user has
 export const fetchNumBooks = async (setNumBooks) => {
@@ -151,5 +153,17 @@ export const fetchAllUserAndGroupBooks = async (
     console.error('Error fetching all books:', error);
   } finally {
     setIsLoading(false);
+  }
+};
+export const fetchNumBooksInWishlist = async (setNumBooksInWishlist) => {
+  if (currentUserId) {
+    const wishlistSnapshot = await db
+      .collection('wishlist')
+      .where('userId', '==', currentUserId)
+      .get();
+
+    setNumBooksInWishlist(wishlistSnapshot.size);
+  } else {
+    console.error('currentUserId is undefined');
   }
 };

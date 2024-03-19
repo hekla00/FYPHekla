@@ -5,20 +5,14 @@ import {
   IonCard,
   IonCardContent,
   IonCardHeader,
-  IonCardTitle,
   IonContent,
   IonHeader,
   IonIcon,
-  IonItem,
   IonLabel,
   IonPage,
   IonText,
   IonTitle,
   IonToolbar,
-  IonFab,
-  IonFabButton,
-  IonFabList,
-  IonModal,
 } from '@ionic/react';
 import {
   bookSharp,
@@ -26,38 +20,21 @@ import {
   starHalf,
   starOutline,
   add,
-  remove,
   checkmark,
 } from 'ionicons/icons';
-import './Home.css';
-import { useLocation, useParams, useRouteMatch } from 'react-router';
-// import { dummyBooks } from "../dummydata";
-import { firestore } from '../firebase';
-import { useEffect, useState } from 'react';
-import { useHistory } from 'react-router';
+import { useLocation } from 'react-router';
+import { useState, useEffect } from 'react';
 import firebase from 'firebase/app';
 import './RecommendationBookPage.css';
 import 'firebase/firestore';
 
-interface RouteParams {
-  id: string;
-}
-
 const RecommendationBookPage: React.FC = () => {
-  const match = useRouteMatch<RouteParams>();
-  const history = useHistory();
   const currentUser = firebase.auth().currentUser;
-  const [rating, setRating] = useState(0);
   const [isAddedToWishlist, setIsAddedToWishlist] = useState(false);
   const db = firebase.firestore();
   const location = useLocation();
   const book = (location.state as { book: any })?.book;
   const year = book?.volumeInfo.publishedDate.split('-')[0];
-  console.log('book:', book);
-
-  const handleRatingChange = (newRating) => {
-    setRating(newRating);
-  };
 
   const handleWishlistClick = () => {
     setIsAddedToWishlist(!isAddedToWishlist);
@@ -108,7 +85,25 @@ const RecommendationBookPage: React.FC = () => {
         });
     }
   };
-
+  useEffect(() => {
+    // Check if the book is already in the wishlist
+    if (book) {
+      db.collection('wishlist')
+        .where('userId', '==', currentUser.uid)
+        .where('bookId', '==', book.id)
+        .get()
+        .then((querySnapshot) => {
+          if (!querySnapshot.empty) {
+            setIsAddedToWishlist(true);
+          } else {
+            setIsAddedToWishlist(false);
+          }
+        })
+        .catch((error) => {
+          console.error('Error finding document: ', error);
+        });
+    }
+  }, [book]);
   return (
     <IonPage>
       <IonHeader>
