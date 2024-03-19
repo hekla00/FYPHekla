@@ -156,6 +156,7 @@ export const fetchAllUserAndGroupBooks = async (
   }
 };
 export const fetchNumBooksInWishlist = async (setNumBooksInWishlist) => {
+  const currentUserId = firebase.auth().currentUser?.uid;
   if (currentUserId) {
     const wishlistSnapshot = await db
       .collection('wishlist')

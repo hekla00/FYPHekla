@@ -1,17 +1,14 @@
 .book-card {
-  /* Add your styles here */
   margin-bottom: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .book-card .card-content {
-  /* Add your styles for the card content here */
   padding-left: 20px;
 }
 
 .book-card .card-title {
-  /* Add your styles for the card title here */
   font-size: 20px;
   font-weight: bold;
 }

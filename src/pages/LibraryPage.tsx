@@ -473,7 +473,7 @@ const LibraryPage: React.FC = () => {
               }}
               className='book-card'
               button
-              key={book.id}
+              key={book.index}
               routerLink={`/my/books/view/${book.id}`}
             >
               <IonCardHeader>

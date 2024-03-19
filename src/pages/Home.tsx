@@ -105,7 +105,7 @@ const Home: React.FC = () => {
               </IonCard>
             </IonCol>
             <IonCol size='6'>
-              <IonCard href='/my/groups'>
+              <IonCard href='/my/wishlist'>
                 <IonCardHeader className='card-header-home'>
                   <div className='card-top-home'>
                     <IonIcon icon={list} />

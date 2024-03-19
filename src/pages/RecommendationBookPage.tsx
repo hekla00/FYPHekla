@@ -30,16 +30,33 @@ import 'firebase/firestore';
 
 const RecommendationBookPage: React.FC = () => {
   const currentUser = firebase.auth().currentUser;
-  const [isAddedToWishlist, setIsAddedToWishlist] = useState(false);
   const db = firebase.firestore();
   const location = useLocation();
-  const book = (location.state as { book: any })?.book;
-  const year = book?.volumeInfo.publishedDate.split('-')[0];
+  const locationState = location.state as {
+    book: any;
+    isFromWishlist: boolean;
+  };
+  const bookFromLocation = locationState?.book;
+  const isFromWishlist = locationState?.isFromWishlist || false;
+  const [isAddedToWishlist, setIsAddedToWishlist] = useState(isFromWishlist);
+  const [book, setBook] = useState(null);
+  let year;
+  if (book?.volumeInfo?.publishedDate) {
+    year = book?.volumeInfo.publishedDate.split('-')[0];
+  } else if (book?.publishedDate) {
+    year = book?.publishedDate.split('-')[0];
+  }
+  console.log('bookReco:', book);
 
   const handleWishlistClick = () => {
+    // if (!book || !book.volumeInfo) {
+    //   console.error('Book or volumeInfo is not defined');
+    //   return;
+    // }
     setIsAddedToWishlist(!isAddedToWishlist);
     // Adding book to wishlist
     if (!isAddedToWishlist) {
+      setIsAddedToWishlist(true);
       db.collection('wishlist')
         .add({
           userId: currentUser.uid,
@@ -63,8 +80,10 @@ const RecommendationBookPage: React.FC = () => {
           console.error('Error adding document: ', error);
         });
     } else if (isAddedToWishlist) {
+      // if (currentUser && currentUser.uid && book && book.id && book.bookId) {
+      setIsAddedToWishlist(false);
       db.collection('wishlist')
-        .where('bookId', '==', book.id)
+        .where('bookId', '==', book.id || book.bookId)
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
@@ -83,11 +102,19 @@ const RecommendationBookPage: React.FC = () => {
         .catch((error) => {
           console.error('Error finding document: ', error);
         });
+      // } else {
+      //   console.error('currentUser.uid or book.id is undefined');
+      // }
     }
   };
   useEffect(() => {
+    const bookData = (location.state as { book: any; isFromWishlist: boolean })
+      ?.book;
+    setBook(bookData);
+  }, [location]);
+  useEffect(() => {
     // Check if the book is already in the wishlist
-    if (book) {
+    if (currentUser && currentUser.uid && book && book.id) {
       db.collection('wishlist')
         .where('userId', '==', currentUser.uid)
         .where('bookId', '==', book.id)
@@ -111,7 +138,7 @@ const RecommendationBookPage: React.FC = () => {
           <IonButtons slot='start'>
             <IonBackButton />
           </IonButtons>
-          <IonTitle>{book?.volumeInfo.title}</IonTitle>
+          <IonTitle>{book?.volumeInfo?.title || book?.title}</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className='ion-padding'>
@@ -127,9 +154,9 @@ const RecommendationBookPage: React.FC = () => {
           </IonButton>
         )} */}
         <div className='thumbnail-container-recom'>
-          {book?.volumeInfo.imageLinks?.thumbnail ? (
+          {book?.volumeInfo?.imageLinks?.thumbnail || book?.thumbnail ? (
             <img
-              src={book.volumeInfo.imageLinks.thumbnail}
+              src={book?.volumeInfo?.imageLinks?.thumbnail || book?.thumbnail}
               className='full-thumbnail-recom'
             />
           ) : (
@@ -139,7 +166,8 @@ const RecommendationBookPage: React.FC = () => {
         <div className='rating-container-recom'>
           {[1, 2, 3, 4, 5].map((starNumber) => {
             let icon;
-            const averageRating = book?.volumeInfo.averageRating;
+            const averageRating =
+              book?.volumeInfo?.averageRating || book?.averageRating;
             if (starNumber <= averageRating) {
               icon = star; // Full star
             } else if (starNumber <= averageRating + 0.5) {
@@ -158,12 +186,12 @@ const RecommendationBookPage: React.FC = () => {
         </div>
         <div className='book-title-recom'>
           <IonText className='book-title-recom'>
-            {book?.volumeInfo.title}
+            {book?.volumeInfo?.title || book?.title}
           </IonText>
         </div>
         <div className='book-authors-recom'>
           <IonText className='book-authors-recom'>
-            {book?.volumeInfo.authors.join(', ')}
+            {book?.volumeInfo?.authors.join(', ') || book?.authors.join(', ')}
           </IonText>
         </div>
         <div className='book-details-container-recom'>
@@ -174,7 +202,7 @@ const RecommendationBookPage: React.FC = () => {
           <div className='book-details-recom'>
             <IonLabel className='book-details'>Pages</IonLabel>
             <IonLabel className='book-pages-recom'>
-              {book?.volumeInfo.pageCount}
+              {book?.volumeInfo?.pageCount || book?.pages}
             </IonLabel>
           </div>
         </div>
@@ -192,7 +220,7 @@ const RecommendationBookPage: React.FC = () => {
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Description</IonCardHeader>
           <IonCardContent className='IonCardContent'>
-            {book?.volumeInfo.description}
+            {book?.volumeInfo?.description || book?.description}
           </IonCardContent>
         </IonCard>
       </IonContent>
