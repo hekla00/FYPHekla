@@ -11,27 +11,32 @@ import {
   IonRow,
   IonCol,
   IonLabel,
-  IonText,
   IonIcon,
   IonBadge,
-  IonList,
-  IonItem,
-  IonLoading,
+  IonSpinner,
+  IonListHeader,
 } from '@ionic/react';
 import './Home.css';
-import { book, people, arrowRedo, arrowUndo } from 'ionicons/icons';
+import { book, people, list, calendarClearSharp } from 'ionicons/icons';
 import { useEffect, useState } from 'react';
-import { fetchNumBooks, fetchNumGroups } from '../functions/UserHelper';
+import {
+  fetchNumBooks,
+  fetchNumGroups,
+  fetchNumBooksInWishlist,
+} from '../functions/UserHelper';
 import { fetchBooks } from '../functions/RecommendationsHelper';
-import { bookSharp, star, starOutline, starHalf } from 'ionicons/icons';
+import { bookSharp } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
 
 const Home: React.FC = () => {
   const [numBooks, setNumBooks] = useState(0);
   const [numGroups, setNumGroups] = useState(0);
   const [numBorrowed, setNumBorrowed] = useState(0);
+  const [numBooksInWishlist, setNumBooksInWishlist] = useState(0);
   const [numLoaned, setNumLoaned] = useState(0);
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const history = useHistory();
 
   const getBooks = async () => {
     setIsLoading(true);
@@ -47,8 +52,13 @@ const Home: React.FC = () => {
   useEffect(() => {
     fetchNumBooks(setNumBooks);
     fetchNumGroups(setNumGroups);
+    fetchNumBooksInWishlist(setNumBooksInWishlist);
     getBooks();
   }, []);
+
+  const goToBookRecommendation = (book) => {
+    history.push(`/my/bookRecommendation/view/${book.id}`, { book });
+  };
 
   return (
     <IonPage>
@@ -71,7 +81,7 @@ const Home: React.FC = () => {
                   </div>
                   <div className='card-content-home'>
                     <IonCardTitle className='small-font-home'>
-                      Books
+                      Library
                     </IonCardTitle>
                   </div>
                 </IonCardHeader>
@@ -79,14 +89,35 @@ const Home: React.FC = () => {
             </IonCol>
             <IonCol size='6'>
               <IonCard href='/my/groups'>
-                <IonCardHeader className='card-header'>
-                  <IonIcon icon={people} />
-                  <div className='title-container-home'>
+                <IonCardHeader className='card-header-home'>
+                  <div className='card-top-home'>
+                    <IonIcon icon={people} />
+                    <div className='card-badge-home'>
+                      <IonBadge>{numGroups}</IonBadge>
+                    </div>
+                  </div>
+                  <div className='card-content-home'>
                     <IonCardTitle className='small-font-home'>
                       Groups
                     </IonCardTitle>
                   </div>
-                  <IonBadge>{numGroups}</IonBadge>
+                </IonCardHeader>
+              </IonCard>
+            </IonCol>
+            <IonCol size='6'>
+              <IonCard href='/my/wishlist'>
+                <IonCardHeader className='card-header-home'>
+                  <div className='card-top-home'>
+                    <IonIcon icon={list} />
+                    <div className='card-badge-home'>
+                      <IonBadge>{numBooksInWishlist}</IonBadge>
+                    </div>
+                  </div>
+                  <div className='card-content-home'>
+                    <IonCardTitle className='small-font-home'>
+                      Wishlist
+                    </IonCardTitle>
+                  </div>
                 </IonCardHeader>
               </IonCard>
             </IonCol>
@@ -94,89 +125,42 @@ const Home: React.FC = () => {
               <IonCard href='/my/bookTracking'>
                 <IonCardHeader className='card-header-home'>
                   <div className='card-top-home'>
-                    <IonIcon icon={arrowRedo} />
+                    <IonIcon icon={calendarClearSharp} />
                     <div className='card-badge-home'>
                       <IonBadge>{numBorrowed > 0 ? numBorrowed : 0}</IonBadge>
                     </div>
                   </div>
                   <div className='card-content-home'>
                     <IonCardTitle className='small-font-home'>
-                      Borrowed Books
+                      Book Tracking
                     </IonCardTitle>
                   </div>
-                </IonCardHeader>
-              </IonCard>
-            </IonCol>
-            <IonCol size='6'>
-              <IonCard href='/my/bookTracking'>
-                <IonCardHeader className='card-header'>
-                  <IonBadge>{numLoaned > 0 ? numLoaned : 0}</IonBadge>
-                  <div className='title-container-home'>
-                    <IonCardTitle className='small-font-home'>
-                      Loaned Books
-                    </IonCardTitle>
-                  </div>
-                  <IonIcon icon={arrowUndo} />
                 </IonCardHeader>
               </IonCard>
             </IonCol>
           </IonRow>
-
-          <IonText className='ion-padding'>Recommendations</IonText>
-          <IonLoading isOpen={isLoading} message={'Loading...'} />
-          <IonList>
-            {books.map((book, index) => (
-              <IonItem key={index}>
-                <IonLabel>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {book.volumeInfo.imageLinks?.thumbnail ? (
-                      <img
-                        className='full-thumbnail'
-                        src={book.volumeInfo.imageLinks.thumbnail}
-                        alt='Book thumbnail'
-                        style={{ marginRight: '10px' }}
-                      />
-                    ) : (
-                      <IonIcon
-                        slot='start'
-                        icon={bookSharp}
-                        className='book-icon'
-                        style={{ marginRight: '10px' }}
-                      />
-                    )}
-                    <div className='book-details-home'>
-                      <div>
-                        {[1, 2, 3, 4, 5].map((starNumber) => {
-                          const rating =
-                            Math.round(book.volumeInfo.averageRating * 2) / 2;
-                          let icon;
-                          if (starNumber <= rating) {
-                            icon = star;
-                          } else if (starNumber - 0.5 === rating) {
-                            icon = starHalf;
-                          } else {
-                            icon = starOutline;
-                          }
-                          return (
-                            <IonIcon
-                              key={starNumber}
-                              icon={icon}
-                              className='rating-star'
-                            />
-                          );
-                        })}
-                      </div>
-                      <h1>{book.volumeInfo.title}</h1>
-                      <p>
-                        {book.volumeInfo.authors &&
-                          book.volumeInfo.authors.join(', ')}
-                      </p>
+          <IonCol>
+            <IonListHeader>
+              <IonLabel className='header-label-home'>Recommendations</IonLabel>
+            </IonListHeader>
+            <div className='thumbnail-container'>
+              {isLoading ? (
+                <IonSpinner />
+              ) : (
+                books.map((book, index) => (
+                  <div key={index} className='thumbnail-home'>
+                    <div onClick={() => goToBookRecommendation(book)}>
+                      {book.volumeInfo.imageLinks?.thumbnail ? (
+                        <img src={book.volumeInfo.imageLinks.thumbnail} />
+                      ) : (
+                        <IonIcon icon={bookSharp} />
+                      )}
                     </div>
                   </div>
-                </IonLabel>
-              </IonItem>
-            ))}
-          </IonList>
+                ))
+              )}
+            </div>
+          </IonCol>
         </IonGrid>
       </IonContent>
     </IonPage>

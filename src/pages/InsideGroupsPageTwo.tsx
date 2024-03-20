@@ -48,8 +48,6 @@ const InsideGroupsPageTwo: React.FC = () => {
   const { id: groupId } = useParams<{ id: string }>();
   const [group, setGroup] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const location = useLocation<{ group: any }>();
-  const groupData = location.state?.group;
   const history = useHistory();
   const [membersData, setMembersData] = useState([]);
   const [reviewsData, setReviewsData] = useState([]);

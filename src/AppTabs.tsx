@@ -56,6 +56,8 @@ import AddBookPage from './pages/AddBookPage';
 import SearchPage from './pages/SearchPage';
 import InsideGroupsPage from './pages/InsideGroupsPage';
 import InsideGroupsPageTwo from './pages/InsideGroupsPageTwo';
+import RecommendationBookPage from './pages/RecommendationBookPage';
+import WishlistPage from './pages/WishlistPage';
 setupIonicReact();
 
 const AppTabs: React.FC = () => {
@@ -121,6 +123,11 @@ const AppTabs: React.FC = () => {
           component={InsideGroupsPageTwo}
           exact={true}
         />
+        <Route
+          path='/my/bookRecommendation/view/:id'
+          component={RecommendationBookPage}
+          exact={true}
+        />
         {/* <Route
           path='/my/groups/:id'
           component={InsideGroupsPage}
@@ -128,6 +135,7 @@ const AppTabs: React.FC = () => {
         /> */}
 
         <Route path='/my/addmember' component={AddMemberPage} exact={true} />
+        <Route path='/my/wishlist' component={WishlistPage} exact={true} />
         <Route
           path='/my/barcodeScanner'
           component={BarcodeScannerPage}
@@ -159,7 +167,7 @@ const AppTabs: React.FC = () => {
         </IonTabButton>
         <IonTabButton tab='SettingsPage' href='/my/settings'>
           <IonIcon icon={MoreIcon} />
-          <IonLabel>More</IonLabel>
+          <IonLabel>Settings</IonLabel>
         </IonTabButton>
       </IonTabBar>
       <AddBookActionSheet

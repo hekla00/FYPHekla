@@ -1,0 +1,50 @@
+.book-card-wishlist {
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.book-card-wishlist .card-content-wishlist {
+  display: flex;
+  align-items: center;
+}
+
+.book-card-wishlist .card-content-wishlist {
+  margin-right: 20px;
+}
+
+.book-card-wishlist .card-content-wishlist .card-title-wishlist {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.full-thumbnail-wishlist {
+  width: 30%;
+  height: 30%;
+  object-fit: cover;
+  margin-bottom: -10px;
+  margin-right: 10px;
+}
+
+.book-icon-wishlist {
+  font-size: 60px;
+}
+
+.book-icon {
+  margin-right: 10px;
+}
+
+.flex-align-center {
+  display: flex;
+  align-items: center;
+}
+.rating-star-wishlist {
+  cursor: pointer;
+  font-size: 20px;
+  color: secondary;
+}
+
+.rating-container {
+  display: flex;
+  justify-content: center;
+}
