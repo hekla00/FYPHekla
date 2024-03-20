@@ -28,6 +28,7 @@ import {
   fetchAllUserAndGroupBooks,
   fetchAllUserBooks,
 } from '../functions/UserHelper';
+import BookDisplay from '../components/BookDisplay';
 
 const LibraryPage: React.FC = () => {
   const [selectedSegment, setSelectedSegment] = useState<string>('all');
@@ -190,9 +191,9 @@ const LibraryPage: React.FC = () => {
     if (selectedSegment === 'mine') {
       fetchAllUserBooks(setIsLoading, setAllBooks);
     } else if (selectedSegment === 'all') {
-      fetchAllUserAndGroupBooks(setIsLoading, setAllBooks, setFilteredBooks);
+      fetchAllUserAndGroupBooks(setIsLoading, setAllBooks);
     }
-  }, [setIsLoading, setAllBooks, setFilteredBooks, selectedSegment]);
+  }, [setIsLoading, setAllBooks, selectedSegment]);
 
   useEffect(() => {
     fetchLocations();
@@ -205,15 +206,14 @@ const LibraryPage: React.FC = () => {
     const nonNullBooks = allBooks.filter((book) => book !== null);
     const filteredBooks = nonNullBooks.filter(
       (book) =>
-        book &&
-        book.title &&
-        book.categories &&
+        (book && book.title) ||
+        book.categories ||
         (selectedLocation.length > 0
           ? selectedLocation.includes(book.location)
-          : true) &&
+          : true) ||
         (selectedTag.length > 0
           ? book.tags.some((tag) => selectedTag.includes(tag))
-          : true) &&
+          : true) ||
         book.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -465,52 +465,7 @@ const LibraryPage: React.FC = () => {
         {isLoading ? (
           <IonSpinner />
         ) : (
-          selectedSegment === 'mine' &&
-          filteredBooks.map((book) => (
-            <IonCard
-              onClick={() => {
-                console.log('Clicked book ID:', book.id);
-              }}
-              className='book-card'
-              button
-              key={book.index}
-              routerLink={`/my/books/view/${book.id}`}
-            >
-              <IonCardHeader>
-                <IonCardTitle className='card-title'>
-                  {book?.title}
-                </IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent className='card-content'>
-                {book?.author}
-              </IonCardContent>
-            </IonCard>
-          ))
-        )}
-        {isLoading ? (
-          <IonSpinner />
-        ) : (
-          selectedSegment === 'all' &&
-          filteredBooks.map((book) => (
-            <IonCard
-              onClick={() => {
-                console.log('Clicked book ID:', book.id);
-              }}
-              className='book-card'
-              button
-              key={book.id}
-              routerLink={`/my/books/view/${book.id}`}
-            >
-              <IonCardHeader>
-                <IonCardTitle className='card-title'>
-                  {book?.title}
-                </IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent className='card-content'>
-                {book?.author}
-              </IonCardContent>
-            </IonCard>
-          ))
+          filteredBooks.map((book) => <BookDisplay book={book} key={book.id} />)
         )}
       </IonContent>
     </IonPage>

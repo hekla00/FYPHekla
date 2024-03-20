@@ -2,9 +2,13 @@ import firebase from 'firebase/app';
 const db = firebase.firestore();
 const currentUserId = firebase.auth().currentUser?.uid;
 
-export const fetchMembersData = async (group, setMembersData) => {
+export const fetchMembersData = async (selectedGroup, setMembersData) => {
+  if (!selectedGroup) {
+    setMembersData([]);
+    return;
+  }
   // Fetch user data for each member
-  const membersDataPromises = group.members.map((memberId) =>
+  const membersDataPromises = selectedGroup.members.map((memberId) =>
     db.collection('publicUsers').doc(memberId).get()
   );
   const membersSnapshots = await Promise.all(membersDataPromises);
@@ -29,6 +33,16 @@ export const fetchGroup = async (groupId, setGroup, setLoading) => {
   }
   setLoading(false);
   //   console.log('loading:', loading);
+};
+
+export const fetchGroupTwo = async (groupId) => {
+  const doc = await db.collection('groups').doc(groupId).get();
+  if (doc.exists) {
+    return { id: doc.id, ...doc.data() };
+  } else {
+    console.error('No such group!');
+    return null;
+  }
 };
 
 export const fetchGroupCurrentUser = async (setGroups, setLoading) => {

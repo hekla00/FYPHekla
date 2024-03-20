@@ -26,6 +26,8 @@ import {
   IonRouterLink,
   IonBackButton,
   IonButtons,
+  IonSegment,
+  IonSegmentButton,
 } from '@ionic/react';
 import {
   chevronUpCircle,
@@ -33,6 +35,7 @@ import {
   star,
   starOutline,
   book,
+  add,
 } from 'ionicons/icons';
 import LeaveGroup from '../components/LeaveGroup';
 import { fetchBookBasedOnBookID } from '../functions/BooksHelper';
@@ -162,7 +165,13 @@ const InsideGroupsPageTwo: React.FC = () => {
   }, [group]);
 
   const handleAddMemberClick = () => {
+    // if (selectedGroup) {
     history.push('/my/addmember');
+    // }
+  };
+
+  const handleCreateGroup = () => {
+    history.push('/my/creategroup');
   };
 
   if (loading) {
@@ -180,6 +189,21 @@ const InsideGroupsPageTwo: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
+        <IonSegment
+          // value={selectedSegment}
+          // onIonChange={handleSegmentChange}
+          scrollable
+        >
+          <IonSegmentButton>
+            <IonLabel>Group One</IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton>
+            <IonLabel>Group Two</IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton>
+            <IonLabel>Group Three</IonLabel>
+          </IonSegmentButton>
+        </IonSegment>
         <IonGrid>
           <IonRow>
             <IonCol>
@@ -235,8 +259,27 @@ const InsideGroupsPageTwo: React.FC = () => {
                   </div>
                 ))
               ) : (
-                <p>No reviews available</p>
+                <p className='ion-padding'>No reviews available</p>
               )}
+            </IonCol>
+          </IonRow>
+
+          <IonRow>
+            <IonCol>
+              <IonListHeader>
+                <IonLabel className='header-label'>Members</IonLabel>
+              </IonListHeader>
+              <IonList lines='full'>
+                {/* Display the members */}
+                {membersData.map((member, index) => (
+                  <IonItem key={index}>
+                    <IonAvatar slot='start'>
+                      <img src={member.profile || '/placeholder1.jpg'} />
+                    </IonAvatar>
+                    <IonLabel>{member.email}</IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
             </IonCol>
           </IonRow>
           <IonRow>
@@ -266,24 +309,6 @@ const InsideGroupsPageTwo: React.FC = () => {
               </div>
             </IonCol>
           </IonRow>
-          <IonRow>
-            <IonCol>
-              <IonListHeader>
-                <IonLabel className='header-label'>Members</IonLabel>
-              </IonListHeader>
-              <IonList lines='full'>
-                {/* Display the members */}
-                {membersData.map((member, index) => (
-                  <IonItem key={index}>
-                    <IonAvatar slot='start'>
-                      <img src={member.profile || '/placeholder1.jpg'} />
-                    </IonAvatar>
-                    <IonLabel>{member.email}</IonLabel>
-                  </IonItem>
-                ))}
-              </IonList>
-            </IonCol>
-          </IonRow>
         </IonGrid>
         {/* <p>Group ID: {group ? group.id : 'Loading...'}</p> */}
         <IonFab vertical='bottom' horizontal='end' slot='fixed'>
@@ -296,6 +321,9 @@ const InsideGroupsPageTwo: React.FC = () => {
               </IonFabButton> */}
             <IonFabButton onClick={handleAddMemberClick}>
               <IonIcon icon={personAdd}></IonIcon>
+            </IonFabButton>
+            <IonFabButton onClick={handleCreateGroup}>
+              <IonIcon icon={add}></IonIcon>
             </IonFabButton>
             <LeaveGroup groupId={group.id} />
           </IonFabList>

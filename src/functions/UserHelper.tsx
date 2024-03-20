@@ -88,8 +88,8 @@ export const fetchGroupCurrentUser = async () => {
 
 export const fetchAllUserAndGroupBooks = async (
   setIsLoading,
-  setAllBooks,
-  setFilteredBooks
+  setAllBooks
+  // setFilteredBooks
 ) => {
   setIsLoading(true);
   try {
@@ -113,7 +113,7 @@ export const fetchAllUserAndGroupBooks = async (
     // Extract user IDs from the group data
     type Group = {
       id: string;
-      members: string[]; // Add the 'members' property with the appropriate type
+      members: string[];
     };
 
     const groupUserIds = groups.flatMap((group: Group) => group.members);
@@ -148,7 +148,7 @@ export const fetchAllUserAndGroupBooks = async (
     console.log('allBooks:', allBooks);
 
     setAllBooks(allBooks as any[]);
-    setFilteredBooks(allBooks as any[]);
+    // setFilteredBooks(allBooks as any[]);
   } catch (error) {
     console.error('Error fetching all books:', error);
   } finally {

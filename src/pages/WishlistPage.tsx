@@ -10,7 +10,6 @@ import {
   IonIcon,
   IonLabel,
   IonButtons,
-  IonButton,
   IonBackButton,
 } from '@ionic/react';
 import { bookSharp, star, starHalf, starOutline } from 'ionicons/icons';

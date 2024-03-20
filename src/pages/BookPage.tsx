@@ -98,21 +98,74 @@ const BookPage: React.FC = () => {
       console.log('No user is signed in');
     }
   }, [id]);
-  const handleDelete = async () => {
-    const bookRef = firestore
-      .collection('users')
-      .doc(userID)
-      .collection('books')
-      .doc(id);
-    const userBooksRef = firestore.collection('userBooks').doc(id);
-    bookRef.delete().then(() => {
+  const handleDelete = async (bookId) => {
+    console.log('Deleting book with ID:', bookId);
+    if (!bookId) {
+      console.error('Book ID is not defined');
+      return;
+    }
+
+    // Reference to the book in the books collection
+    const bookRef = firestore.collection('books').doc(bookId);
+
+    // Delete the book from the books collection
+    try {
+      await bookRef.delete();
       console.log('Book successfully deleted from books collection');
+    } catch (error) {
+      console.error('Error deleting book from books collection: ', error);
+    }
+
+    // Query the userBooks collection for documents where bookId matches
+    const userBooksQuery = firestore
+      .collection('userBooks')
+      .where('bookID', '==', bookId);
+
+    // Get the documents from the query
+    const querySnapshot = await userBooksQuery.get();
+
+    // Delete each matching document from the userBooks collection
+    querySnapshot.forEach((doc) => {
+      try {
+        doc.ref.delete();
+        console.log('Book successfully deleted from userBooks collection');
+      } catch (error) {
+        console.error('Error deleting book from userBooks collection: ', error);
+      }
     });
-    userBooksRef.delete().then(() => {
-      console.log('Book successfully deleted from userBooks collection');
+    const booksReviewsQuery = firestore
+      .collection('bookReviews')
+      .where('bookID', '==', bookId);
+
+    // Get the documents from the query
+    const querySnapshotreview = await booksReviewsQuery.get();
+
+    // Delete each matching document from the userBooks collection
+    querySnapshotreview.forEach((doc) => {
+      try {
+        doc.ref.delete();
+        console.log('Book successfully deleted from userBooks collection');
+      } catch (error) {
+        console.error('Error deleting book from userBooks collection: ', error);
+      }
     });
-    await bookRef.delete();
-    await userBooksRef.delete();
+    const booksNotesQuery = firestore
+      .collection('bookNotes')
+      .where('bookID', '==', bookId);
+
+    // Get the documents from the query
+    const querySnapshotNotes = await booksReviewsQuery.get();
+
+    // Delete each matching document from the userBooks collection
+    querySnapshotNotes.forEach((doc) => {
+      try {
+        doc.ref.delete();
+        console.log('Book successfully deleted from userBooks collection');
+      } catch (error) {
+        console.error('Error deleting book from userBooks collection: ', error);
+      }
+    });
+
     history.goBack();
   };
 
@@ -125,7 +178,7 @@ const BookPage: React.FC = () => {
           </IonButtons>
           <IonTitle>{book?.title}</IonTitle>
           <IonButtons slot='end'>
-            <IonButton onClick={handleDelete}>
+            <IonButton onClick={() => handleDelete(book?.id)}>
               <IonIcon icon={trashIcon} slot='icon-only'></IonIcon>
             </IonButton>
           </IonButtons>
