@@ -369,7 +369,7 @@ const LibraryPage: React.FC = () => {
                 button
                 onClick={() => setShowCategories(!showCategories)}
               >
-                Category
+                Genre
               </IonItem>
               {/* {showCategories && (
                 <IonList>

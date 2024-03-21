@@ -12,10 +12,43 @@ import {
   fetchThumbnailByTitle,
 } from '../functions/APIHelper';
 import { bookSharp } from 'ionicons/icons';
+import { Link } from 'react-router-dom';
+import { fetchUserSpecificInfo } from '../functions/UserHelper';
+import firebase from 'firebase/app';
 
 const BookDisplay = ({ book }) => {
   const [thumbnail, setThumbnail] = useState(null);
+  const [userID, setUserID] = useState(null);
+  const bookID = book.id;
+  const [userSpecificData, setUserSpecificData] = useState(null);
+
   //   console.log('Book isbn:', book.isbn.identifier);
+
+  useEffect(() => {
+    const fetchUserID = async () => {
+      const userBooksRef = firebase.firestore().collection('userBooks');
+      const snapshot = await userBooksRef.where('bookID', '==', bookID).get();
+
+      if (!snapshot.empty) {
+        // Assuming each bookID is unique across all documents
+        setUserID(snapshot.docs[0].data().userID);
+      } else {
+        console.log('No such document!');
+      }
+    };
+
+    fetchUserID();
+  }, [bookID]);
+
+  useEffect(() => {
+    const userSpecificData = async () => {
+      const data = await fetchUserSpecificInfo(bookID, userID);
+      console.log('User specific info:', data);
+      setUserSpecificData(data);
+    };
+
+    userSpecificData();
+  }, [bookID, userID]);
 
   useEffect(() => {
     const fetchThumbnail = async () => {
@@ -55,33 +88,36 @@ const BookDisplay = ({ book }) => {
       className='book-card'
       button
       key={book.id}
-      routerLink={`/my/books/view/${book.id}`}
+      //   routerLink={`/my/books/view/${book.id}`}
     >
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        {thumbnail ? (
-          <img
-            className='full-thumbnail-bookdisplay'
-            src={thumbnail}
-            // style={{ marginRight: '10px' }}
-          />
-        ) : (
-          <IonIcon
-            slot='start'
-            icon={bookSharp}
-            className='book-icon-bookdisplay'
-            // style={{ marginRight: '10px' }}
-          />
-        )}
-        <div>
-          <IonCardHeader>
-            <IonCardTitle className='card-title'>{book?.title}</IonCardTitle>
-          </IonCardHeader>
-          <IonCardContent className='card-content'>
-            {book?.author}
-          </IonCardContent>
+      <Link
+        to={{
+          pathname: `/my/books/view/${book.id}`,
+          state: { thumbnail, book, userSpecificData },
+        }}
+        style={{ textDecoration: 'none' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          {thumbnail ? (
+            <img className='full-thumbnail-bookdisplay' src={thumbnail} />
+          ) : (
+            <IonIcon
+              slot='start'
+              icon={bookSharp}
+              className='book-icon-bookdisplay'
+            />
+          )}
+          <div>
+            <IonCardHeader>
+              <IonCardTitle className='card-title'>{book?.title}</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent className='card-content'>
+              {book?.author}
+            </IonCardContent>
+          </div>
         </div>
-      </div>
-      <IonLabel></IonLabel>
+        <IonLabel></IonLabel>
+      </Link>
     </IonCard>
   );
 };

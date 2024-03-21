@@ -30,23 +30,23 @@ const SettingsPage: React.FC = () => {
       </IonHeader>
       <IonContent className='ion-padding'>
         <IonList>
-          <IonItem>
+          <IonItem href='/my/account'>
             <IonIcon icon={personIcon} slot='start' />
             <IonLabel>Account</IonLabel>
           </IonItem>
-          <IonItem>
+          {/* <IonItem>
             <IonIcon icon={notificationsIcon} slot='start' />
             <IonLabel>Notifications</IonLabel>
-          </IonItem>
-          <IonItem>
+          </IonItem> */}
+          <IonItem href='/my/privacy'>
             <IonIcon icon={lockClosedIcon} slot='start' />
             <IonLabel>Privacy & Security</IonLabel>
           </IonItem>
-          <IonItem>
+          <IonItem href='/my/support'>
             <IonIcon icon={helpIcon} slot='start' />
             <IonLabel>Help & Support</IonLabel>
           </IonItem>
-          <IonItem>
+          <IonItem href='/my/about'>
             <IonIcon icon={informationCircleIcon} slot='start' />
             <IonLabel>About</IonLabel>
           </IonItem>

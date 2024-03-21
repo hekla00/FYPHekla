@@ -214,3 +214,12 @@ export const fetchSelectedGroupBooks = async (
     setIsLoading(false);
   }
 };
+
+export const fetchUserSpecificInfo = async (bookID, userID) => {
+  const userBookSnapshot = await db
+    .collection('userBooks')
+    .where('userID', '==', userID)
+    .where('bookID', '==', bookID)
+    .get();
+  return userBookSnapshot.docs[0].data();
+};

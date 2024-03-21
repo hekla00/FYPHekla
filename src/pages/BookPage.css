@@ -42,3 +42,10 @@
   height: 80px;
   padding-top: 10px;
 }
+
+.button-book {
+  display: block;
+  margin: auto;
+  padding: 5px 10px;
+  max-width: 40%;
+}

@@ -39,7 +39,7 @@ const ManuallyAddBookPage: React.FC = () => {
   const [authorData, setAuthorData] = useState('');
   const history = useHistory();
   const [location, setLocation] = useState('');
-  const [categories, setCategory] = useState([]);
+  const [categories, setCategory] = useState('');
   const [tags, setTags] = useState('');
   const [languages, setLanguage] = useState('');
   const [publisher, setPublisher] = useState('');
@@ -59,7 +59,6 @@ const ManuallyAddBookPage: React.FC = () => {
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const currentUser = firebase.auth().currentUser;
-  const [newCategory, setNewCategory] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [bookSelected, setBookSelected] = useState(false);
   // const [rating, setRating] = useState(0);
@@ -131,7 +130,7 @@ const ManuallyAddBookPage: React.FC = () => {
       setPublisher(publisherSearch);
       setPages(pagesSearch);
       setReleaseDate(releaseDateSearch);
-      setCategory(category);
+      setCategory(category[0]);
       setEdition(editionSearch);
       setThumbnailUrl(thumbnailUrlSearch);
       setLanguage(language);
@@ -527,8 +526,8 @@ const ManuallyAddBookPage: React.FC = () => {
                   label='Genres'
                   labelPlacement='stacked'
                   debounce={1000}
-                  value={categories.join(',')}
-                  onIonChange={(event) => setCategory([event.detail.value])}
+                  value={categories}
+                  onIonInput={(event) => setCategory(event.detail.value)}
                 />
               </IonItem>
               <IonItem>

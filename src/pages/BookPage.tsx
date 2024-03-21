@@ -15,6 +15,8 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
+  IonPopover,
+  IonList,
   IonFab,
   IonFabButton,
   IonFabList,
@@ -22,9 +24,16 @@ import {
 } from '@ionic/react';
 import {
   add,
+  ellipsisHorizontalCircleOutline,
+  exit,
+  personAdd,
   chevronUpCircle,
+  starHalf,
+  starOutline,
   pencil,
+  bookSharp,
   trash as trashIcon,
+  star,
 } from 'ionicons/icons';
 import './Home.css';
 import { useParams, useRouteMatch } from 'react-router';
@@ -38,6 +47,8 @@ import firebase from 'firebase/app';
 import './BookPage.css';
 import RatingsReviews from '../components/RatingsReviews';
 import { fetchReview, fetchNotes } from '../functions/RatingsReviewHelper';
+import { handleDelete } from '../functions/BooksHelper';
+import { useLocation } from 'react-router-dom';
 interface RouteParams {
   id: string;
 }
@@ -53,19 +64,27 @@ const BookPage: React.FC = () => {
   const [review, setReview] = useState('');
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState(0);
+  const location = useLocation();
+  const [userOwnsBook, setUserOwnsBook] = useState(false);
+  const thumbnail = (location.state as { thumbnail?: string })?.thumbnail;
+  const bookFromLocation = (location.state as { book?: typeof book })?.book;
+  const userSpecificData = (location.state as { userSpecificData?: any })
+    ?.userSpecificData;
+  const [showPopover, setShowPopover] = useState<{
+    open: boolean;
+    event: Event | undefined;
+  }>({
+    open: false,
+    event: undefined,
+  });
 
-  // useEffect(() => {
-  //   const bookRef = firestore
-  //     .collection('users')
-  //     .doc(userID)
-  //     .collection('books')
-  //     .doc(id);
-  //   bookRef.get().then((doc) =>
-  //     // set the book state to the fetched book
-  //     // toBook is a function that takes a doc and returns a book with its data
-  //     setBook(toBook(doc))
-  //   );
-  // }, [userID, id]);
+  let year;
+  if (book?.releaseDate) {
+    year = book?.releaseDate.split('-')[0];
+  } else if (bookFromLocation?.releaseDate) {
+    year = bookFromLocation?.releaseDate.split('-')[0];
+  }
+
   useEffect(() => {
     // Get current user
     const currentUser = firebase.auth().currentUser;
@@ -89,6 +108,7 @@ const BookPage: React.FC = () => {
               .then((bookDoc) => {
                 // Set the 'book' state to the fetched book
                 setBook(toBook(bookDoc));
+                setUserOwnsBook(true);
               });
           } else {
             console.log("The book does not exist in the user's books");
@@ -98,76 +118,6 @@ const BookPage: React.FC = () => {
       console.log('No user is signed in');
     }
   }, [id]);
-  const handleDelete = async (bookId) => {
-    console.log('Deleting book with ID:', bookId);
-    if (!bookId) {
-      console.error('Book ID is not defined');
-      return;
-    }
-
-    // Reference to the book in the books collection
-    const bookRef = firestore.collection('books').doc(bookId);
-
-    // Delete the book from the books collection
-    try {
-      await bookRef.delete();
-      console.log('Book successfully deleted from books collection');
-    } catch (error) {
-      console.error('Error deleting book from books collection: ', error);
-    }
-
-    // Query the userBooks collection for documents where bookId matches
-    const userBooksQuery = firestore
-      .collection('userBooks')
-      .where('bookID', '==', bookId);
-
-    // Get the documents from the query
-    const querySnapshot = await userBooksQuery.get();
-
-    // Delete each matching document from the userBooks collection
-    querySnapshot.forEach((doc) => {
-      try {
-        doc.ref.delete();
-        console.log('Book successfully deleted from userBooks collection');
-      } catch (error) {
-        console.error('Error deleting book from userBooks collection: ', error);
-      }
-    });
-    const booksReviewsQuery = firestore
-      .collection('bookReviews')
-      .where('bookID', '==', bookId);
-
-    // Get the documents from the query
-    const querySnapshotreview = await booksReviewsQuery.get();
-
-    // Delete each matching document from the userBooks collection
-    querySnapshotreview.forEach((doc) => {
-      try {
-        doc.ref.delete();
-        console.log('Book successfully deleted from userBooks collection');
-      } catch (error) {
-        console.error('Error deleting book from userBooks collection: ', error);
-      }
-    });
-    const booksNotesQuery = firestore
-      .collection('bookNotes')
-      .where('bookID', '==', bookId);
-
-    // Get the documents from the query
-    const querySnapshotNotes = await booksReviewsQuery.get();
-
-    // Delete each matching document from the userBooks collection
-    querySnapshotNotes.forEach((doc) => {
-      try {
-        doc.ref.delete();
-        console.log('Book successfully deleted from userBooks collection');
-      } catch (error) {
-        console.error('Error deleting book from userBooks collection: ', error);
-      }
-    });
-
-    history.goBack();
-  };
 
   return (
     <IonPage>
@@ -176,109 +126,165 @@ const BookPage: React.FC = () => {
           <IonButtons slot='start'>
             <IonBackButton />
           </IonButtons>
-          <IonTitle>{book?.title}</IonTitle>
-          <IonButtons slot='end'>
-            <IonButton onClick={() => handleDelete(book?.id)}>
-              <IonIcon icon={trashIcon} slot='icon-only'></IonIcon>
-            </IonButton>
-          </IonButtons>
+          {userOwnsBook && (
+            <IonButtons
+              slot='end'
+              onClick={(e) =>
+                setShowPopover({ open: true, event: e.nativeEvent })
+              }
+            >
+              <IonIcon
+                slot='icon-only'
+                icon={ellipsisHorizontalCircleOutline}
+              ></IonIcon>
+            </IonButtons>
+          )}
+          <IonPopover
+            isOpen={showPopover.open}
+            event={showPopover.event}
+            onDidDismiss={() =>
+              setShowPopover({ open: false, event: undefined })
+            }
+          >
+            <IonList>
+              <IonItem>
+                <IonIcon slot='end' icon={pencil}></IonIcon>
+                <IonLabel>Edit Book</IonLabel>
+              </IonItem>
+              <IonItem onClick={() => setShowModal(true)}>
+                <IonIcon slot='end' icon={add}></IonIcon>
+                <IonLabel>Add/Edit Review</IonLabel>
+              </IonItem>
+              <IonItem onClick={() => handleDelete(book?.id, history)}>
+                <IonIcon slot='end' icon={trashIcon}></IonIcon>
+                <IonLabel>Delete Book</IonLabel>
+              </IonItem>
+            </IonList>
+          </IonPopover>
+
+          <IonTitle>{book?.title || bookFromLocation?.title}</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className='ion-padding'>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Title</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.title}
-          </IonCardContent>
-        </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Pages</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.pages}
-          </IonCardContent>
-        </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Author</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.author}
-          </IonCardContent>
-        </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Rating</IonCardHeader>
-          <IonCardContent className='IonCardContent'>{rating}</IonCardContent>
-        </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Review</IonCardHeader>
-          <IonCardContent className='IonCardContent'>{review}</IonCardContent>
-        </IonCard>
+        <div className='thumbnail-container-recom'>
+          {thumbnail ? (
+            <img src={thumbnail} className='full-thumbnail-recom' />
+          ) : (
+            <IonIcon icon={bookSharp} className='book-icon-recom' />
+          )}
+        </div>
+        {rating ? (
+          <div className='rating-container-recom'>
+            {[1, 2, 3, 4, 5].map((starNumber) => {
+              let icon;
+              // const averageRating = rating;
+              if (starNumber <= rating) {
+                icon = star; // Full star
+              } else if (starNumber <= rating + 0.5) {
+                icon = starHalf; // Half star
+              } else {
+                icon = starOutline; // Empty star
+              }
+              return (
+                <IonIcon
+                  key={starNumber}
+                  icon={icon}
+                  className='rating-star-recom'
+                />
+              );
+            })}
+          </div>
+        ) : null}
+        <div className='book-title-recom'>
+          <IonText className='book-title-recom'>
+            {book?.title || bookFromLocation?.title}
+          </IonText>
+        </div>
+        <div className='book-authors-recom'>
+          <IonText className='book-authors-recom'>
+            {book?.author || bookFromLocation?.author}
+          </IonText>
+        </div>
+        <div className='book-details-container-recom'>
+          <div className='book-details-recom'>
+            <IonLabel className='book-details'>Published</IonLabel>
+            <IonLabel className='book-publication-year-recom'>{year}</IonLabel>
+          </div>
+          <div className='book-details-recom'>
+            <IonLabel className='book-details'>Pages</IonLabel>
+            <IonLabel className='book-pages-recom'>
+              {book?.pages || bookFromLocation?.pages}
+            </IonLabel>
+          </div>
+        </div>
+        {userOwnsBook && !rating && !review ? (
+          <IonButton className='button-book' onClick={() => setShowModal(true)}>
+            Review Book
+          </IonButton>
+        ) : null}
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Description</IonCardHeader>
           <IonCardContent className='IonCardContent'>
-            {book?.description}
+            {book?.description || bookFromLocation?.description}
           </IonCardContent>
         </IonCard>
+        {review ? (
+          <IonCard className='IonCard'>
+            <IonCardHeader className='IonCardHeader'>Review</IonCardHeader>
+            <IonCardContent className='IonCardContent'>{review}</IonCardContent>
+          </IonCard>
+        ) : null}
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Location</IonCardHeader>
           <IonCardContent className='IonCardContent'>
-            {book?.location}
-          </IonCardContent>
-        </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Edition</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.edition}
-          </IonCardContent>
-        </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Categories</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.categories}
+            {/* {book?.location || bookFromLocation?.location}
+             */}
+            {userSpecificData?.location}
           </IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Tags</IonCardHeader>
           <IonCardContent className='IonCardContent'>
-            {book?.tags}
+            {/* {book?.tags || bookFromLocation?.tags}
+             */}
+            {userSpecificData?.tags}
+          </IonCardContent>
+        </IonCard>
+        {userOwnsBook && notes ? (
+          <IonCard className='IonCard'>
+            <IonCardHeader className='IonCardHeader'>
+              Private Notes
+            </IonCardHeader>
+            <IonCardContent className='IonCardContent'>{notes}</IonCardContent>
+          </IonCard>
+        ) : null}
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Purchase Date</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {/* {book?.purchaseDate || bookFromLocation?.purchaseDate}
+             */}
+            {userSpecificData?.purchaseDate}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Edition</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {/* {book?.edition || bookFromLocation?.edition} */}
+            {userSpecificData?.edition}
+          </IonCardContent>
+        </IonCard>
+        <IonCard className='IonCard'>
+          <IonCardHeader className='IonCardHeader'>Genres</IonCardHeader>
+          <IonCardContent className='IonCardContent'>
+            {book?.categories || bookFromLocation?.categories}
           </IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>ISBN</IonCardHeader>
           <IonCardContent className='IonCardContent'>
-            {book?.isbn}
+            {book?.isbn || bookFromLocation?.isbn}
           </IonCardContent>
         </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Notes</IonCardHeader>
-          <IonCardContent className='IonCardContent'>{notes}</IonCardContent>
-        </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Release Date</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.releaseDate}
-          </IonCardContent>
-        </IonCard>
-        <IonCard className='IonCard'>
-          <IonCardHeader className='IonCardHeader'>Purchase Date</IonCardHeader>
-          <IonCardContent className='IonCardContent'>
-            {book?.purchaseDate}
-          </IonCardContent>
-        </IonCard>
-        <IonFab vertical='bottom' horizontal='end' slot='fixed'>
-          <IonFabButton>
-            <IonIcon icon={chevronUpCircle}></IonIcon>
-          </IonFabButton>
-          <IonFabList side='top'>
-            {/* <IonFabButton>
-                <IonIcon icon={settings}></IonIcon>
-              </IonFabButton> */}
-            <IonFabButton onClick={() => setShowModal(true)}>
-              <IonIcon icon={add}></IonIcon>
-            </IonFabButton>
-            <IonFabButton>
-              <IonIcon icon={pencil}></IonIcon>
-            </IonFabButton>
-          </IonFabList>
-        </IonFab>
         <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
           <RatingsReviews
             showModal={showModal}
@@ -286,7 +292,6 @@ const BookPage: React.FC = () => {
             userID={currentUser?.uid}
             book={book}
           />
-          {/* <p>Hello, world!</p> */}
         </IonModal>
       </IonContent>
     </IonPage>

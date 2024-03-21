@@ -58,6 +58,10 @@ import InsideGroupsPage from './pages/InsideGroupsPage';
 import InsideGroupsPageTwo from './pages/InsideGroupsPageTwo';
 import RecommendationBookPage from './pages/RecommendationBookPage';
 import WishlistPage from './pages/WishlistPage';
+import AccountPage from './pages/AccountPage';
+import PrivacyPage from './pages/PrivacyPage';
+import SupportPage from './pages/SupportPage';
+import AboutPage from './pages/AboutPage';
 setupIonicReact();
 
 const AppTabs: React.FC = () => {
@@ -101,6 +105,10 @@ const AppTabs: React.FC = () => {
           exact={true}
         />
         <Route path='/my/settings' component={SettingsPage} exact={true} />
+        <Route path='/my/account' component={AccountPage} exact={true} />
+        <Route path='/my/privacy' component={PrivacyPage} exact={true} />
+        <Route path='/my/support' component={SupportPage} exact={true} />
+        <Route path='/my/about' component={AboutPage} exact={true} />
         <Route
           path='/my/bookTracking'
           component={LoanBorrowTracking}

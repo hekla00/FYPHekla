@@ -46,7 +46,7 @@ const RecommendationBookPage: React.FC = () => {
   } else if (book?.publishedDate) {
     year = book?.publishedDate.split('-')[0];
   }
-  console.log('bookReco:', book);
+  // console.log('bookReco:', book);
 
   const handleWishlistClick = () => {
     // if (!book || !book.volumeInfo) {

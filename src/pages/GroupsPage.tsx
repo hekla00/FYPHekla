@@ -256,18 +256,18 @@ const GroupsPage: React.FC = () => {
             }
           >
             <IonList>
-              <IonItem button onClick={handleAddMemberClick}>
-                <IonIcon slot='start' icon={personAdd}></IonIcon>
+              <IonItem onClick={handleAddMemberClick}>
+                <IonIcon slot='end' icon={personAdd}></IonIcon>
                 <IonLabel>Add Member</IonLabel>
               </IonItem>
 
-              <IonItem button onClick={handleCreateGroup}>
-                <IonIcon slot='start' icon={add}></IonIcon>
+              <IonItem onClick={handleCreateGroup}>
+                <IonIcon slot='end' icon={add}></IonIcon>
                 <IonLabel>Create Group</IonLabel>
               </IonItem>
 
-              <IonItem button onClick={handleLeaveGroup}>
-                <IonIcon slot='start' icon={exit}></IonIcon>
+              <IonItem onClick={handleLeaveGroup}>
+                <IonIcon slot='end' icon={exit}></IonIcon>
                 <IonLabel>Leave Group</IonLabel>
               </IonItem>
             </IonList>
