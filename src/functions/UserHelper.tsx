@@ -221,5 +221,8 @@ export const fetchUserSpecificInfo = async (bookID, userID) => {
     .where('userID', '==', userID)
     .where('bookID', '==', bookID)
     .get();
-  return userBookSnapshot.docs[0].data();
+  // return userBookSnapshot.docs[0].data();
+  const doc = userBookSnapshot.docs.find((doc) => doc.exists);
+  return doc ? doc.data() : undefined;
+  // return userBookSnapshot.docs.map((doc) => doc.data());
 };

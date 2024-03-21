@@ -26,8 +26,8 @@ import firebase from 'firebase/app';
 import SearchResultModal from '../components/SearchResultModal';
 import { bookSharp } from 'ionicons/icons';
 import './ManuallyAddBookPage.css';
-import { v4 as uuidv4 } from 'uuid';
-import takePhoto from '../components/TakePhoto';
+// import { v4 as uuidv4 } from 'uuid';
+// import takePhoto from '../components/TakePhoto';
 import handleISBNSearch from '../components/HandleISBNSearch';
 
 const ManuallyAddBookPage: React.FC = () => {
@@ -44,12 +44,10 @@ const ManuallyAddBookPage: React.FC = () => {
   const [languages, setLanguage] = useState('');
   const [publisher, setPublisher] = useState('');
   const [description, setDescription] = useState('');
-  // const [review, setReview] = useState('');
   const [pages, setPages] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [purchaseDate, setPurchaseDate] = useState('');
   const [edition, setEdition] = useState('');
-  // const [notes, setNotes] = useState('');
   const isbnDataRef = useRef('');
   const titleDataRef = useRef('');
   const authorDataRef = useRef('');
@@ -61,12 +59,9 @@ const ManuallyAddBookPage: React.FC = () => {
   const currentUser = firebase.auth().currentUser;
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [bookSelected, setBookSelected] = useState(false);
-  // const [rating, setRating] = useState(0);
   const [showPopover, setShowPopover] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
-  const [authorInput, setAuthorInput] = useState('');
-  const [key, setKey] = useState(0);
+  // const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
   const locationISBNData = useLocation<{ isbn: string | null }>();
   const locationTitleData = useLocation();
   const isbn = locationISBNData.state?.isbn;
@@ -248,32 +243,32 @@ const ManuallyAddBookPage: React.FC = () => {
   //   setRating(newRating);
   // };
 
-  const uploadPhoto = async (photo: string) => {
-    if (!currentUser) {
-      throw new Error('User is not authenticated');
-    }
-    try {
-      const response = await fetch(photo);
+  // const uploadPhoto = async (photo: string) => {
+  //   if (!currentUser) {
+  //     throw new Error('User is not authenticated');
+  //   }
+  //   try {
+  //     const response = await fetch(photo);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch the image');
-      }
+  //     if (!response.ok) {
+  //       throw new Error('Failed to fetch the image');
+  //     }
 
-      const blob = await response.blob();
-      const fileType = blob.type.split('/')[1];
+  //     const blob = await response.blob();
+  //     const fileType = blob.type.split('/')[1];
 
-      const storageRef = firebase.storage().ref();
-      const photoRef = storageRef.child(`bookImages/${uuidv4()}.${fileType}`);
+  //     const storageRef = firebase.storage().ref();
+  //     const photoRef = storageRef.child(`bookImages/${uuidv4()}.${fileType}`);
 
-      const snapshot = await photoRef.put(blob);
-      const url = await snapshot.ref.getDownloadURL();
-      console.log('url: ', url);
-      return url;
-    } catch (error) {
-      console.error('Failed to upload the image: ', error);
-      throw error;
-    }
-  };
+  //     const snapshot = await photoRef.put(blob);
+  //     const url = await snapshot.ref.getDownloadURL();
+  //     console.log('url: ', url);
+  //     return url;
+  //   } catch (error) {
+  //     console.error('Failed to upload the image: ', error);
+  //     throw error;
+  //   }
+  // };
 
   return (
     <IonPage>
@@ -287,15 +282,13 @@ const ManuallyAddBookPage: React.FC = () => {
       </IonHeader>
       <IonContent className='ion-padding'>
         <div className='thumbnail-container-addBook'>
-          {uploadedPhoto ? (
-            <img src={uploadedPhoto} className='full-thumbnail-addBook' />
-          ) : bookSelected ? (
+          {bookSelected ? (
             <img src={thumbnailUrl} className='full-thumbnail-addBook' />
           ) : (
             <IonIcon icon={bookSharp} className='book-icon-addBook' />
           )}
         </div>
-        <div
+        {/* <div
           style={{
             display: 'flex',
             justifyContent: 'center',
@@ -320,7 +313,7 @@ const ManuallyAddBookPage: React.FC = () => {
           >
             Edit Image
           </IonButton>
-        </div>
+        </div> */}
         {/* <input
           id='fileInput'
           type='file'
@@ -342,7 +335,7 @@ const ManuallyAddBookPage: React.FC = () => {
             }
           }}
         /> */}
-        <input
+        {/* <input
           id='fileInput'
           type='file'
           accept='image/*'
@@ -378,17 +371,7 @@ const ManuallyAddBookPage: React.FC = () => {
               reader.readAsArrayBuffer(file);
             }
           }}
-        />
-        {/* <div className='rating-container'>
-          {[1, 2, 3, 4, 5].map((starNumber) => (
-            <IonIcon
-              key={starNumber}
-              icon={starNumber <= rating ? star : starOutline}
-              onClick={() => handleRatingChange(starNumber)}
-              className='rating-star'
-            />
-          ))}
-        </div> */}
+        /> */}
         <IonItem>
           <IonInput
             label='ISBN'
@@ -451,16 +434,6 @@ const ManuallyAddBookPage: React.FC = () => {
             onIonChange={(event) => setLocation(event.detail.value)}
           ></IonInput>
         </IonItem>
-        {/* <IonItem>
-          <IonTextarea
-            rows={4}
-            label='Review'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={review}
-            onIonChange={(event) => setReview(event.detail.value)}
-          ></IonTextarea>
-        </IonItem> */}
         <IonItem>
           <IonInput
             label='Tags'
@@ -476,8 +449,9 @@ const ManuallyAddBookPage: React.FC = () => {
             labelPlacement='stacked'
             label='Purchase Date'
             value={purchaseDate}
-            readonly
+            // readonly
           />
+          <IonLabel>{purchaseDate}</IonLabel>
         </IonItem>
 
         <IonPopover
@@ -488,23 +462,16 @@ const ManuallyAddBookPage: React.FC = () => {
             presentation='date'
             value={purchaseDate || undefined}
             onIonChange={(event) => {
+              console.log('event.detail.value: ', event.detail.value);
+              console.log('event: ');
               const date = new Date(event.detail.value as string);
-              const formattedDate = date.toISOString().split('T')[0];
+              const formattedDate = date.toDateString();
               setPurchaseDate(formattedDate);
+              console.log('purchaseDate: ', formattedDate);
               setShowPopover(false);
             }}
           />
         </IonPopover>
-        {/* <IonItem>
-          <IonTextarea
-            rows={4}
-            label='Private Notes'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={notes}
-            onIonChange={(event) => setNotes(event.detail.value)}
-          ></IonTextarea>
-        </IonItem> */}
         <IonAccordionGroup>
           <IonAccordion value='More'>
             <IonItem slot='header'>

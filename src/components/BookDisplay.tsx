@@ -42,6 +42,7 @@ const BookDisplay = ({ book }) => {
 
   useEffect(() => {
     const userSpecificData = async () => {
+      if (!bookID || !userID) return;
       const data = await fetchUserSpecificInfo(bookID, userID);
       console.log('User specific info:', data);
       setUserSpecificData(data);

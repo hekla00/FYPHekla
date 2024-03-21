@@ -49,6 +49,7 @@ import RatingsReviews from '../components/RatingsReviews';
 import { fetchReview, fetchNotes } from '../functions/RatingsReviewHelper';
 import { handleDelete } from '../functions/BooksHelper';
 import { useLocation } from 'react-router-dom';
+import Loans from '../components/Loans';
 interface RouteParams {
   id: string;
 }
@@ -60,7 +61,8 @@ const BookPage: React.FC = () => {
   const [book, setBook] = useState<Book>();
   const history = useHistory();
   const currentUser = firebase.auth().currentUser;
-  const [showModal, setShowModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showLoansModal, setShowLoansModal] = useState(false);
   const [review, setReview] = useState('');
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState(0);
@@ -151,9 +153,13 @@ const BookPage: React.FC = () => {
                 <IonIcon slot='end' icon={pencil}></IonIcon>
                 <IonLabel>Edit Book</IonLabel>
               </IonItem>
-              <IonItem onClick={() => setShowModal(true)}>
+              <IonItem onClick={() => setShowReviewModal(true)}>
                 <IonIcon slot='end' icon={add}></IonIcon>
                 <IonLabel>Add/Edit Review</IonLabel>
+              </IonItem>
+              <IonItem onClick={() => setShowLoansModal(true)}>
+                <IonIcon slot='end' icon={add}></IonIcon>
+                <IonLabel>Add Loan</IonLabel>
               </IonItem>
               <IonItem onClick={() => handleDelete(book?.id, history)}>
                 <IonIcon slot='end' icon={trashIcon}></IonIcon>
@@ -218,7 +224,10 @@ const BookPage: React.FC = () => {
           </div>
         </div>
         {userOwnsBook && !rating && !review ? (
-          <IonButton className='button-book' onClick={() => setShowModal(true)}>
+          <IonButton
+            className='button-book'
+            onClick={() => setShowReviewModal(true)}
+          >
             Review Book
           </IonButton>
         ) : null}
@@ -285,12 +294,26 @@ const BookPage: React.FC = () => {
             {book?.isbn || bookFromLocation?.isbn}
           </IonCardContent>
         </IonCard>
-        <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+        <IonModal
+          isOpen={showReviewModal}
+          onDidDismiss={() => setShowReviewModal(false)}
+        >
           <RatingsReviews
-            showModal={showModal}
-            setShowModal={setShowModal}
+            showModal={showReviewModal}
+            setShowModal={setShowReviewModal}
             userID={currentUser?.uid}
             book={book}
+          />
+        </IonModal>
+        <IonModal
+          isOpen={showLoansModal}
+          onDidDismiss={() => setShowLoansModal(false)}
+        >
+          <Loans
+            showModal={showLoansModal}
+            setShowModal={setShowLoansModal}
+            book={book}
+            userID={currentUser?.uid}
           />
         </IonModal>
       </IonContent>
