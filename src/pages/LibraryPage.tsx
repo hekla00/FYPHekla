@@ -20,7 +20,7 @@ import {
   IonCheckbox,
   IonSpinner,
 } from '@ionic/react';
-import { filter, home, grid, pricetag } from 'ionicons/icons';
+import { filter } from 'ionicons/icons';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import { IonSearchbar } from '@ionic/react';
@@ -206,15 +206,17 @@ const LibraryPage: React.FC = () => {
     const nonNullBooks = allBooks.filter((book) => book !== null);
     const filteredBooks = nonNullBooks.filter(
       (book) =>
-        (book && book.title) ||
-        book.categories ||
-        (selectedLocation.length > 0
-          ? selectedLocation.includes(book.location)
-          : true) ||
-        (selectedTag.length > 0
-          ? book.tags.some((tag) => selectedTag.includes(tag))
-          : true) ||
-        book.title.toLowerCase().includes(searchQuery.toLowerCase())
+        (book &&
+          book.title &&
+          book.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          book.categories) ||
+        (book.categories == null &&
+          (selectedLocation.length > 0
+            ? selectedLocation.includes(book.location)
+            : true) &&
+          (selectedTag.length > 0
+            ? book.tags.some((tag) => selectedTag.includes(tag))
+            : true))
     );
 
     setFilteredBooks(filteredBooks);
@@ -465,6 +467,9 @@ const LibraryPage: React.FC = () => {
         {isLoading ? (
           <IonSpinner />
         ) : (
+          // filteredBooks.map((book, index) => (
+          //   <BookDisplay book={book} key={`${book.id}-${index}`} />
+          // ))
           filteredBooks.map((book) => <BookDisplay book={book} key={book.id} />)
         )}
       </IonContent>

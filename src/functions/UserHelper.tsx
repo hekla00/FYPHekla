@@ -69,6 +69,7 @@ export const fetchAllUserBooks = async (setIsLoading, setAllBooks) => {
 
 export const fetchGroupCurrentUser = async () => {
   const db = firebase.firestore();
+  const currentUserId = firebase.auth().currentUser?.uid;
   try {
     const snapshot = await db
       .collection('groups')
@@ -83,6 +84,7 @@ export const fetchGroupCurrentUser = async () => {
     return groups;
   } catch (error) {
     console.error('Error fetching groups:', error);
+    return [];
   }
 };
 

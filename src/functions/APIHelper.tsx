@@ -12,7 +12,7 @@ export const fetchThumbnailByISBN = async (isbn) => {
     // console.log('Booki: ', book);
     return book.imageLinks?.thumbnail;
   } else {
-    throw new Error('No book found with the provided ISBN');
+    return null;
   }
 };
 
@@ -29,7 +29,7 @@ export const fetchThumbnailByTitle = async (title) => {
     // console.log('Bookt: ', book);
     return book.imageLinks?.thumbnail;
   } else {
-    throw new Error('No book found with the provided title');
+    return null;
   }
 };
 
