@@ -103,12 +103,6 @@ export const fetchAllUserAndGroupBooks = async (
       return;
     }
 
-    // Fetch userBooks documents for the current user
-    const userBooksSnapshot = await db
-      .collection('userBooks')
-      .where('userID', '==', userId)
-      .get();
-
     // Fetch groups for the current user
     const groups = await fetchGroupCurrentUser();
 
@@ -128,16 +122,17 @@ export const fetchAllUserAndGroupBooks = async (
 
     // Combine the userBooks documents of the current user and the users in the same groups
     const allUserBooksSnapshots = [
-      ...userBooksSnapshot.docs,
+      // ...userBooksSnapshot.docs,
       ...groupBooksSnapshots.flatMap((snapshot) => snapshot.docs),
     ];
 
     // Extract book IDs from the userBooks documents
     const bookIds = allUserBooksSnapshots.map((doc) => doc.data().bookID);
     console.log('bookIds:', bookIds);
-
+    const uniqueBookIds = Array.from(new Set(bookIds));
+    console.log('uniqueBookIds:', uniqueBookIds);
     // Fetch books documents for the extracted book IDs
-    const booksPromises = bookIds.map((ID) =>
+    const booksPromises = uniqueBookIds.map((ID) =>
       db.collection('books').doc(ID).get()
     );
     const booksSnapshots = await Promise.all(booksPromises);
@@ -150,7 +145,6 @@ export const fetchAllUserAndGroupBooks = async (
     console.log('allBooks:', allBooks);
 
     setAllBooks(allBooks as any[]);
-    // setFilteredBooks(allBooks as any[]);
   } catch (error) {
     console.error('Error fetching all books:', error);
   } finally {
@@ -168,5 +162,55 @@ export const fetchNumBooksInWishlist = async (setNumBooksInWishlist) => {
     setNumBooksInWishlist(wishlistSnapshot.size);
   } else {
     console.error('currentUserId is undefined');
+  }
+};
+
+export const fetchSelectedGroupBooks = async (
+  setIsLoading,
+  setAllBooks,
+  groupId
+) => {
+  try {
+    const db = firebase.firestore();
+
+    // Fetch the group document for the selected group
+    const groupSnapshot = await db.collection('groups').doc(groupId).get();
+    const group = groupSnapshot.data();
+
+    // Extract user IDs from the group data
+    const groupUserIds = group.members;
+
+    // Fetch userBooks documents for the users in the group
+    const groupBooksPromises = groupUserIds.map((id) =>
+      db.collection('userBooks').where('userID', '==', id).get()
+    );
+    const groupBooksSnapshots = await Promise.all(groupBooksPromises);
+
+    // Combine the userBooks documents of the users in the group
+    const allUserBooksSnapshots = groupBooksSnapshots.flatMap(
+      (snapshot) => snapshot.docs
+    );
+
+    // Extract book IDs from the userBooks documents
+    const bookIds = allUserBooksSnapshots.map((doc) => doc.data().bookID);
+    const uniqueBookIds = Array.from(new Set(bookIds));
+
+    // Fetch books documents for the extracted book IDs
+    const booksPromises = uniqueBookIds.map((ID) =>
+      db.collection('books').doc(ID).get()
+    );
+    const booksSnapshots = await Promise.all(booksPromises);
+
+    // Extract book data from the books documents
+    const groupBooks = booksSnapshots.map((snapshot) => ({
+      id: snapshot.id,
+      ...snapshot.data(),
+    }));
+
+    setAllBooks(groupBooks);
+  } catch (error) {
+    console.error('Error fetching group books:', error);
+  } finally {
+    setIsLoading(false);
   }
 };

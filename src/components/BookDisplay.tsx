@@ -4,11 +4,14 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
+  IonIcon,
+  IonLabel,
 } from '@ionic/react';
 import {
   fetchThumbnailByISBN,
   fetchThumbnailByTitle,
 } from '../functions/APIHelper';
+import { bookSharp } from 'ionicons/icons';
 
 const BookDisplay = ({ book }) => {
   const [thumbnail, setThumbnail] = useState(null);
@@ -54,11 +57,31 @@ const BookDisplay = ({ book }) => {
       key={book.id}
       routerLink={`/my/books/view/${book.id}`}
     >
-      <IonCardHeader>
-        <IonCardTitle className='card-title'>{book?.title}</IonCardTitle>
-      </IonCardHeader>
-      <IonCardContent className='card-content'>{book?.author}</IonCardContent>
-      {thumbnail && <img src={thumbnail} alt={book?.title} />}
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        {thumbnail ? (
+          <img
+            className='full-thumbnail-bookdisplay'
+            src={thumbnail}
+            // style={{ marginRight: '10px' }}
+          />
+        ) : (
+          <IonIcon
+            slot='start'
+            icon={bookSharp}
+            className='book-icon-bookdisplay'
+            // style={{ marginRight: '10px' }}
+          />
+        )}
+        <div>
+          <IonCardHeader>
+            <IonCardTitle className='card-title'>{book?.title}</IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent className='card-content'>
+            {book?.author}
+          </IonCardContent>
+        </div>
+      </div>
+      <IonLabel></IonLabel>
     </IonCard>
   );
 };

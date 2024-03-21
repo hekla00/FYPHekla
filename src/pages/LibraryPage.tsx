@@ -29,6 +29,7 @@ import {
   fetchAllUserBooks,
 } from '../functions/UserHelper';
 import BookDisplay from '../components/BookDisplay';
+import { fetchSelectedGroupBooks } from '../functions/UserHelper';
 
 const LibraryPage: React.FC = () => {
   const [selectedSegment, setSelectedSegment] = useState<string>('all');
@@ -53,54 +54,16 @@ const LibraryPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const db = firebase.firestore();
 
   const handleSegmentChange = (event: CustomEvent) => {
     setSelectedSegment(event.detail.value);
   };
 
-  const fetchLocations = async () => {
-    try {
-      const db = firebase.firestore();
-      const userId = firebase.auth().currentUser?.uid;
-      console.log('userId lib', userId);
-      if (!userId) {
-        console.error('No user is currently logged in.');
-        return;
-      }
-
-      // Fetch userBooks documents for the current user
-      const userBooksSnapshot = await db
-        .collection('userBooks')
-        .where('userID', '==', userId)
-        .get();
-
-      // Extract book IDs from the userBooks documents
-      const bookIds = userBooksSnapshot.docs.map((doc) => doc.data().bookID);
-
-      //   console.log('bookIds', bookIds);
-      // Fetch books documents for the extracted book IDs
-      const booksPromises = bookIds.map((ID) =>
-        db.collection('books').doc(ID).get()
-      );
-      const booksSnapshots = await Promise.all(booksPromises);
-      const locations = {};
-      booksSnapshots.forEach((snapshot) => {
-        const data = snapshot.data();
-        const location = data && data.location ? data.location : 'Undefined';
-        if (!locations[location]) {
-          locations[location] = [];
-        }
-        locations[location].push(data);
-      });
-      setLocations(locations as any[]);
-    } catch (error) {
-      console.error('Error fetching locations: ', error);
-    }
-  };
-
   const fetchCategories = async () => {
     try {
-      const db = firebase.firestore();
       const userId = firebase.auth().currentUser?.uid;
       console.log('userId lib', userId);
       if (!userId) {
@@ -145,9 +108,54 @@ const LibraryPage: React.FC = () => {
 
   const fetchTags = async () => {
     try {
-      const db = firebase.firestore();
       const userId = firebase.auth().currentUser?.uid;
-      console.log('userId lib', userId);
+      if (!userId) {
+        console.error('No user is currently logged in.');
+        return;
+      }
+
+      // Fetch userBooks and books documents for the current user
+      const userBooksSnapshot = await db
+        .collection('userBooks')
+        .where('userID', '==', userId)
+        .get();
+
+      const booksSnapshot = await db.collection('books').get();
+
+      // Create a map of books by their id
+      const booksById = {};
+      booksSnapshot.docs.forEach((doc) => {
+        booksById[doc.id] = doc.data();
+      });
+
+      // Extract tags from the userBooks documents and match them with the books
+      const tags = {};
+      userBooksSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.tags) {
+          const tag = typeof data.tags === 'string' ? data.tags : undefined;
+          if (tag) {
+            if (!tags[tag]) {
+              tags[tag] = [];
+            }
+            // Match the userBook with the corresponding book
+            const book = booksById[data.bookId];
+            if (book) {
+              tags[tag].push(book);
+            }
+          }
+        }
+      });
+
+      setTags(Object.values(tags));
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+    }
+  };
+
+  const fetchLocations = async () => {
+    try {
+      const userId = firebase.auth().currentUser?.uid;
       if (!userId) {
         console.error('No user is currently logged in.');
         return;
@@ -159,31 +167,21 @@ const LibraryPage: React.FC = () => {
         .where('userID', '==', userId)
         .get();
 
-      // Extract book IDs from the userBooks documents
-      const bookIds = userBooksSnapshot.docs.map((doc) => doc.data().bookID);
-      console.log('bookIds:', bookIds);
+      // Extract locations from the userBooks documents
+      const locations = {};
+      userBooksSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const bookLocation = data.location || 'Undefined';
 
-      // Fetch books documents for the extracted book IDs
-      const booksPromises = bookIds.map((ID) =>
-        db.collection('books').doc(ID).get()
-      );
-      const booksSnapshots = await Promise.all(booksPromises);
-      const tags = {};
-      booksSnapshots.forEach((snapshot) => {
-        const data = snapshot.data();
-        console.log('book data:', data);
-        const bookTags = data && data.tags ? data.tags : ['Undefined'];
-        bookTags.forEach((tag) => {
-          if (!tags[tag]) {
-            tags[tag] = [];
-          }
-          tags[tag].push(data);
-        });
+        if (!locations[bookLocation]) {
+          locations[bookLocation] = [];
+        }
+        locations[bookLocation].push(data);
       });
-      // console.log('tags:', tags);
-      setTags(Object.values(tags) as any[]);
+
+      setLocations(Object.values(locations));
     } catch (error) {
-      console.error('Error fetching tags:', error);
+      console.error('Error fetching locations:', error);
     }
   };
 
@@ -213,10 +211,12 @@ const LibraryPage: React.FC = () => {
         (book.categories == null &&
           (selectedLocation.length > 0
             ? selectedLocation.includes(book.location)
-            : true) &&
+            : true)) ||
+        (selectedLocation == null &&
           (selectedTag.length > 0
             ? book.tags.some((tag) => selectedTag.includes(tag))
-            : true))
+            : true)) ||
+        selectedTag == null
     );
 
     setFilteredBooks(filteredBooks);
@@ -285,6 +285,42 @@ const LibraryPage: React.FC = () => {
   const allTags = Array.from(
     new Set(allBooks.flatMap((book) => book.tags || []))
   );
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const currentUserId = firebase.auth().currentUser?.uid;
+      const db = firebase.firestore();
+      // console.log('currentUserId', currentUserId);
+      db.collection('groups')
+        .where('members', 'array-contains', currentUserId)
+        .get()
+        .then((snapshot) => {
+          const groups = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          // console.log('groups', groups);
+          setGroups(groups);
+          // console.log('groups after', groups);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching groups:', error);
+        });
+    };
+    fetchGroups();
+  }, [groups]);
+
+  const handleGroupChange = (groupId) => {
+    setSelectedSegment(groupId);
+    if (!groupId) {
+      console.log('No group selected');
+      return;
+    }
+    fetchSelectedGroupBooks(setIsLoading, setAllBooks, groupId);
+
+    // setFilteredBooks(groupBooks);
+  };
   return (
     <IonPage>
       <IonHeader>
@@ -430,12 +466,15 @@ const LibraryPage: React.FC = () => {
           <IonSegmentButton value='mine'>
             <IonLabel>My Books</IonLabel>
           </IonSegmentButton>
-          <IonSegmentButton value='group1'>
-            <IonLabel>Group 1</IonLabel>
-          </IonSegmentButton>
-          <IonSegmentButton value='group2'>
-            <IonLabel>Group 2</IonLabel>
-          </IonSegmentButton>
+          {groups.map((group, index) => (
+            <IonSegmentButton
+              value={group.id}
+              key={index}
+              onClick={() => handleGroupChange(group.id)}
+            >
+              <IonLabel>{group.name}</IonLabel>
+            </IonSegmentButton>
+          ))}
         </IonSegment>
         <IonSearchbar
           placeholder='Search for books'

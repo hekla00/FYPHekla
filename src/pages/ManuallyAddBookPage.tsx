@@ -13,32 +13,24 @@ import {
   IonLabel,
   IonTextarea,
   IonIcon,
-  IonThumbnail,
   IonDatetime,
   IonPopover,
   IonAccordionGroup,
   IonAccordion,
   IonToast,
-  IonActionSheet,
 } from '@ionic/react';
-import { search } from 'ionicons/icons';
 import React, { useState, useRef, useEffect } from 'react';
 import { firestore } from '../firebase';
-import { useAuth } from '../authentication';
 import { useHistory, useLocation } from 'react-router';
 import firebase from 'firebase/app';
 import SearchResultModal from '../components/SearchResultModal';
-import { add as AddIcon, bookSharp, star, starOutline } from 'ionicons/icons';
+import { bookSharp } from 'ionicons/icons';
 import './ManuallyAddBookPage.css';
 import { v4 as uuidv4 } from 'uuid';
-// import CategoriesModal from '../components/CategoriesModal';
 import takePhoto from '../components/TakePhoto';
 import handleISBNSearch from '../components/HandleISBNSearch';
-import handleTitleSearch from '../components/HandleTitleSearch';
-import handleAuthorSearch from '../components/HandleAuthorSearch';
 
 const ManuallyAddBookPage: React.FC = () => {
-  const { userID } = useAuth();
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [data, setData] = useState(null);
@@ -103,12 +95,9 @@ const ManuallyAddBookPage: React.FC = () => {
     locationTitleData.state as { thumbnailUrl?: string }
   )?.thumbnailUrl;
   const language = (locationTitleData.state as { language?: string })?.language;
-  // const notesSearch = (locationTitleData.state as { notes?: string })?.notes;
   const purchaseDateSearch = (
     locationTitleData.state as { purchaseDate?: string }
   )?.purchaseDate;
-  // const ratingSearch = (locationTitleData.state as { rating?: number })?.rating;
-  // const reviewSearch = (locationTitleData.state as { review?: string })?.review;
 
   useEffect(() => {
     if (locationISBNData.state?.isbn) {
@@ -129,9 +118,6 @@ const ManuallyAddBookPage: React.FC = () => {
         setThumbnailUrl,
         setBookSelected,
         setLanguage,
-        // setNotes,
-        // setRating,
-        // setReview,
         setPurchaseDate,
         setShowToast,
         setModalData
@@ -146,16 +132,10 @@ const ManuallyAddBookPage: React.FC = () => {
       setPages(pagesSearch);
       setReleaseDate(releaseDateSearch);
       setCategory(category);
-      // setCategory((oldCategories) =>
-      //   Array.from(new Set([...oldCategories, ...(categories.flat() || [])]))
-      // );
       setEdition(editionSearch);
       setThumbnailUrl(thumbnailUrlSearch);
       setLanguage(language);
-      // setNotes(notesSearch);
       setPurchaseDate(purchaseDateSearch);
-      // setRating(ratingSearch || 0);
-      // setReview(reviewSearch);
       setBookSelected(true);
       const isbn13Obj = selectedBook.industryIdentifiers?.find(
         (identifier: any) => identifier.type === 'ISBN_13'
@@ -167,44 +147,37 @@ const ManuallyAddBookPage: React.FC = () => {
   }, [location, selectedBook]);
 
   const handleAddBook = async () => {
-    console.log('handleAddBook function called');
+    // console.log('handleAddBook function called');
     const booksRef = firestore.collection('books');
+    // const booksRef1 = firestore.collection('books').doc(selectedBook?.id);
+    // const bookDoc = await booksRef1;
     const newBookRef = {
       title: titleData || title || '',
       author: authorData || author || authorDataRef.current || '',
-      location: location || '',
-      // categories: categories || [],
-      tags: tags || [],
+      categories: categories || [],
       languages: languages || [],
       publisher: publisher || '',
       description: description || '',
-      // review: review || '',
       pages: pages || 0,
       releaseDate: releaseDate || null,
-      purchaseDate: purchaseDate || null,
-      edition: edition || '',
-      // notes: notes || '',
-      // rating: rating || 0,
       isbn: isbnData || isbn || isbnDataRef.current || '',
     };
-    const bookRef = await booksRef.add(newBookRef);
-    console.log('newBookRef: ', newBookRef);
-    // Clearing the fields
-    // setTitle('');
-    // setAuthor('');
-    // setLocation('');
-    // setCategory([]);
-    // setTags('');
-    // setLanguage('');
-    // setPublisher('');
-    // setDescription('');
-    // setReview('');
-    // setPages('0');
-    // setReleaseDate(null);
-    // setPurchaseDate(null);
-    // setEdition('');
-    // setNotes('');
-    // setRating(0);
+    const bookSnapshot = await booksRef
+      .where('isbn', '==', newBookRef.isbn)
+      .get();
+
+    let bookId;
+
+    // If a book with the same ISBN is found, use its ID
+    if (!bookSnapshot.empty) {
+      bookId = bookSnapshot.docs[0].id;
+    } else {
+      // Otherwise, add the book to the 'books' collection and get the created document
+      const bookDocRef = await booksRef.add(newBookRef);
+
+      // Get the ID of the created document
+      bookId = bookDocRef.id;
+    }
 
     const userID = firebase.auth().currentUser?.uid;
     console.log('userID book: ', userID);
@@ -212,19 +185,23 @@ const ManuallyAddBookPage: React.FC = () => {
       console.error('No user is currently logged in.');
       return;
     }
-    console.log('bookRef1: ', bookRef);
+    // console.log('bookRef1: ', bookRef);
 
-    if (!bookRef || !bookRef.id) {
-      console.error(
-        'bookRef is not a document reference or bookRef.id is undefined.'
-      );
-      return;
-    }
+    // if (!bookRef || !bookRef.id) {
+    //   console.error(
+    //     'bookRef is not a document reference or bookRef.id is undefined.'
+    //   );
+    //   return;
+    // }
 
     const newUserBooksRef = {
-      userID,
-      bookID: bookRef.id,
+      userID: userID,
+      bookID: bookId,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      location: location || '',
+      purchaseDate: purchaseDate || null,
+      edition: edition || '',
+      tags: tags || [],
     };
     // write function that adds the books to the userBooks collection for the current user
     const userBooksRefa = firestore.collection('userBooks');
@@ -237,7 +214,7 @@ const ManuallyAddBookPage: React.FC = () => {
     }
     // firebase.firestore().collection('userBooks').add(userBooksRef);
 
-    console.log('bookRef: ', bookRef);
+    // console.log('bookRef: ', bookRef);
     // history.goBack();
     history.push('/my/library');
   };
@@ -252,21 +229,11 @@ const ManuallyAddBookPage: React.FC = () => {
     setPublisher(book.volumeInfo.publisher);
     setPages(book.volumeInfo.pageCount);
     setReleaseDate(book.volumeInfo.publishedDate);
-    setCategory((oldCategories) =>
-      Array.from(
-        new Set([
-          ...oldCategories,
-          ...(book.volumeInfo.categories ? [book.volumeInfo.categories] : []),
-        ])
-      )
-    );
+    setCategory(book.volumeInfo.categories);
     setEdition(book.volumeInfo.edition);
     setThumbnailUrl(book.volumeInfo.imageLinks?.thumbnail);
     setLanguage(book.volumeInfo.language);
-    // setNotes(book.volumeInfo.notes);
     setPurchaseDate(book.volumeInfo.purchaseDate);
-    // setRating(book.volumeInfo.rating);
-    // setReview(book.volumeInfo.review);
     setShowModal(false);
     setBookSelected(true);
 
@@ -277,22 +244,6 @@ const ManuallyAddBookPage: React.FC = () => {
       setIsbnData(isbn13Obj.identifier);
     }
   };
-
-  const handleAddCategory = (newCategory) => {
-    if (newCategory.trim() !== '') {
-      setCategory((prevCategories) => [...prevCategories, newCategory]);
-      console.log('categories: ', [...categories, newCategory]);
-      setNewCategory(''); // Clear the input field
-    }
-  };
-
-  const handleRemoveCategory = (categoryToRemove) => {
-    setCategory(categories.filter((category) => category !== categoryToRemove));
-  };
-
-  useEffect(() => {
-    console.log('categories2: ', categories);
-  }, [categories]);
 
   // const handleRatingChange = (newRating) => {
   //   setRating(newRating);
@@ -325,15 +276,6 @@ const ManuallyAddBookPage: React.FC = () => {
     }
   };
 
-  // const handleToggleChange = (categoryId: string, isChecked: boolean) => {
-  //   setCategories((prevCategories) =>
-  //     prevCategories.map((category) =>
-  //       category.id === categoryId
-  //         ? { ...category, selected: isChecked }
-  //         : category
-  //     )
-  //   );
-  // };
   return (
     <IonPage>
       <IonHeader>
@@ -456,45 +398,8 @@ const ManuallyAddBookPage: React.FC = () => {
             clearInput={true}
             onIonChange={(event) => {
               setIsbnData(event.detail.value);
-              // isbnDataRef.current = event.detail.value;
             }}
           />
-          {isbnData && (
-            // <IonButton slot='end' onClick={() => handleISBNSearch(isbnData)}>
-            //   <IonIcon icon={search} />
-            // </IonButton>
-            <IonButton
-              slot='end'
-              onClick={() =>
-                handleISBNSearch(
-                  isbnData,
-                  setTitle,
-                  setAuthor,
-                  setShowModal,
-                  setIsLoading,
-                  setData,
-                  setIsbnData,
-                  setBooks,
-                  setDescription,
-                  setPublisher,
-                  setPages,
-                  setReleaseDate,
-                  setCategory,
-                  setThumbnailUrl,
-                  setBookSelected,
-                  setLanguage,
-                  setShowToast,
-                  // setNotes,
-                  setPurchaseDate,
-                  // setRating,
-                  // setReview,
-                  setModalData
-                )
-              }
-            >
-              <IonIcon icon={search} />
-            </IonButton>
-          )}
         </IonItem>
         <SearchResultModal
           isOpen={showModal}
@@ -513,39 +418,6 @@ const ManuallyAddBookPage: React.FC = () => {
               titleDataRef.current = event.detail.value;
             }}
           />
-          {titleData && (
-            <IonButton
-              slot='end'
-              onClick={() =>
-                handleTitleSearch(
-                  titleData,
-                  setTitle,
-                  setAuthor,
-                  setShowModal,
-                  setIsLoading,
-                  setData,
-                  setIsbnData,
-                  setBooks,
-                  setDescription,
-                  setPublisher,
-                  setPages,
-                  setReleaseDate,
-                  setCategory,
-                  setThumbnailUrl,
-                  setBookSelected,
-                  setLanguage,
-                  setShowToast,
-                  // setNotes,
-                  setPurchaseDate,
-                  // setRating,
-                  // setReview,
-                  setModalData
-                )
-              }
-            >
-              <IonIcon icon={search} />
-            </IonButton>
-          )}
         </IonItem>
         <SearchResultModal
           isOpen={showModal}
@@ -561,42 +433,8 @@ const ManuallyAddBookPage: React.FC = () => {
             value={authorData}
             onIonChange={(event) => {
               setAuthorData(event.detail.value);
-              // authorDataRef.current = event.detail.value;
             }}
           />
-          {authorData && (
-            <IonButton
-              slot='end'
-              onClick={() =>
-                handleAuthorSearch(
-                  authorData,
-                  setTitle,
-                  setAuthor,
-                  setShowModal,
-                  setIsLoading,
-                  setData,
-                  setIsbnData,
-                  setBooks,
-                  setDescription,
-                  setPublisher,
-                  setPages,
-                  setReleaseDate,
-                  setCategory,
-                  setThumbnailUrl,
-                  setBookSelected,
-                  setLanguage,
-                  // setNotes,
-                  setPurchaseDate,
-                  // setRating,
-                  // setReview,
-                  setShowToast,
-                  setModalData
-                )
-              }
-            >
-              <IonIcon icon={search} />
-            </IonButton>
-          )}
         </IonItem>
         <SearchResultModal
           isOpen={showModal}
@@ -631,7 +469,7 @@ const ManuallyAddBookPage: React.FC = () => {
             clearInput={true}
             debounce={1000}
             value={tags}
-            onIonChange={(event) => setTags(event.detail.value)}
+            onIonInput={(event) => setTags(event.detail.value)}
           />
         </IonItem>
         <IonItem onClick={() => setShowPopover(true)}>
@@ -684,49 +522,15 @@ const ManuallyAddBookPage: React.FC = () => {
                   onIonChange={(event) => setDescription(event.detail.value)}
                 ></IonTextarea>
               </IonItem>
-              {/* <IonItem>
-          <IonInput
-            label='Categories'
-            labelPlacement='stacked'
-            debounce={1000}
-            value={categories}
-            onIonChange={(event) => setCategory(event.detail.value)}
-          />
-        </IonItem> */}
               <IonItem>
                 <IonInput
-                  label='Categories'
+                  label='Genres'
                   labelPlacement='stacked'
-                  clearInput={true}
-                  // debounce={1000}
-                  value={newCategory}
-                  onIonChange={(event) => setNewCategory(event.detail.value)}
-                  // onIonBlur={() => handleAddCategory(newCategory)}
+                  debounce={1000}
+                  value={categories.join(',')}
+                  onIonChange={(event) => setCategory([event.detail.value])}
                 />
-                {/* <IonButton
-                  slot='end'
-                  onClick={() => {
-                    handleAddCategory(newCategory);
-                    // setShowModal(true);
-                  }}
-                >
-                  <IonIcon icon={AddIcon} />
-                </IonButton> */}
               </IonItem>
-              {/* <IonList>
-                {categories.map((category, index) => (
-                  <IonItem key={index}>
-                    <IonLabel>{category}</IonLabel>
-
-                    <IonButton
-                      // style={{ color: 'red' }}
-                      onClick={() => handleRemoveCategory(category)}
-                    >
-                      Remove
-                    </IonButton>
-                  </IonItem>
-                ))}
-              </IonList> */}
               <IonItem>
                 <IonInput
                   label='Pages'
