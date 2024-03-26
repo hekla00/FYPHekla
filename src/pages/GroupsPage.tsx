@@ -43,6 +43,7 @@ import {
   book,
   ellipsisHorizontalCircleOutline,
   exit,
+  person,
 } from 'ionicons/icons';
 import { fetchMembersData } from '../functions/GroupsHelper';
 import { fetchBookBasedOnBookID } from '../functions/BooksHelper';
@@ -75,10 +76,12 @@ const GroupsPage: React.FC = () => {
     history.push('/my/groupcreation');
   };
 
-  const handleAddMemberClick = () => {
+  const handleAddMemberClick = (groupId) => {
     setShowPopover({ open: false, event: undefined });
-    if (selectedGroup) {
-      history.push('/my/addmember');
+    // const groupId = useParams().groupId;
+    const group = groups.find((group) => group.id === groupId);
+    if (group) {
+      history.push(`/my/addmember/${group.id}`);
     } else {
       console.log('No group selected');
     }
@@ -236,10 +239,10 @@ const GroupsPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        {/* <IonToolbar>
+        <IonToolbar>
           {groups.length !== 1 && <IonTitle>My Groups</IonTitle>}
-          {groups.length === 1 && <IonTitle>{groups[0]?.name}</IonTitle>} */}
-        <div className='header-container-groups'>
+          {groups.length === 1 && <IonTitle>{groups[0]?.name}</IonTitle>}
+          {/* <div className='header-container-groups'> */}
           <IonButtons
             // slot='end'
             onClick={(e) =>
@@ -260,7 +263,9 @@ const GroupsPage: React.FC = () => {
             }
           >
             <IonList>
-              <IonItem onClick={handleAddMemberClick}>
+              <IonItem
+                onClick={() => handleAddMemberClick(selectedGroup.groupId)}
+              >
                 <IonIcon slot='end' icon={personAdd}></IonIcon>
                 <IonLabel>Add Member</IonLabel>
               </IonItem>
@@ -270,14 +275,14 @@ const GroupsPage: React.FC = () => {
                 <IonLabel>Create Group</IonLabel>
               </IonItem>
 
-              <IonItem onClick={handleLeaveGroup}>
+              <IonItem onClick={() => handleLeaveGroup(selectedGroup.groupId)}>
                 <IonIcon slot='end' icon={exit}></IonIcon>
                 <IonLabel>Leave Group</IonLabel>
               </IonItem>
             </IonList>
           </IonPopover>
-        </div>
-        {/* </IonToolbar> */}
+          {/* </div> */}
+        </IonToolbar>
       </IonHeader>
       <IonContent>
         {groups.length > 1 && (
@@ -293,67 +298,75 @@ const GroupsPage: React.FC = () => {
             ))}
           </IonSegment>
         )}
+
         <IonRow>
           <IonCol>
             <IonListHeader>
               <IonLabel className='header-label'>Recent Reviews</IonLabel>
             </IonListHeader>
-            {reviewsData.length > 0 ? (
-              reviewsData.slice(0, 1).map((memberReviews, memberIndex) => (
-                <div key={memberIndex}>
-                  {memberReviews
-                    .filter(
-                      (review) =>
-                        review.review !== undefined && review.book !== undefined
-                    )
-                    .map((review, bookIndex) =>
-                      review.book?.id ? (
-                        <IonRouterLink
-                          routerLink={`/my/books/view/${review.book.id}`}
-                          key={bookIndex}
-                        >
-                          <IonCard className='card-groups'>
-                            <div className='card-header'>
-                              <IonCardTitle className='small-title'>
-                                {review.book?.title}
-                              </IonCardTitle>
+            <div style={{ maxHeight: '200px', overflow: 'auto' }}>
+              {reviewsData.length > 0 ? (
+                reviewsData.slice(0, 2).map((memberReviews, memberIndex) => (
+                  <div key={memberIndex}>
+                    {memberReviews
+                      .filter(
+                        (review) =>
+                          review.review !== undefined &&
+                          review.book !== undefined
+                      )
+                      .map((review, bookIndex) =>
+                        review.book?.id ? (
+                          <IonRouterLink
+                            routerLink={`/my/books/view/${review.book.id}`}
+                            key={bookIndex}
+                          >
+                            <IonCard className='card-groups'>
+                              <div className='card-header'>
+                                <IonCardTitle className='small-title'>
+                                  {review.book?.title}
+                                </IonCardTitle>
 
-                              <div className='rating-container'>
-                                {[1, 2, 3, 4, 5].map((starNumber) => (
-                                  <IonIcon
-                                    key={starNumber}
-                                    icon={
-                                      starNumber <= review.review?.rating
-                                        ? star
-                                        : starOutline
-                                    }
-                                    className='rating-star'
-                                  />
-                                ))}
+                                <div className='rating-container'>
+                                  {[1, 2, 3, 4, 5].map((starNumber) => (
+                                    <IonIcon
+                                      key={starNumber}
+                                      icon={
+                                        starNumber <= review.review?.rating
+                                          ? star
+                                          : starOutline
+                                      }
+                                      className='rating-star'
+                                    />
+                                  ))}
+                                </div>
                               </div>
-                            </div>
 
-                            <IonCardTitle className='username'>
-                              {review.user?.firstName || review.user?.email}
-                            </IonCardTitle>
-                            <IonCardContent className='card-content'>
-                              {review.review?.review}
-                            </IonCardContent>
-                          </IonCard>
-                        </IonRouterLink>
-                      ) : null
-                    )}
-                </div>
-              ))
-            ) : (
-              <IonCard className='card-groups'>
-                <div className='card-header'>
-                  <IonCardTitle className='small-title'>
-                    No reviews available
-                  </IonCardTitle>
-                </div>
-              </IonCard>
-            )}
+                              <IonCardTitle className='username'>
+                                <IonIcon
+                                  icon={person}
+                                  style={{ paddingRight: '3px' }}
+                                ></IonIcon>
+                                {review.user?.firstName || review.user?.email}
+                              </IonCardTitle>
+                              <IonCardContent className='card-content'>
+                                {review.review?.review}
+                              </IonCardContent>
+                            </IonCard>
+                          </IonRouterLink>
+                        ) : null
+                      )}
+                  </div>
+                ))
+              ) : (
+                <IonCard className='card-groups'>
+                  <div className='card-header'>
+                    <IonCardTitle className='small-title'>
+                      No reviews available
+                    </IonCardTitle>
+                  </div>
+                </IonCard>
+              )}
+            </div>
           </IonCol>
         </IonRow>
         <IonRow>
@@ -361,17 +374,19 @@ const GroupsPage: React.FC = () => {
             <IonListHeader>
               <IonLabel className='header-label'>Members</IonLabel>
             </IonListHeader>
-            <IonList lines='full'>
-              {/* Display the members */}
-              {membersData.map((member, index) => (
-                <IonItem key={index}>
-                  <IonAvatar slot='start'>
-                    <img src={member.profile || '/placeholder1.jpg'} />
-                  </IonAvatar>
-                  <IonLabel>{member.email}</IonLabel>
-                </IonItem>
-              ))}
-            </IonList>
+            <div style={{ maxHeight: '100px', overflow: 'auto' }}>
+              <IonList lines='full'>
+                {/* Display the members */}
+                {membersData.map((member, index) => (
+                  <IonItem key={index}>
+                    <IonAvatar slot='start'>
+                      <img src={member.profile || '/placeholder1.jpg'} />
+                    </IonAvatar>
+                    <IonLabel>{member.email}</IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
+            </div>
           </IonCol>
         </IonRow>
         <IonRow>
@@ -399,23 +414,27 @@ const GroupsPage: React.FC = () => {
             </div>
           </IonCol>
         </IonRow>
-        {/* <IonFab vertical='bottom' horizontal='end' slot='fixed'>
+        <IonFab vertical='bottom' horizontal='end' slot='fixed'>
           <IonFabButton>
             <IonIcon icon={chevronUpCircle}></IonIcon>
           </IonFabButton>
           <IonFabList side='top'>
-            <IonFabButton onClick={handleAddMemberClick}>
+            <IonFabButton
+              onClick={() => handleAddMemberClick(selectedGroup.groupId)}
+            >
               <IonIcon icon={personAdd}></IonIcon>
             </IonFabButton>
             <IonFabButton onClick={handleCreateGroup}>
               <IonIcon icon={add}></IonIcon>
             </IonFabButton>
-            <IonFabButton onClick={handleLeaveGroup}>
+            {/* <IonFabButton
+              onClick={() => handleLeaveGroup(selectedGroup.groupId)}
+            >
               <IonIcon icon={exit}></IonIcon>
             </IonFabButton> */}
-        {/* <LeaveGroup groupId={groupId} /> */}
-        {/* </IonFabList>
-        </IonFab> */}
+            <LeaveGroup groupId={selectedGroup.groupId} />
+          </IonFabList>
+        </IonFab>
       </IonContent>
     </IonPage>
   );

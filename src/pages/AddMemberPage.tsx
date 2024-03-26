@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   IonPage,
   IonHeader,
@@ -10,32 +11,31 @@ import {
 } from '@ionic/react';
 import firebase from 'firebase/app';
 import AddMemberForm from '../components/AddMemberForm';
+// import { useParams } from 'react-router-dom';
+
+interface RouteParams {
+  groupId: string;
+}
 
 const AddMemberPage = () => {
+  const { groupId } = useParams<RouteParams>();
   const firestore = firebase.firestore();
-  const [groupId, setGroupId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGroupId = async () => {
-      const userUid = firebase.auth().currentUser.uid;
-
-      // Query the 'groups' collection where the 'members' array contains the current user's ID
+    const fetchGroup = async () => {
       const groupSnapshot = await firestore
         .collection('groups')
-        .where('members', 'array-contains', userUid)
+        .doc(groupId)
         .get();
 
-      if (!groupSnapshot.empty) {
-        // If the user is part of multiple groups, this will get the ID of the first group in the query results
-        const groupId = groupSnapshot.docs[0].id;
-        setGroupId(groupId);
+      if (groupSnapshot.exists) {
         setLoading(false);
       }
     };
 
-    fetchGroupId();
-  }, [firestore]);
+    fetchGroup();
+  }, [firestore, groupId]);
 
   if (loading) {
     return <div>Loading...</div>;

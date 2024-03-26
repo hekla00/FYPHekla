@@ -143,6 +143,7 @@ const AppTabs: React.FC = () => {
         /> */}
 
         <Route path='/my/addmember' component={AddMemberPage} exact={true} />
+        <Route path='/my/addmember/:groupId' component={AddMemberPage} />
         <Route path='/my/wishlist' component={WishlistPage} exact={true} />
         <Route
           path='/my/barcodeScanner'
