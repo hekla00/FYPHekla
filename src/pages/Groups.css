@@ -90,3 +90,12 @@
   width: 50px; /* adjust as needed */
   height: 50px; /* adjust as needed */
 }
+.header-container-groups {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 10px;
+  padding-top: 50px;
+  align-items: center;
+  width: 100%;
+  /* padding: 0.75rem 1.25rem; */
+}

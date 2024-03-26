@@ -201,23 +201,29 @@ const LibraryPage: React.FC = () => {
 
   useEffect(() => {
     console.log('searchQuery:', searchQuery);
+    const currentUserId = firebase.auth().currentUser?.uid; // Get the current user's ID
     const nonNullBooks = allBooks.filter((book) => book !== null);
-    const filteredBooks = nonNullBooks.filter(
-      (book) =>
-        (book &&
-          book.title &&
-          book.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          book.categories) ||
-        (book.categories == null &&
-          (selectedLocation.length > 0
-            ? selectedLocation.includes(book.location)
-            : true)) ||
-        (selectedLocation == null &&
-          (selectedTag.length > 0
-            ? book.tags.some((tag) => selectedTag.includes(tag))
-            : true)) ||
-        selectedTag == null
-    );
+    const filteredBooks = nonNullBooks
+      .filter(
+        (book) =>
+          (book &&
+            book.title &&
+            book.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            book.categories) ||
+          (book.categories == null &&
+            (selectedLocation.length > 0
+              ? selectedLocation.includes(book.location)
+              : true)) ||
+          (selectedLocation == null &&
+            (selectedTag.length > 0
+              ? book.tags.some((tag) => selectedTag.includes(tag))
+              : true)) ||
+          selectedTag == null
+      )
+      .map((book) => ({
+        ...book,
+        isOwnedByCurrentUser: book.owner === currentUserId,
+      }));
 
     setFilteredBooks(filteredBooks);
   }, [allBooks, selectedLocation, selectedCategory, selectedTag, searchQuery]);
@@ -323,9 +329,61 @@ const LibraryPage: React.FC = () => {
   };
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle slot='start'>Library</IonTitle>
+      <IonHeader className='header-padding'>
+        {/* <IonToolbar> */}
+        {/* <IonTitle slot='start'>Library</IonTitle> */}
+        {/* </IonToolbar> */}
+      </IonHeader>
+      <IonContent className='ion-padding'>
+        <IonSegment
+          value={selectedSegment}
+          onIonChange={handleSegmentChange}
+          scrollable
+        >
+          <IonSegmentButton value='all'>
+            <IonLabel>All</IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton value='mine'>
+            <IonLabel>My Books</IonLabel>
+          </IonSegmentButton>
+          {groups.map((group, index) => (
+            <IonSegmentButton
+              value={group.id}
+              key={index}
+              onClick={() => handleGroupChange(group.id)}
+            >
+              <IonLabel>{group.name}</IonLabel>
+            </IonSegmentButton>
+          ))}
+        </IonSegment>
+        <div className='search-filter-container'>
+          <IonSearchbar
+            placeholder='Search for books'
+            value={searchQuery}
+            onIonInput={(e) => {
+              const term = e.detail.value || '';
+              setSearchQuery(term);
+              if (term) {
+                const nonNullBooks = allBooks.filter((book) => book !== null);
+                const newFilteredBooks = nonNullBooks.filter(
+                  (book) =>
+                    book.title &&
+                    book.categories &&
+                    (selectedLocation.length > 0
+                      ? selectedLocation.includes(book.location)
+                      : true) &&
+                    (selectedTag.length > 0
+                      ? book.tags.some((tag) => selectedTag.includes(tag))
+                      : true) &&
+                    book.title.toLowerCase().includes(term.toLowerCase())
+                );
+                setFilteredBooks(newFilteredBooks);
+              } else {
+                setFilteredBooks(allBooks);
+              }
+            }}
+            onIonClear={() => setFilteredBooks(allBooks)}
+          />
           <IonLabel
             className='ion-padding'
             slot='end'
@@ -452,57 +510,7 @@ const LibraryPage: React.FC = () => {
               )}
             </IonList>
           </IonPopover>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className='ion-padding'>
-        <IonSegment
-          value={selectedSegment}
-          onIonChange={handleSegmentChange}
-          scrollable
-        >
-          <IonSegmentButton value='all'>
-            <IonLabel>All</IonLabel>
-          </IonSegmentButton>
-          <IonSegmentButton value='mine'>
-            <IonLabel>My Books</IonLabel>
-          </IonSegmentButton>
-          {groups.map((group, index) => (
-            <IonSegmentButton
-              value={group.id}
-              key={index}
-              onClick={() => handleGroupChange(group.id)}
-            >
-              <IonLabel>{group.name}</IonLabel>
-            </IonSegmentButton>
-          ))}
-        </IonSegment>
-        <IonSearchbar
-          placeholder='Search for books'
-          value={searchQuery}
-          onIonInput={(e) => {
-            const term = e.detail.value || '';
-            setSearchQuery(term);
-            if (term) {
-              const nonNullBooks = allBooks.filter((book) => book !== null);
-              const newFilteredBooks = nonNullBooks.filter(
-                (book) =>
-                  book.title &&
-                  book.categories &&
-                  (selectedLocation.length > 0
-                    ? selectedLocation.includes(book.location)
-                    : true) &&
-                  (selectedTag.length > 0
-                    ? book.tags.some((tag) => selectedTag.includes(tag))
-                    : true) &&
-                  book.title.toLowerCase().includes(term.toLowerCase())
-              );
-              setFilteredBooks(newFilteredBooks);
-            } else {
-              setFilteredBooks(allBooks);
-            }
-          }}
-          onIonClear={() => setFilteredBooks(allBooks)}
-        />
+        </div>
         {isLoading ? (
           <IonSpinner />
         ) : (

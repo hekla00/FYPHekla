@@ -14,6 +14,7 @@ import {
   IonDatetime,
   IonDatetimeButton,
   IonToast,
+  IonPopover,
 } from '@ionic/react';
 import firebase from 'firebase/app';
 import BookDisplay from './BookDisplay';
@@ -25,6 +26,14 @@ function Loans({ showModal, setShowModal, book, userID }) {
   const db = firebase.firestore();
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [showStartDatePopover, setShowStartDatePopover] = useState({
+    isOpen: false,
+    event: undefined,
+  });
+  const [showEndDatePopover, setShowEndDatePopover] = useState({
+    isOpen: false,
+    event: undefined,
+  });
   const [selectedStartDate, setSelectedStartDate] = useState<
     string | undefined
   >(undefined);
@@ -32,21 +41,22 @@ function Loans({ showModal, setShowModal, book, userID }) {
     undefined
   );
   const [showErrorToast, setShowErrorToast] = useState(false);
-  const startDateTimestamp = selectedStartDate
-    ? firebase.firestore.Timestamp.fromDate(new Date(selectedStartDate))
-    : null;
-  const endDateTimestamp = selectedEndDate
-    ? firebase.firestore.Timestamp.fromDate(new Date(selectedEndDate))
-    : null;
 
   const confirm = async () => {
     const bookID = book.id;
+    const startDateTimestamp = selectedStartDate
+      ? firebase.firestore.Timestamp.fromDate(new Date(selectedStartDate))
+      : null;
+    const endDateTimestamp = selectedEndDate
+      ? firebase.firestore.Timestamp.fromDate(new Date(selectedEndDate))
+      : null;
     await db.collection('bookLoans').add({
       bookID,
       userID,
       contactName,
       startDate: startDateTimestamp,
       endDate: endDateTimestamp,
+      loaned: true,
     });
 
     setShowModal(false);
@@ -96,39 +106,53 @@ function Loans({ showModal, setShowModal, book, userID }) {
 
         <IonItem>
           <IonLabel position='stacked'>Start Date</IonLabel>
-          <IonButton onClick={() => setShowStartDatePicker(true)}>
+          <IonButton
+            onClick={(e) =>
+              setShowStartDatePopover({ isOpen: true, event: e.nativeEvent })
+            }
+          >
             {selectedStartDate
               ? new Date(selectedStartDate).toLocaleDateString()
               : 'Select Start Date'}
           </IonButton>
+          <IonPopover
+            isOpen={showStartDatePopover.isOpen}
+            event={showStartDatePopover.event}
+            onDidDismiss={() =>
+              setShowStartDatePopover({ isOpen: false, event: undefined })
+            }
+          >
+            <IonDatetime
+              value={selectedStartDate}
+              onIonChange={handleStartDateChange}
+            />
+          </IonPopover>
         </IonItem>
-        <IonModal
-          isOpen={showStartDatePicker}
-          onDidDismiss={() => setShowStartDatePicker(false)}
-        >
-          <IonDatetime
-            value={selectedStartDate}
-            onIonChange={handleStartDateChange}
-          />
-        </IonModal>
 
         <IonItem>
           <IonLabel position='stacked'>End Date</IonLabel>
-          <IonButton onClick={() => setShowEndDatePicker(true)}>
+          <IonButton
+            onClick={(e) =>
+              setShowEndDatePopover({ isOpen: true, event: e.nativeEvent })
+            }
+          >
             {selectedEndDate
               ? new Date(selectedEndDate).toLocaleDateString()
               : 'Select End Date'}
           </IonButton>
+          <IonPopover
+            isOpen={showEndDatePopover.isOpen}
+            event={showEndDatePopover.event}
+            onDidDismiss={() =>
+              setShowEndDatePopover({ isOpen: false, event: undefined })
+            }
+          >
+            <IonDatetime
+              value={selectedEndDate}
+              onIonChange={handleEndDateChange}
+            />
+          </IonPopover>
         </IonItem>
-        <IonModal
-          isOpen={showEndDatePicker}
-          onDidDismiss={() => setShowEndDatePicker(false)}
-        >
-          <IonDatetime
-            value={selectedEndDate}
-            onIonChange={handleEndDateChange}
-          />
-        </IonModal>
         <IonLabel className='ion-padding'>Book</IonLabel>
         <BookDisplay book={book} />
         <IonToast

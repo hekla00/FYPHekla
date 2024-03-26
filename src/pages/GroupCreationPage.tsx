@@ -19,9 +19,9 @@ const GroupCreationPage = ({ userUid }) => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          {/* <IonButtons slot='start'>
+          <IonButtons slot='start'>
             <IonBackButton defaultHref='/my/groups' />
-          </IonButtons> */}
+          </IonButtons>
           <IonTitle>Create Group</IonTitle>
         </IonToolbar>
       </IonHeader>

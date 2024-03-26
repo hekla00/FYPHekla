@@ -11,9 +11,18 @@ import {
   fetchThumbnailByISBN,
   fetchThumbnailByTitle,
 } from '../functions/APIHelper';
-import { bookSharp } from 'ionicons/icons';
+import {
+  bookSharp,
+  checkmarkCircleOutline,
+  share,
+  shareOutline,
+  shareSocial,
+} from 'ionicons/icons';
 import { Link } from 'react-router-dom';
-import { fetchUserSpecificInfo } from '../functions/UserHelper';
+import {
+  fetchUserSpecificInfo,
+  fetchLoanDetails,
+} from '../functions/UserHelper';
 import firebase from 'firebase/app';
 
 const BookDisplay = ({ book }) => {
@@ -21,6 +30,7 @@ const BookDisplay = ({ book }) => {
   const [userID, setUserID] = useState(null);
   const bookID = book.id;
   const [userSpecificData, setUserSpecificData] = useState(null);
+  const [loaned, setLoaned] = useState(false);
 
   //   console.log('Book isbn:', book.isbn.identifier);
 
@@ -39,6 +49,21 @@ const BookDisplay = ({ book }) => {
 
     fetchUserID();
   }, [bookID]);
+
+  useEffect(() => {
+    const fetchLoanData = async () => {
+      if (!bookID || !userID) return;
+      const data = await fetchLoanDetails(bookID, userID);
+      if (data.length > 0) {
+        console.log('Loan data:', data);
+        setLoaned(data[0].loaned);
+      } else {
+        console.log('No such document!');
+      }
+    };
+
+    fetchLoanData();
+  }, [bookID, userID]);
 
   useEffect(() => {
     const userSpecificData = async () => {
@@ -111,6 +136,7 @@ const BookDisplay = ({ book }) => {
           <div>
             <IonCardHeader>
               <IonCardTitle className='card-title'>{book?.title}</IonCardTitle>
+              {/* {loaned && <IonIcon icon={shareOutline} />} */}
             </IonCardHeader>
             <IonCardContent className='card-content'>
               {book?.author}

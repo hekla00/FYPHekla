@@ -10,6 +10,7 @@
   border-radius: 5px;
   margin-bottom: 10px;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  /* width: 100px; */
 }
 
 .IonCardHeader {
@@ -33,7 +34,7 @@
   width: 100px;
   height: 100%;
   object-fit: cover;
-  border-radius: 5px;
+  /* border-radius: 5px; */
 }
 
 .book-icon-bookdisplay {
@@ -48,4 +49,15 @@
   margin: auto;
   padding: 5px 10px;
   max-width: 40%;
+}
+
+.contact-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.loan-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

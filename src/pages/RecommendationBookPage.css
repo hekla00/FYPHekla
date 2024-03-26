@@ -21,7 +21,8 @@ ion-thumbnail {
 }
 .full-thumbnail-recom {
   width: 40%;
-  height: auto;
+  height: 100%;
+  /* height: auto; */
   object-fit: contain;
   margin-bottom: 10px;
 }

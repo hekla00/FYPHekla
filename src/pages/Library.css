@@ -12,3 +12,14 @@
   font-size: 20px;
   font-weight: bold;
 }
+.search-filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  /* padding-left: 10px; */
+}
+
+.header-padding {
+  padding: 20px;
+}

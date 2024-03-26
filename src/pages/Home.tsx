@@ -23,6 +23,7 @@ import {
   fetchNumBooks,
   fetchNumGroups,
   fetchNumBooksInWishlist,
+  fetchNumLoans,
 } from '../functions/UserHelper';
 import { fetchBooks } from '../functions/RecommendationsHelper';
 import { bookSharp } from 'ionicons/icons';
@@ -53,6 +54,7 @@ const Home: React.FC = () => {
     fetchNumBooks(setNumBooks);
     fetchNumGroups(setNumGroups);
     fetchNumBooksInWishlist(setNumBooksInWishlist);
+    fetchNumLoans(setNumLoaned);
     getBooks();
   }, []);
 
@@ -127,12 +129,12 @@ const Home: React.FC = () => {
                   <div className='card-top-home'>
                     <IonIcon icon={calendarClearSharp} />
                     <div className='card-badge-home'>
-                      <IonBadge>{numBorrowed > 0 ? numBorrowed : 0}</IonBadge>
+                      <IonBadge>{numLoaned > 0 ? numLoaned : 0}</IonBadge>
                     </div>
                   </div>
                   <div className='card-content-home'>
                     <IonCardTitle className='small-font-home'>
-                      Book Tracking
+                      Loan Tracking
                     </IonCardTitle>
                   </div>
                 </IonCardHeader>

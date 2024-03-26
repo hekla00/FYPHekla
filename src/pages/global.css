@@ -1,5 +1,5 @@
 :root {
-  --ion-background-color: #eeede7; /* The background color of the app */
+  --ion-background-color: #fbf6f0; /* The background color of the app */
   --ion-color-primary: #334040; /* The primary colour, used for the button background */
   --ion-color-primary-contrast: #ffffff; /* The contrast colour, used for the button text */
   --ion-color-primary-contrast-rgb: 255, 255, 255; /* The contrast colour in RGB format, used for the button text */
@@ -36,4 +36,18 @@ ion-text {
   font-size: 1rem;
   font-weight: 700;
   margin-bottom: 1rem;
+}
+ion-card {
+  background-color: #fefefe;
+}
+ion-header {
+  background-color: var(--ion-background-color);
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+ion-toolbar {
+  --background: #fefefe;
 }

@@ -21,6 +21,9 @@ import {
   IonFabButton,
   IonFabList,
   IonModal,
+  IonInput,
+  IonCardSubtitle,
+  IonToast,
 } from '@ionic/react';
 import {
   add,
@@ -34,6 +37,8 @@ import {
   bookSharp,
   trash as trashIcon,
   star,
+  arrowBackCircle,
+  checkmarkCircle,
 } from 'ionicons/icons';
 import './Home.css';
 import { useParams, useRouteMatch } from 'react-router';
@@ -50,6 +55,8 @@ import { fetchReview, fetchNotes } from '../functions/RatingsReviewHelper';
 import { handleDelete } from '../functions/BooksHelper';
 import { useLocation } from 'react-router-dom';
 import Loans from '../components/Loans';
+import { fetchLoanDetails, returnBook } from '../functions/UserHelper';
+
 interface RouteParams {
   id: string;
 }
@@ -70,6 +77,7 @@ const BookPage: React.FC = () => {
   const [userOwnsBook, setUserOwnsBook] = useState(false);
   const thumbnail = (location.state as { thumbnail?: string })?.thumbnail;
   const bookFromLocation = (location.state as { book?: typeof book })?.book;
+  const [loanDetails, setLoanDetails] = useState([]);
   const userSpecificData = (location.state as { userSpecificData?: any })
     ?.userSpecificData;
   const [showPopover, setShowPopover] = useState<{
@@ -79,7 +87,7 @@ const BookPage: React.FC = () => {
     open: false,
     event: undefined,
   });
-
+  const [showToast, setShowToast] = useState(false);
   let year;
   if (book?.releaseDate) {
     year = book?.releaseDate.split('-')[0];
@@ -92,6 +100,7 @@ const BookPage: React.FC = () => {
     const currentUser = firebase.auth().currentUser;
     fetchReview(currentUser?.uid, id, setRating, setReview);
     fetchNotes(currentUser?.uid, id, setNotes);
+
     if (currentUser) {
       // Reference to the 'userBooks' collection
       const userBooksRef = firestore.collection('userBooks');
@@ -108,9 +117,11 @@ const BookPage: React.FC = () => {
               .doc(id)
               .get()
               .then((bookDoc) => {
-                // Set the 'book' state to the fetched book
                 setBook(toBook(bookDoc));
                 setUserOwnsBook(true);
+                fetchLoanDetails(id, currentUser.uid).then((details) => {
+                  setLoanDetails(details);
+                });
               });
           } else {
             console.log("The book does not exist in the user's books");
@@ -267,6 +278,37 @@ const BookPage: React.FC = () => {
             <IonCardContent className='IonCardContent'>{notes}</IonCardContent>
           </IonCard>
         ) : null}
+        {userOwnsBook &&
+          loanDetails.map((loan, index) => (
+            <IonCard key={index} className='IonCard'>
+              <IonCardHeader className='IonCardHeader'>Loans</IonCardHeader>
+              <IonCardContent>
+                <div className='loan-details'>
+                  <span className='contact-name'>
+                    {loan.contactName || 'Unknown'}
+                  </span>
+                  {loan.loaned ? (
+                    <button
+                      onClick={() =>
+                        returnBook(book.id, currentUser.uid, () =>
+                          setShowToast(true)
+                        )
+                      }
+                    >
+                      <IonIcon icon={arrowBackCircle} /> Loaned
+                    </button>
+                  ) : (
+                    <p>
+                      <IonIcon icon={checkmarkCircle} /> Returned
+                    </p>
+                  )}
+                </div>
+                {/* <br /> */}
+                {loan.startDate?.toDate().toLocaleDateString()} -{' '}
+                {loan.endDate?.toDate().toLocaleDateString()}
+              </IonCardContent>
+            </IonCard>
+          ))}
         <IonCard className='IonCard'>
           <IonCardHeader className='IonCardHeader'>Purchase Date</IonCardHeader>
           <IonCardContent className='IonCardContent'>
@@ -316,6 +358,12 @@ const BookPage: React.FC = () => {
             userID={currentUser?.uid}
           />
         </IonModal>
+        <IonToast
+          isOpen={showToast}
+          onDidDismiss={() => setShowToast(false)}
+          message='Book returned successfully.'
+          duration={2000}
+        />
       </IonContent>
     </IonPage>
   );

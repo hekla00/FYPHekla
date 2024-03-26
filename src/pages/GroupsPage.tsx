@@ -233,11 +233,12 @@ const GroupsPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar>
+        {/* <IonToolbar>
           {groups.length !== 1 && <IonTitle>My Groups</IonTitle>}
-          {groups.length === 1 && <IonTitle>{groups[0]?.name}</IonTitle>}
+          {groups.length === 1 && <IonTitle>{groups[0]?.name}</IonTitle>} */}
+        <div className='header-container-groups'>
           <IonButtons
-            slot='end'
+            // slot='end'
             onClick={(e) =>
               setShowPopover({ open: true, event: e.nativeEvent })
             }
@@ -272,7 +273,8 @@ const GroupsPage: React.FC = () => {
               </IonItem>
             </IonList>
           </IonPopover>
-        </IonToolbar>
+        </div>
+        {/* </IonToolbar> */}
       </IonHeader>
       <IonContent>
         {groups.length > 1 && (

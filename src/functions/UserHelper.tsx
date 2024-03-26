@@ -24,6 +24,16 @@ export const fetchNumGroups = async (setNumGroups) => {
   setNumGroups(snapshot.size);
 };
 
+export const fetchNumLoans = async (setNumLoans) => {
+  const userId = firebase.auth().currentUser?.uid;
+  const snapshot = await firebase
+    .firestore()
+    .collection('bookLoans')
+    .where('userID', '==', userId)
+    .get();
+  setNumLoans(snapshot.size);
+};
+
 export const fetchAllUserBooks = async (setIsLoading, setAllBooks) => {
   setIsLoading(true);
   try {
@@ -216,6 +226,9 @@ export const fetchSelectedGroupBooks = async (
 };
 
 export const fetchUserSpecificInfo = async (bookID, userID) => {
+  if (!bookID || !userID) {
+    throw new Error('bookID and userID must be defined');
+  }
   const userBookSnapshot = await db
     .collection('userBooks')
     .where('userID', '==', userID)
@@ -225,4 +238,34 @@ export const fetchUserSpecificInfo = async (bookID, userID) => {
   const doc = userBookSnapshot.docs.find((doc) => doc.exists);
   return doc ? doc.data() : undefined;
   // return userBookSnapshot.docs.map((doc) => doc.data());
+};
+
+export const fetchLoanDetails = async (bookID, userID) => {
+  if (!bookID || !userID) {
+    throw new Error('bookID and userID must be defined');
+  }
+  const loanSnapshot = await db
+    .collection('bookLoans')
+    .where('userID', '==', userID)
+    .where('bookID', '==', bookID)
+    .get();
+  return loanSnapshot.docs.map((doc) => doc.data());
+};
+
+export const returnBook = async (bookID, userID, onReturn) => {
+  console.log('Returning book:', bookID, 'for user:', userID);
+  const loanSnapshot = await db
+    .collection('bookLoans')
+    .where('userID', '==', userID)
+    .where('bookID', '==', bookID)
+    .get();
+
+  if (!loanSnapshot.empty) {
+    const loanDoc = loanSnapshot.docs[0];
+    await db.collection('bookLoans').doc(loanDoc.id).update({
+      loaned: false,
+      endDate: firebase.firestore.Timestamp.now(),
+    });
+    onReturn();
+  }
 };

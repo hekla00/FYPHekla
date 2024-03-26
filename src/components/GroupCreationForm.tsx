@@ -188,6 +188,7 @@ const GroupCreationForm: React.FC<GroupCreationFormProps> = ({
                   // disabled={isLoading}
                 >
                   {/* {isLoading ? 'Creating Group...' : 'Create Group'} */}
+                  Create Group
                 </IonButton>
               </IonCol>
             </IonRow>
