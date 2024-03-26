@@ -1,3 +1,4 @@
+import firebase from 'firebase/app';
 // Place to keep all the models
 // This is a simple model for a book
 export interface Book {
@@ -14,9 +15,9 @@ export interface Book {
   languages: string[];
   description: string;
   notes: string;
-  purchaseDate: string;
+  purchaseDate: firebase.firestore.Timestamp;
   rating: number;
-  releaseDate: string;
+  releaseDate: firebase.firestore.Timestamp;
   reviews: string[];
   // thumbnailUrl: string;
 }

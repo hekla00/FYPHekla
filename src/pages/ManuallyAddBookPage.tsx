@@ -61,6 +61,20 @@ const ManuallyAddBookPage: React.FC = () => {
   const [bookSelected, setBookSelected] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [selectedPurchaseDate, setSelectedPurchaseDate] = useState<
+    string | undefined
+  >(undefined);
+  const [showPurchaseDatePopover, setShowPurchaseDatePopover] = useState({
+    isOpen: false,
+    event: undefined,
+  });
+  const [selectedReleaseDate, setSelectedReleaseDate] = useState<
+    string | undefined
+  >(undefined);
+  const [showReleaseDatePopover, setShowReleaseDatePopover] = useState({
+    isOpen: false,
+    event: undefined,
+  });
   // const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
   const locationISBNData = useLocation<{ isbn: string | null }>();
   const locationTitleData = useLocation();
@@ -125,7 +139,7 @@ const ManuallyAddBookPage: React.FC = () => {
       setPublisher(publisherSearch);
       setPages(pagesSearch);
       setReleaseDate(releaseDateSearch);
-      setCategory(category[0]);
+      setCategory(category ? category[0] : undefined);
       setEdition(editionSearch);
       setThumbnailUrl(thumbnailUrlSearch);
       setLanguage(language);
@@ -153,7 +167,11 @@ const ManuallyAddBookPage: React.FC = () => {
       publisher: publisher || '',
       description: description || '',
       pages: pages || 0,
-      releaseDate: releaseDate || null,
+      releaseDate: releaseDate
+        ? firebase.firestore.Timestamp.fromDate(new Date(releaseDate))
+        : selectedReleaseDate
+        ? firebase.firestore.Timestamp.fromDate(new Date(selectedReleaseDate))
+        : null,
       isbn: isbnData || isbn || isbnDataRef.current || '',
     };
     const bookSnapshot = await booksRef
@@ -193,7 +211,9 @@ const ManuallyAddBookPage: React.FC = () => {
       bookID: bookId,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       location: location || '',
-      purchaseDate: purchaseDate || null,
+      purchaseDate: selectedPurchaseDate
+        ? firebase.firestore.Timestamp.fromDate(new Date(selectedPurchaseDate))
+        : null,
       edition: edition || '',
       tags: tags || [],
     };
@@ -269,7 +289,15 @@ const ManuallyAddBookPage: React.FC = () => {
   //     throw error;
   //   }
   // };
+  const handlePurchaseDateChange = (e: CustomEvent) => {
+    setSelectedPurchaseDate(e.detail.value);
+    setShowPurchaseDatePopover({ isOpen: false, event: undefined });
+  };
 
+  const handleReleaseDateChange = (e: CustomEvent) => {
+    setSelectedReleaseDate(e.detail.value);
+    setShowReleaseDatePopover({ isOpen: false, event: undefined });
+  };
   return (
     <IonPage>
       <IonHeader>
@@ -444,7 +472,35 @@ const ManuallyAddBookPage: React.FC = () => {
             onIonInput={(event) => setTags(event.detail.value)}
           />
         </IonItem>
-        <IonItem onClick={() => setShowPopover(true)}>
+        <IonItem>
+          <IonLabel position='stacked'>Purchase Date</IonLabel>
+          <IonButton
+            onClick={(e) =>
+              setShowPurchaseDatePopover({ isOpen: true, event: e.nativeEvent })
+            }
+          >
+            {selectedPurchaseDate
+              ? new Date(selectedPurchaseDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })
+              : 'Select Purchase Date'}
+          </IonButton>
+          <IonPopover
+            isOpen={showPurchaseDatePopover.isOpen}
+            event={showPurchaseDatePopover.event}
+            onDidDismiss={() =>
+              setShowPurchaseDatePopover({ isOpen: false, event: undefined })
+            }
+          >
+            <IonDatetime
+              value={selectedPurchaseDate}
+              onIonChange={handlePurchaseDateChange}
+            />
+          </IonPopover>
+        </IonItem>
+        {/* <IonItem onClick={() => setShowPopover(true)}>
           <IonInput
             labelPlacement='stacked'
             label='Purchase Date'
@@ -452,9 +508,9 @@ const ManuallyAddBookPage: React.FC = () => {
             // readonly
           />
           <IonLabel>{purchaseDate}</IonLabel>
-        </IonItem>
+        </IonItem> */}
 
-        <IonPopover
+        {/* <IonPopover
           isOpen={showPopover}
           onDidDismiss={() => setShowPopover(false)}
         >
@@ -471,7 +527,7 @@ const ManuallyAddBookPage: React.FC = () => {
               setShowPopover(false);
             }}
           />
-        </IonPopover>
+        </IonPopover> */}
         <IonAccordionGroup>
           <IonAccordion value='More'>
             <IonItem slot='header'>
@@ -506,16 +562,59 @@ const ManuallyAddBookPage: React.FC = () => {
                   onIonChange={(event) => setPages(event.detail.value)}
                 />
               </IonItem>
-              <IonItem onClick={() => setShowPopover(true)}>
+              <IonItem>
+                <IonLabel position='stacked'>Release Date</IonLabel>
+                <IonButton
+                  onClick={(e) =>
+                    setShowReleaseDatePopover({
+                      isOpen: true,
+                      event: e.nativeEvent,
+                    })
+                  }
+                >
+                  {releaseDate
+                    ? new Date(releaseDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })
+                    : selectedReleaseDate
+                    ? new Date(selectedReleaseDate).toLocaleDateString(
+                        'en-US',
+                        {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        }
+                      )
+                    : 'Select Release Date'}
+                </IonButton>
+                <IonPopover
+                  isOpen={showReleaseDatePopover.isOpen}
+                  event={showReleaseDatePopover.event}
+                  onDidDismiss={() =>
+                    setShowReleaseDatePopover({
+                      isOpen: false,
+                      event: undefined,
+                    })
+                  }
+                >
+                  <IonDatetime
+                    value={selectedReleaseDate}
+                    onIonChange={handleReleaseDateChange}
+                  />
+                </IonPopover>
+              </IonItem>
+              {/* <IonItem onClick={() => setShowPopover(true)}>
                 <IonInput
                   labelPlacement='stacked'
                   label='Release Date'
                   value={releaseDate}
                   readonly
                 />
-              </IonItem>
+              </IonItem> */}
 
-              <IonPopover
+              {/* <IonPopover
                 isOpen={showPopover}
                 onDidDismiss={() => setShowPopover(false)}
               >
@@ -529,7 +628,7 @@ const ManuallyAddBookPage: React.FC = () => {
                     setShowPopover(false);
                   }}
                 />
-              </IonPopover>
+              </IonPopover> */}
               <IonItem>
                 <IonInput
                   label='Edition'

@@ -148,14 +148,17 @@ const GroupsPage: React.FC = () => {
         const reviewIDs = userBooksSnapshot.docs.map(
           (doc) => doc.data().bookID
         );
-        const reviewsSnapshot = await db
-          .collection('bookReviews')
-          .where('bookID', 'in', reviewIDs)
-          .get();
-        const reviewsData = reviewsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        let reviewsData = [];
+        if (reviewIDs.length > 0) {
+          const reviewsSnapshot = await db
+            .collection('bookReviews')
+            .where('bookID', 'in', reviewIDs)
+            .get();
+          reviewsData = reviewsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        }
 
         const userBooksData = await Promise.all(
           userBooksSnapshot.docs.map(async (doc) => {
@@ -343,7 +346,13 @@ const GroupsPage: React.FC = () => {
                 </div>
               ))
             ) : (
-              <p className='ion-padding'>No reviews available</p>
+              <IonCard className='card-groups'>
+                <div className='card-header'>
+                  <IonCardTitle className='small-title'>
+                    No reviews available
+                  </IonCardTitle>
+                </div>
+              </IonCard>
             )}
           </IonCol>
         </IonRow>

@@ -17,20 +17,12 @@ import {
   IonToolbar,
   IonPopover,
   IonList,
-  IonFab,
-  IonFabButton,
-  IonFabList,
   IonModal,
-  IonInput,
-  IonCardSubtitle,
   IonToast,
 } from '@ionic/react';
 import {
   add,
   ellipsisHorizontalCircleOutline,
-  exit,
-  personAdd,
-  chevronUpCircle,
   starHalf,
   starOutline,
   pencil,
@@ -89,10 +81,27 @@ const BookPage: React.FC = () => {
   });
   const [showToast, setShowToast] = useState(false);
   let year;
-  if (book?.releaseDate) {
-    year = book?.releaseDate.split('-')[0];
+  let formattedDate;
+  if (book?.releaseDate instanceof firebase.firestore.Timestamp) {
+    const releaseDate = book.releaseDate.toDate();
+    year = releaseDate.getFullYear();
+    formattedDate = releaseDate.toLocaleDateString();
   } else if (bookFromLocation?.releaseDate) {
-    year = bookFromLocation?.releaseDate.split('-')[0];
+    let releaseDate;
+    if (
+      typeof bookFromLocation.releaseDate === 'string' ||
+      typeof bookFromLocation.releaseDate === 'number'
+    ) {
+      releaseDate = new Date(bookFromLocation.releaseDate);
+    } else if (
+      bookFromLocation.releaseDate instanceof firebase.firestore.Timestamp
+    ) {
+      releaseDate = bookFromLocation.releaseDate.toDate();
+    }
+    if (releaseDate) {
+      year = releaseDate.getFullYear();
+      formattedDate = releaseDate.toLocaleDateString();
+    }
   }
 
   useEffect(() => {
@@ -225,7 +234,9 @@ const BookPage: React.FC = () => {
         <div className='book-details-container-recom'>
           <div className='book-details-recom'>
             <IonLabel className='book-details'>Published</IonLabel>
-            <IonLabel className='book-publication-year-recom'>{year}</IonLabel>
+            <IonLabel className='book-publication-year-recom'>
+              {year || formattedDate}
+            </IonLabel>
           </div>
           <div className='book-details-recom'>
             <IonLabel className='book-details'>Pages</IonLabel>
@@ -314,7 +325,7 @@ const BookPage: React.FC = () => {
           <IonCardContent className='IonCardContent'>
             {/* {book?.purchaseDate || bookFromLocation?.purchaseDate}
              */}
-            {userSpecificData?.purchaseDate}
+            {userSpecificData?.purchaseDate?.toDate().toLocaleDateString()}
           </IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>
