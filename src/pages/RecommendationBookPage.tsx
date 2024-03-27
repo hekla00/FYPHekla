@@ -133,13 +133,13 @@ const RecommendationBookPage: React.FC = () => {
   }, [book]);
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonBackButton />
-          </IonButtons>
-          <IonTitle>{book?.volumeInfo?.title || book?.title}</IonTitle>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton />
+        </IonButtons>
+        {/* <IonTitle>{book?.volumeInfo?.title || book?.title}</IonTitle> */}
+        {/* </IonToolbar> */}
       </IonHeader>
       <IonContent className='ion-padding'>
         {/* {isAddedToWishlist ? (

@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react';
 import { firestore } from '../firebase';
 import logo from '../../images/logo.png';
 import logo2 from '../../images/logo2.png';
+import logoNewColorCrop from '../../images/logoNewColorCropped.png';
 import './Login.css';
 
 const RegisterPage: React.FC = () => {
@@ -84,7 +85,7 @@ const RegisterPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent className='ion-padding'>
-        <img src={logo2} alt='logo2' />
+        <img src={logoNewColorCrop} alt='logo2' />
         {/* Creating login form */}
         <IonList>
           <IonItem lines='none'>
@@ -143,7 +144,7 @@ const RegisterPage: React.FC = () => {
         </form>
         <IonButton expand='block' fill='clear' routerLink='/login'>
           Already have an account?{''}
-          <strong>Log in</strong>
+          <strong style={{ paddingLeft: '5px' }}>Log in</strong>
         </IonButton>
         <IonLoading isOpen={status.loading} />
       </IonContent>

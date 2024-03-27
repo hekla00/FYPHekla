@@ -43,15 +43,16 @@ const SearchResultModal: React.FC<SearchResultModalProps> = ({
       onDidDismiss={onClose}
       onWillDismiss={(ev) => onWillDismiss(ev)}
     >
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonButton onClick={onClose}>Cancel</IonButton>
-          </IonButtons>
-          <IonTitle>Search Results</IonTitle>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        <IonButtons className='button-padding-extra-left' slot='start'>
+          <IonButton onClick={onClose}>Cancel</IonButton>
+        </IonButtons>
+        {/* <IonTitle>Search Results</IonTitle> */}
+        {/* </IonToolbar> */}
       </IonHeader>
       <IonContent className='ion-padding'>
+        <h1 className='h1-padding-left'>Search Results</h1>
         <IonList>
           {books &&
             books.map((book, index) => (

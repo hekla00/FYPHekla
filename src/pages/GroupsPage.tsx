@@ -44,6 +44,7 @@ import {
   ellipsisHorizontalCircleOutline,
   exit,
   person,
+  personCircle,
 } from 'ionicons/icons';
 import { fetchMembersData } from '../functions/GroupsHelper';
 import { fetchBookBasedOnBookID } from '../functions/BooksHelper';
@@ -238,53 +239,54 @@ const GroupsPage: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          {groups.length !== 1 && <IonTitle>My Groups</IonTitle>}
-          {groups.length === 1 && <IonTitle>{groups[0]?.name}</IonTitle>}
-          {/* <div className='header-container-groups'> */}
-          <IonButtons
-            // slot='end'
-            onClick={(e) =>
-              setShowPopover({ open: true, event: e.nativeEvent })
-            }
-          >
-            <IonIcon
-              slot='icon-only'
-              icon={ellipsisHorizontalCircleOutline}
-            ></IonIcon>
-          </IonButtons>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        {/* {groups.length !== 1 && <IonTitle>My Groups</IonTitle>}
+        {groups.length === 1 && <IonTitle>{groups[0]?.name}</IonTitle>} */}
+        {/* <div className='header-container-groups'> */}
+        {/* <IonButtons
+          className='button-padding'
+          // slot='end'
+          onClick={(e) => setShowPopover({ open: true, event: e.nativeEvent })}
+        >
+          <IonIcon
+            slot='icon-only'
+            icon={ellipsisHorizontalCircleOutline}
+          ></IonIcon>
+        </IonButtons>
 
-          <IonPopover
-            isOpen={showPopover.open}
-            event={showPopover.event}
-            onDidDismiss={() =>
-              setShowPopover({ open: false, event: undefined })
-            }
-          >
-            <IonList>
-              <IonItem
-                onClick={() => handleAddMemberClick(selectedGroup.groupId)}
-              >
-                <IonIcon slot='end' icon={personAdd}></IonIcon>
-                <IonLabel>Add Member</IonLabel>
-              </IonItem>
+        <IonPopover
+          isOpen={showPopover.open}
+          event={showPopover.event}
+          onDidDismiss={() => setShowPopover({ open: false, event: undefined })}
+        >
+          <IonList>
+            <IonItem
+              onClick={() => handleAddMemberClick(selectedGroup.groupId)}
+            >
+              <IonIcon slot='end' icon={personAdd}></IonIcon>
+              <IonLabel>Add Member</IonLabel>
+            </IonItem>
 
-              <IonItem onClick={handleCreateGroup}>
-                <IonIcon slot='end' icon={add}></IonIcon>
-                <IonLabel>Create Group</IonLabel>
-              </IonItem>
+            <IonItem onClick={handleCreateGroup}>
+              <IonIcon slot='end' icon={add}></IonIcon>
+              <IonLabel>Create Group</IonLabel>
+            </IonItem>
 
-              <IonItem onClick={() => handleLeaveGroup(selectedGroup.groupId)}>
-                <IonIcon slot='end' icon={exit}></IonIcon>
-                <IonLabel>Leave Group</IonLabel>
-              </IonItem>
-            </IonList>
-          </IonPopover>
-          {/* </div> */}
-        </IonToolbar>
+            <IonItem onClick={() => handleLeaveGroup(selectedGroup.groupId)}>
+              <IonIcon slot='end' icon={exit}></IonIcon>
+              <IonLabel>Leave Group</IonLabel>
+            </IonItem>
+          </IonList>
+        </IonPopover> */}
+        {/* </div> */}
+        {/* </IonToolbar> */}
       </IonHeader>
       <IonContent>
+        {groups.length === 0 && <h1 className='h1-padding-left'>My Groups</h1>}
+        {/* {groups.length === 1 && (
+          <h1 className='h1-padding-left'>{groups[0]?.name}</h1>
+        )} */}
         {groups.length > 1 && (
           <IonSegment scrollable className='segment-groups'>
             {groups.map((group, index) => (
@@ -379,10 +381,16 @@ const GroupsPage: React.FC = () => {
                 {/* Display the members */}
                 {membersData.map((member, index) => (
                   <IonItem key={index}>
-                    <IonAvatar slot='start'>
-                      <img src={member.profile || '/placeholder1.jpg'} />
-                    </IonAvatar>
-                    <IonLabel>{member.email}</IonLabel>
+                    {/* <IonAvatar slot='start'> */}
+                    <IonIcon
+                      icon={personCircle}
+                      className='icon-spacing'
+                    ></IonIcon>
+                    {/* <img src={member.profile || '/placeholder1.jpg'} /> */}
+                    {/* </IonAvatar> */}
+                    <IonLabel className='label-spacing'>
+                      {member.email}
+                    </IonLabel>
                   </IonItem>
                 ))}
               </IonList>
@@ -394,12 +402,18 @@ const GroupsPage: React.FC = () => {
             <IonListHeader>
               <IonLabel className='header-label'>Recently Added Books</IonLabel>
             </IonListHeader>
+
             <div className='thumbnail-container'>
               {reviewsData.map((userBooksData) =>
                 userBooksData.map((userBookData) => (
                   <div key={userBookData.book.title} className='thumbnail'>
-                    <IonRouterLink
-                      routerLink={`/my/books/view/${userBookData.book.id}`}
+                    <div
+                      onClick={() =>
+                        history.push(
+                          `/my/books/view/${userBookData.book.id}`,
+                          userBookData
+                        )
+                      }
                       key={userBookData.book.title}
                     >
                       {userBookData.thumbnail ? (
@@ -407,7 +421,7 @@ const GroupsPage: React.FC = () => {
                       ) : (
                         <IonIcon icon={book} />
                       )}
-                    </IonRouterLink>
+                    </div>
                   </div>
                 ))
               )}
@@ -420,7 +434,7 @@ const GroupsPage: React.FC = () => {
           </IonFabButton>
           <IonFabList side='top'>
             <IonFabButton
-              onClick={() => handleAddMemberClick(selectedGroup.groupId)}
+              onClick={() => handleAddMemberClick(selectedGroup?.groupId)}
             >
               <IonIcon icon={personAdd}></IonIcon>
             </IonFabButton>
@@ -432,7 +446,7 @@ const GroupsPage: React.FC = () => {
             >
               <IonIcon icon={exit}></IonIcon>
             </IonFabButton> */}
-            <LeaveGroup groupId={selectedGroup.groupId} />
+            <LeaveGroup groupId={selectedGroup?.groupId} />
           </IonFabList>
         </IonFab>
       </IonContent>

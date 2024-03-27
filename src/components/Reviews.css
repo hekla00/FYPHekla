@@ -1,0 +1,17 @@
+.h1-padding-review {
+  padding-left: 30px;
+  padding-top: 20px;
+  padding-bottom: -10px;
+}
+.rating-container-review {
+  display: flex;
+  justify-content: center;
+  /* padding-top: -10px; */
+}
+
+.rating-star-review {
+  cursor: pointer;
+  font-size: 40px;
+  padding-bottom: 25px;
+  /* padding-top: -10px; */
+}

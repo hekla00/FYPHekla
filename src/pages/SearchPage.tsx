@@ -9,6 +9,8 @@ import {
   IonItem,
   IonLabel,
   IonIcon,
+  IonButtons,
+  IonBackButton,
 } from '@ionic/react';
 import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/app';
@@ -231,13 +233,17 @@ export const SearchPage = () => {
   }, [searchText]);
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar>
           <IonTitle>Search</IonTitle>
-        </IonToolbar>
+        </IonToolbar> */}
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton />
+        </IonButtons>
       </IonHeader>
       <IonContent>
         <IonSearchbar
+          className='search-bar-padding'
           value={searchText}
           placeholder='Search by title, author or ISBN'
           onIonInput={(e) => setSearchText(e.detail.value!)}

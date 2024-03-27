@@ -43,15 +43,16 @@ const LoanBorrowTracking: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonBackButton />
-          </IonButtons>
-          <IonTitle> Loan Tracking</IonTitle>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton defaultHref='/my/home' />
+        </IonButtons>
+        {/* <IonTitle> Loan Tracking</IonTitle> */}
+        {/* </IonToolbar> */}
       </IonHeader>
       <IonContent className='ion-padding'>
+        <h1 className='h1-padding-left'>Loan Tracking</h1>
         {books.map((book, index) => (
           <BookDisplay key={index} book={book} />
         ))}

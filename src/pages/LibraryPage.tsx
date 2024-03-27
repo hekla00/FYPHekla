@@ -20,7 +20,7 @@ import {
   IonCheckbox,
   IonSpinner,
 } from '@ionic/react';
-import { filter } from 'ionicons/icons';
+import { filter, filterCircleOutline } from 'ionicons/icons';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import { IonSearchbar } from '@ionic/react';
@@ -330,9 +330,9 @@ const LibraryPage: React.FC = () => {
   return (
     <IonPage>
       <IonHeader className='header-padding'>
-        {/* <IonToolbar> */}
-        {/* <IonTitle slot='start'>Library</IonTitle> */}
-        {/* </IonToolbar> */}
+        {/* <IonToolbar>
+          <IonTitle slot='start'>Library</IonTitle>
+        </IonToolbar> */}
       </IonHeader>
       <IonContent className='ion-padding'>
         <IonSegment
@@ -391,7 +391,7 @@ const LibraryPage: React.FC = () => {
               setShowPopover({ isOpen: true, event: e.nativeEvent })
             }
           >
-            <IonIcon icon={filter} />
+            <IonIcon style={{ fontSize: '30px' }} icon={filterCircleOutline} />
           </IonLabel>
           <IonPopover
             isOpen={showPopover.isOpen}

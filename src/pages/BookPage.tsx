@@ -70,6 +70,7 @@ const BookPage: React.FC = () => {
   const thumbnail = (location.state as { thumbnail?: string })?.thumbnail;
   const bookFromLocation = (location.state as { book?: typeof book })?.book;
   const [loanDetails, setLoanDetails] = useState([]);
+
   const userSpecificData = (location.state as { userSpecificData?: any })
     ?.userSpecificData;
   const [showPopover, setShowPopover] = useState<{
@@ -80,6 +81,7 @@ const BookPage: React.FC = () => {
     event: undefined,
   });
   const [showToast, setShowToast] = useState(false);
+  const purchaseDate = new Date(userSpecificData?.purchaseDate);
   let year;
   let formattedDate;
   if (book?.releaseDate instanceof firebase.firestore.Timestamp) {
@@ -143,14 +145,36 @@ const BookPage: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonBackButton />
-          </IonButtons>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        {/* <IonButtons className='button-padding' slot='start'> */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px',
+            position: 'sticky',
+            // backgroundColor: 'transparent',
+            zIndex: 1,
+            top: 0,
+          }}
+        >
+          <IonBackButton />
           {userOwnsBook && (
-            <IonButtons
-              slot='end'
+            <IonIcon
+              icon={ellipsisHorizontalCircleOutline}
+              style={{
+                cursor: 'pointer',
+                fontSize: '30px',
+                paddingRight: '10px',
+              }}
+              onClick={(e) =>
+                setShowPopover({ open: true, event: e.nativeEvent })
+              }
+            />
+          )}
+          {/* <IonButton
               onClick={(e) =>
                 setShowPopover({ open: true, event: e.nativeEvent })
               }
@@ -159,37 +183,36 @@ const BookPage: React.FC = () => {
                 slot='icon-only'
                 icon={ellipsisHorizontalCircleOutline}
               ></IonIcon>
-            </IonButtons>
-          )}
-          <IonPopover
-            isOpen={showPopover.open}
-            event={showPopover.event}
-            onDidDismiss={() =>
-              setShowPopover({ open: false, event: undefined })
-            }
-          >
-            <IonList>
-              <IonItem>
-                <IonIcon slot='end' icon={pencil}></IonIcon>
-                <IonLabel>Edit Book</IonLabel>
-              </IonItem>
-              <IonItem onClick={() => setShowReviewModal(true)}>
-                <IonIcon slot='end' icon={add}></IonIcon>
-                <IonLabel>Add/Edit Review</IonLabel>
-              </IonItem>
-              <IonItem onClick={() => setShowLoansModal(true)}>
-                <IonIcon slot='end' icon={add}></IonIcon>
-                <IonLabel>Add Loan</IonLabel>
-              </IonItem>
-              <IonItem onClick={() => handleDelete(book?.id, history)}>
-                <IonIcon slot='end' icon={trashIcon}></IonIcon>
-                <IonLabel>Delete Book</IonLabel>
-              </IonItem>
-            </IonList>
-          </IonPopover>
+            </IonButton> */}
+        </div>
+        {/* </IonButtons> */}
+        <IonPopover
+          isOpen={showPopover.open}
+          event={showPopover.event}
+          onDidDismiss={() => setShowPopover({ open: false, event: undefined })}
+        >
+          <IonList>
+            <IonItem>
+              <IonIcon slot='end' icon={pencil}></IonIcon>
+              <IonLabel>Edit Book</IonLabel>
+            </IonItem>
+            <IonItem onClick={() => setShowReviewModal(true)}>
+              <IonIcon slot='end' icon={add}></IonIcon>
+              <IonLabel>Edit Review</IonLabel>
+            </IonItem>
+            <IonItem onClick={() => setShowLoansModal(true)}>
+              <IonIcon slot='end' icon={add}></IonIcon>
+              <IonLabel>Add Loan</IonLabel>
+            </IonItem>
+            <IonItem onClick={() => handleDelete(book?.id, history)}>
+              <IonIcon slot='end' icon={trashIcon}></IonIcon>
+              <IonLabel>Delete Book</IonLabel>
+            </IonItem>
+          </IonList>
+        </IonPopover>
 
-          <IonTitle>{book?.title || bookFromLocation?.title}</IonTitle>
-        </IonToolbar>
+        {/* <IonTitle>{book?.title || bookFromLocation?.title}</IonTitle> */}
+        {/* </IonToolbar> */}
       </IonHeader>
       <IonContent className='ion-padding'>
         <div className='thumbnail-container-recom'>
@@ -325,7 +348,9 @@ const BookPage: React.FC = () => {
           <IonCardContent className='IonCardContent'>
             {/* {book?.purchaseDate || bookFromLocation?.purchaseDate}
              */}
-            {userSpecificData?.purchaseDate?.toDate().toLocaleDateString()}
+            {userSpecificData?.purchaseDate?.toDate().toLocaleDateString()
+              ? userSpecificData?.purchaseDate?.toDate().toLocaleDateString()
+              : 'No purchase date available'}
           </IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>

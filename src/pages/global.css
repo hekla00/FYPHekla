@@ -1,6 +1,11 @@
 :root {
-  --ion-background-color: #fbf6f0; /* The background color of the app */
-  --ion-color-primary: #334040; /* The primary colour, used for the button background */
+  /* --ion-background-color: #ebe7e0; The background color of the app
+   */
+  --ion-background-color: #eee7da; /* The background color of the app */
+  /* --ion-background-color: #f4f1ec; The background color of the app */
+  /* --ion-background-color: #dedbcc; The background color of the app */
+  /* The primary colour, used for the button background */
+  --ion-color-primary: #334040;
   --ion-color-primary-contrast: #ffffff; /* The contrast colour, used for the button text */
   --ion-color-primary-contrast-rgb: 255, 255, 255; /* The contrast colour in RGB format, used for the button text */
   --ion-color-primary-shade: #4a5c5c; /* The colour for when the button is pressed */
@@ -38,16 +43,71 @@ ion-text {
   margin-bottom: 1rem;
 }
 ion-card {
-  background-color: #fefefe;
+  background-color: #f9f9f5;
+  /* background-color: #f2f1eb; */
+  /* --background: #efeee8; */
+  /* color: #bfc2af; */
 }
 ion-header {
-  background-color: var(--ion-background-color);
+  background-color: #eee7da;
 }
 
 ion-content {
   --background: var(--ion-background-color);
 }
-
+ion-title {
+  /* color: #596e79; */
+  font-weight: bold;
+  font-size: large;
+}
 ion-toolbar {
-  --background: #fefefe;
+  /* --background: #f9f9f5; */
+  background-color: #eee7da;
+
+  /* --border-width: 0; */
+}
+/* ion-tab-bar {
+  --background: #f2f1eb;
+} */
+
+ion-icon:active {
+  /* color: var(--ion-color-primary); */
+  /* color: aqua; */
+  /* color: #596e79; */
+  /* color: #d4c1b8; */
+}
+
+ion-segment-button {
+  /* background-color: #f0f0ea; */
+}
+
+ion-header {
+  --background: #eee7da;
+}
+
+.header-padding {
+  padding: 20px;
+}
+
+.header-padding-text {
+  padding-top: 60px;
+  height: 60px;
+  /* padding-top: 50px; */
+  /* padding-left: -40px; */
+  /* padding-bottom: 40px; */
+  /* margin: 20px; */
+  /* padding-bottom: -10px; */
+}
+.custom-header {
+  padding-top: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.button-padding {
+  padding-left: 20px;
+}
+
+.button-padding-extra-left {
+  padding-left: 30px;
 }

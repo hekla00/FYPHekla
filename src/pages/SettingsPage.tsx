@@ -23,12 +23,13 @@ import {
 const SettingsPage: React.FC = () => {
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Settings</IonTitle>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+
+        {/* </IonToolbar> */}
       </IonHeader>
       <IonContent className='ion-padding'>
+        <h1 className='h1-padding-left'>Settings</h1>
         <IonList>
           <IonItem href='/my/account'>
             <IonIcon icon={personIcon} slot='start' />

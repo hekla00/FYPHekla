@@ -64,12 +64,13 @@ const Home: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
+      <IonHeader className='header-padding'>
+        {/* <IonToolbar>
           <IonTitle>Home</IonTitle>
-        </IonToolbar>
+        </IonToolbar> */}
       </IonHeader>
       <IonContent>
+        <h1 className='h1-name'>LibraryVault</h1>
         <IonGrid>
           <IonRow>
             <IonCol size='6'>

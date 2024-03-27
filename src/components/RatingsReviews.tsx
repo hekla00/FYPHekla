@@ -23,6 +23,8 @@ import {
   fetchReview,
   fetchNotes,
 } from '../functions/RatingsReviewHelper';
+import BookDisplay from './BookDisplay';
+import './Reviews.css';
 
 function RatingsReviews({ showModal, setShowModal, book, userID }) {
   const modal = useRef<HTMLIonModalElement>(null);
@@ -64,43 +66,45 @@ function RatingsReviews({ showModal, setShowModal, book, userID }) {
   return (
     <IonModal isOpen={showModal} onWillDismiss={() => setShowModal(false)}>
       <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonButton onClick={() => setShowModal(false)}>Cancel</IonButton>
-          </IonButtons>
-          <IonTitle>Add a Review</IonTitle>
-          <IonButtons slot='end'>
-            <IonButton strong={true} onClick={() => confirm()}>
-              Confirm
+        {/* <IonToolbar> */}
+        <IonHeader className='header-padding-text'>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              paddingLeft: '15px',
+            }}
+          >
+            <IonButton color='background' onClick={() => setShowModal(false)}>
+              <span style={{ color: 'var(--ion-color-primary)' }}>Cancel</span>
             </IonButton>
-          </IonButtons>
-        </IonToolbar>
+            <IonButton
+              color='background'
+              strong={true}
+              onClick={() => confirm()}
+            >
+              <span style={{ color: 'var(--ion-color-primary)' }}>Confirm</span>
+            </IonButton>
+          </div>
+        </IonHeader>
+        {/* </IonToolbar> */}
       </IonHeader>
+      <h1 className='h1-padding-review'>Add Review</h1>
       <IonContent className='ion-padding'>
-        <div className='rating-container'>
+        <div className='rating-container-review'>
           {[1, 2, 3, 4, 5].map((starNumber) => (
             <IonIcon
               key={starNumber}
               icon={starNumber <= rating ? star : starOutline}
               onClick={() => handleRatingChange(starNumber)}
-              className='rating-star'
+              className='rating-star-review'
             />
           ))}
         </div>
-        <IonItem>
-          <IonInput
-            type='text'
-            placeholder='Title'
-            labelPlacement='stacked'
-            label='Title'
-            value={book?.title}
-            readonly
-          ></IonInput>
-        </IonItem>
 
         <IonItem>
           <IonTextarea
-            rows={6}
+            rows={8}
             label='Review'
             labelPlacement='stacked'
             debounce={1000}
@@ -110,7 +114,7 @@ function RatingsReviews({ showModal, setShowModal, book, userID }) {
         </IonItem>
         <IonItem>
           <IonTextarea
-            rows={6}
+            rows={8}
             label='Private Notes'
             labelPlacement='stacked'
             debounce={1000}
@@ -118,6 +122,7 @@ function RatingsReviews({ showModal, setShowModal, book, userID }) {
             onIonInput={(event) => setNotes(event.detail.value)}
           ></IonTextarea>
         </IonItem>
+        <BookDisplay book={book} />
       </IonContent>
     </IonModal>
   );

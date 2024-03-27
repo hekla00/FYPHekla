@@ -300,13 +300,13 @@ const ManuallyAddBookPage: React.FC = () => {
   };
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonBackButton />
-          </IonButtons>
-          <IonTitle>Add a Book</IonTitle>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton />
+        </IonButtons>
+        {/* <IonTitle>Add a Book</IonTitle> */}
+        {/* </IonToolbar> */}
       </IonHeader>
       <IonContent className='ion-padding'>
         <div className='thumbnail-container-addBook'>

@@ -14,3 +14,7 @@ ion-thumbnail {
 .book-icon {
   font-size: 60px;
 }
+
+.search-bar-padding {
+  padding-top: 40px;
+}

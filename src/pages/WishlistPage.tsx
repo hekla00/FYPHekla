@@ -90,15 +90,16 @@ const WishlistPage: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonBackButton defaultHref='/my/home' />
-          </IonButtons>
-          <IonTitle>Wishlist</IonTitle>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton defaultHref='/my/home' />
+        </IonButtons>
+        {/* <IonTitle>Wishlist</IonTitle> */}
+        {/* </IonToolbar> */}
       </IonHeader>
-      <IonContent>
+      <IonContent className='ion-padding'>
+        <h1 className='h1-padding-left'>Wishlist</h1>
         <IonList>
           {books.map((book) => (
             <IonCard

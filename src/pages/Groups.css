@@ -99,3 +99,13 @@
   width: 100%;
   /* padding: 0.75rem 1.25rem; */
 }
+
+.icon-spacing {
+  /* margin-right: -30px; */
+  width: 25px;
+  height: 25px;
+}
+
+.label-spacing {
+  margin-left: 10px;
+}

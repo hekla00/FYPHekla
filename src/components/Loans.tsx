@@ -80,21 +80,25 @@ function Loans({ showModal, setShowModal, book, userID }) {
 
   return (
     <IonModal isOpen={showModal} onWillDismiss={() => setShowModal(false)}>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonButton onClick={() => setShowModal(false)}>Cancel</IonButton>
-          </IonButtons>
-          <IonTitle>Add Loan</IonTitle>
-          <IonButtons slot='end'>
-            <IonButton strong={true} onClick={() => confirm()}>
-              Confirm
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            paddingLeft: '20px',
+          }}
+        >
+          <IonButton color='background' onClick={() => setShowModal(false)}>
+            <span style={{ color: 'var(--ion-color-primary)' }}>Cancel</span>
+          </IonButton>
+          <IonButton color='background' strong={true} onClick={() => confirm()}>
+            <span style={{ color: 'var(--ion-color-primary)' }}>Confirm</span>
+          </IonButton>
+        </div>
       </IonHeader>
 
       <IonContent className='ion-padding'>
+        <h1 className='h1-padding-left'>Add Loan</h1>
         <IonItem>
           <IonLabel position='stacked'>Contact Name</IonLabel>
           <IonInput

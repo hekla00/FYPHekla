@@ -17,6 +17,7 @@ import { useAuth } from '../authentication';
 import { auth } from '../firebase';
 import { useState } from 'react';
 import logo from '../../images/logo.png';
+import logoNewColor from '../../images/logo-color.png';
 import './Login.css';
 
 const LoginPage: React.FC = () => {
@@ -49,7 +50,7 @@ const LoginPage: React.FC = () => {
   return (
     <IonPage>
       <IonContent className='ion-padding'>
-        <img src={logo} alt='logo' />
+        <img src={logoNewColor} alt='logo' />
         {/* Creating login form */}
         <IonList>
           <IonItem lines='none'>
@@ -100,7 +101,7 @@ const LoginPage: React.FC = () => {
         {/* If the user does not have an account they are redirected to the register page */}
         <IonButton expand='block' fill='clear' routerLink='/register'>
           Don't have an account?{''}
-          <strong>Register</strong>
+          <strong style={{ paddingLeft: '5px' }}>Register</strong>
         </IonButton>
         <IonLoading isOpen={status.loading} />
       </IonContent>
