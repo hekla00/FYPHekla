@@ -76,14 +76,28 @@ function RatingsReviews({ showModal, setShowModal, book, userID }) {
             }}
           >
             <IonButton color='background' onClick={() => setShowModal(false)}>
-              <span style={{ color: 'var(--ion-color-primary)' }}>Cancel</span>
+              <span
+                style={{
+                  color: 'var(--ion-color-primary)',
+                  paddingBottom: '10px',
+                }}
+              >
+                Cancel
+              </span>
             </IonButton>
             <IonButton
               color='background'
               strong={true}
               onClick={() => confirm()}
             >
-              <span style={{ color: 'var(--ion-color-primary)' }}>Confirm</span>
+              <span
+                style={{
+                  color: 'var(--ion-color-primary)',
+                  paddingBottom: '10px',
+                }}
+              >
+                Confirm
+              </span>
             </IonButton>
           </div>
         </IonHeader>
@@ -104,7 +118,7 @@ function RatingsReviews({ showModal, setShowModal, book, userID }) {
 
         <IonItem>
           <IonTextarea
-            rows={8}
+            rows={6}
             label='Review'
             labelPlacement='stacked'
             debounce={1000}
@@ -114,7 +128,7 @@ function RatingsReviews({ showModal, setShowModal, book, userID }) {
         </IonItem>
         <IonItem>
           <IonTextarea
-            rows={8}
+            rows={6}
             label='Private Notes'
             labelPlacement='stacked'
             debounce={1000}

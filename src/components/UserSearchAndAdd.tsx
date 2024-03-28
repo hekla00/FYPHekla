@@ -8,7 +8,7 @@ import {
   IonAvatar,
   IonIcon,
 } from '@ionic/react';
-import { trashBin } from 'ionicons/icons';
+import { person, trashBin } from 'ionicons/icons';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
@@ -92,10 +92,11 @@ const UserSearchAndAdd = ({ onUserAdd }) => {
       <IonList>
         {searchResults.map((user, index) => (
           <IonItem key={index}>
-            <IonAvatar slot='start'>
-              <img src={user.profilePicture || '/placeholder1.jpg'} />
-            </IonAvatar>
-            <IonLabel>{user.email}</IonLabel>
+            {/* <IonAvatar slot='start'> */}
+            <IonIcon icon={person} className='icon-spacing-search'></IonIcon>
+            {/* <img src={user.profilePicture || '/placeholder1.jpg'} /> */}
+            {/* </IonAvatar> */}
+            <IonLabel className='label-spacing'>{user.email}</IonLabel>
             <IonButton
               disabled={isAdding}
               onClick={() => {

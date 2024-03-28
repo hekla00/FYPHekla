@@ -86,13 +86,29 @@ function Loans({ showModal, setShowModal, book, userID }) {
             display: 'flex',
             justifyContent: 'space-between',
             paddingLeft: '20px',
+            paddingRight: '5px',
+            // paddingBottom: '20px',
           }}
         >
           <IonButton color='background' onClick={() => setShowModal(false)}>
-            <span style={{ color: 'var(--ion-color-primary)' }}>Cancel</span>
+            <span
+              style={{
+                color: 'var(--ion-color-primary)',
+                paddingBottom: '10px',
+              }}
+            >
+              Cancel
+            </span>
           </IonButton>
           <IonButton color='background' strong={true} onClick={() => confirm()}>
-            <span style={{ color: 'var(--ion-color-primary)' }}>Confirm</span>
+            <span
+              style={{
+                color: 'var(--ion-color-primary)',
+                paddingBottom: '10px',
+              }}
+            >
+              Confirm
+            </span>
           </IonButton>
         </div>
       </IonHeader>

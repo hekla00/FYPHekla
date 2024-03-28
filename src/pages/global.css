@@ -111,3 +111,8 @@ ion-header {
 .button-padding-extra-left {
   padding-left: 30px;
 }
+
+.button-padding-extra-bottom {
+  padding-left: 20px;
+  padding-bottom: 20px;
+}

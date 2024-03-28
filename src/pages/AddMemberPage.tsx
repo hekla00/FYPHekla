@@ -12,6 +12,7 @@ import {
 import firebase from 'firebase/app';
 import AddMemberForm from '../components/AddMemberForm';
 // import { useParams } from 'react-router-dom';
+import './global.css';
 
 interface RouteParams {
   groupId: string;
@@ -43,14 +44,12 @@ const AddMemberPage = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonBackButton defaultHref='/my/groups' />
-          </IonButtons>
-          <IonTitle>Add a Member</IonTitle>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        <IonButtons className='button-padding-extra-bottom' slot='start'>
+          <IonBackButton defaultHref='/my/groups' />
+        </IonButtons>
       </IonHeader>
+      <div style={{ height: '20px' }}></div>
       <IonContent>
         <AddMemberForm groupId={groupId} firestore={firestore} />
       </IonContent>
