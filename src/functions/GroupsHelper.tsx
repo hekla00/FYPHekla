@@ -1,4 +1,10 @@
 import firebase from 'firebase/app';
+import {
+  fetchThumbnailByISBN,
+  fetchThumbnailByAuthor,
+  fetchThumbnailByTitle,
+} from './APIHelper';
+import { fetchBookBasedOnBookID } from './BooksHelper';
 const db = firebase.firestore();
 const currentUserId = firebase.auth().currentUser?.uid;
 
@@ -64,4 +70,98 @@ export const fetchGroupCurrentUser = async (setGroups, setLoading) => {
     .catch((error) => {
       console.error('Error fetching groups:', error);
     });
+};
+export const getUsersBooks = async (memberId) => {
+  const userBooks = await db
+    .collection('userBooks')
+    .where('userID', '==', memberId)
+    .limit(3)
+    .get();
+  return userBooks;
+};
+export const fetchReviewsForGroupMembers = async (
+  membersData,
+  setThumbnails,
+  setReviewsData,
+  setLoading
+) => {
+  // if (selectedGroup) {
+  const reviewsDataPromises = membersData.map(async (member) => {
+    const userBooksSnapshot = await getUsersBooks(member.id);
+    const userID = member.id;
+
+    const userSnapshot = await db.collection('publicUsers').doc(userID).get();
+    const userData = userSnapshot.data();
+
+    const reviewIDs = userBooksSnapshot.docs.map((doc) => doc.data().bookID);
+    let reviewsData = [];
+    if (reviewIDs.length > 0) {
+      const reviewsSnapshot = await db
+        .collection('bookReviews')
+        .where('bookID', 'in', reviewIDs)
+        .get();
+      reviewsData = reviewsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    }
+
+    const userBooksData = await Promise.all(
+      userBooksSnapshot.docs.map(async (doc) => {
+        const userBookData = doc.data();
+        const review = reviewsData.find(
+          (review: { id: string; bookID: string }) =>
+            review.bookID === userBookData.bookID
+        );
+        const book = (await fetchBookBasedOnBookID(userBookData.bookID)) as {
+          isbn?: string;
+          title?: string;
+        };
+        // console.log('book', book);
+        let thumbnail;
+        try {
+          thumbnail = await fetchThumbnailByISBN(book?.isbn);
+        } catch (error) {
+          thumbnail = await fetchThumbnailByTitle(book?.title);
+        }
+        return {
+          ...userBookData,
+          review,
+          user: userData,
+          book,
+          thumbnail,
+        };
+      })
+    );
+
+    // console.log('userBooksData', userBooksData);
+    return userBooksData;
+  });
+
+  const resolvedReviewsData = await Promise.all(reviewsDataPromises);
+  const newThumbnails = {};
+  const fetchedTitles = new Set();
+  let thumbnailCount = 0;
+
+  for (const userBooksData of resolvedReviewsData) {
+    for (const userBookData of userBooksData) {
+      if (thumbnailCount >= 5) {
+        break;
+      }
+
+      if (!fetchedTitles.has(userBookData.book.title)) {
+        newThumbnails[userBookData.book.title] = userBookData.thumbnail;
+        fetchedTitles.add(userBookData.book.title);
+        thumbnailCount++;
+      }
+    }
+
+    if (thumbnailCount >= 5) {
+      break;
+    }
+  }
+  //   console.log('newThumbnails', newThumbnails);
+  setThumbnails(newThumbnails);
+  setReviewsData(resolvedReviewsData);
+  setLoading(false);
 };

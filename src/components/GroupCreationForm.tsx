@@ -13,6 +13,8 @@ import {
   IonListHeader,
   IonLabel,
   IonIcon,
+  IonText,
+  IonTitle,
 } from '@ionic/react';
 import { trashBin } from 'ionicons/icons';
 import firebase from 'firebase/app';
@@ -127,6 +129,10 @@ const GroupCreationForm: React.FC<GroupCreationFormProps> = ({
       <IonContent>
         <form>
           <IonGrid>
+            <IonRow>
+              <IonCol>{/* <IonTitle >Create a group</IonTitle> */}</IonCol>
+            </IonRow>
+
             <IonRow>
               <IonCol>
                 <IonItem>

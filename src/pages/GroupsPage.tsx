@@ -41,8 +41,6 @@ import {
   star,
   starOutline,
   book,
-  ellipsisHorizontalCircleOutline,
-  exit,
   person,
   personCircle,
 } from 'ionicons/icons';
@@ -63,7 +61,6 @@ const GroupsPage: React.FC = () => {
   const [thumbnails, setThumbnails] = useState({});
   const [selectedGroup, setSelectedGroup] = useState(groups[0]);
   // console.log('selectedGroup', selectedGroup);
-  const [showActionSheet, setShowActionSheet] = useState(false);
   const db = firebase.firestore();
   const history = useHistory();
   const [showPopover, setShowPopover] = useState<{
@@ -87,15 +84,11 @@ const GroupsPage: React.FC = () => {
       console.log('No group selected');
     }
   };
-  const handleInsideGroup = (groupId: string) => {
-    history.push({
-      pathname: `/my/insideGroups/${groupId}`,
-      state: { groupId: groupId },
-    });
-  };
+
   useEffect(() => {
-    if (groups.length > 1 && !selectedGroup) {
+    if (groups.length === 1) {
       setSelectedGroup(groups[0]);
+      fetchMembersData(groups[0], setMembersData);
     }
   }, [groups]);
   useEffect(() => {
@@ -123,109 +116,105 @@ const GroupsPage: React.FC = () => {
   }, [groups]);
 
   useEffect(() => {
+    // console.log(selectedGroup);
     if (selectedGroup) {
       fetchMembersData(selectedGroup, setMembersData);
     }
   }, [selectedGroup]);
 
   useEffect(() => {
-    const getUsersBooks = async (memberId) => {
-      const userBooks = await db
-        .collection('userBooks')
-        .where('userID', '==', memberId)
-        .limit(3)
-        .get();
-      return userBooks;
-    };
-    const fetchReviewsForGroupMembers = async () => {
-      // if (selectedGroup) {
-      const reviewsDataPromises = membersData.map(async (member) => {
-        const userBooksSnapshot = await getUsersBooks(member.id);
-        const userID = member.id;
+    if (membersData) {
+      fetchReviewsForGroupMembers();
+    }
+  }, [membersData]);
 
-        const userSnapshot = await db
-          .collection('publicUsers')
-          .doc(userID)
+  const getUsersBooks = async (memberId) => {
+    const userBooks = await db
+      .collection('userBooks')
+      .where('userID', '==', memberId)
+      .limit(3)
+      .get();
+    return userBooks;
+  };
+  const fetchReviewsForGroupMembers = async () => {
+    // if (selectedGroup) {
+    const reviewsDataPromises = membersData.map(async (member) => {
+      const userBooksSnapshot = await getUsersBooks(member.id);
+      const userID = member.id;
+
+      const userSnapshot = await db.collection('publicUsers').doc(userID).get();
+      const userData = userSnapshot.data();
+
+      const reviewIDs = userBooksSnapshot.docs.map((doc) => doc.data().bookID);
+      let reviewsData = [];
+      if (reviewIDs.length > 0) {
+        const reviewsSnapshot = await db
+          .collection('bookReviews')
+          .where('bookID', 'in', reviewIDs)
           .get();
-        const userData = userSnapshot.data();
+        reviewsData = reviewsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      }
 
-        const reviewIDs = userBooksSnapshot.docs.map(
-          (doc) => doc.data().bookID
-        );
-        let reviewsData = [];
-        if (reviewIDs.length > 0) {
-          const reviewsSnapshot = await db
-            .collection('bookReviews')
-            .where('bookID', 'in', reviewIDs)
-            .get();
-          reviewsData = reviewsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-        }
-
-        const userBooksData = await Promise.all(
-          userBooksSnapshot.docs.map(async (doc) => {
-            const userBookData = doc.data();
-            const review = reviewsData.find(
-              (review: { id: string; bookID: string }) =>
-                review.bookID === userBookData.bookID
-            );
-            const book = (await fetchBookBasedOnBookID(
-              userBookData.bookID
-            )) as { isbn?: string; title?: string };
-            // console.log('book', book);
-            let thumbnail;
-            try {
-              thumbnail = await fetchThumbnailByISBN(book?.isbn);
-            } catch (error) {
-              thumbnail = await fetchThumbnailByTitle(book?.title);
-            }
-            return {
-              ...userBookData,
-              review,
-              user: userData,
-              book,
-              thumbnail,
-            };
-          })
-        );
-
-        // console.log('userBooksData', userBooksData);
-        return userBooksData;
-      });
-
-      const resolvedReviewsData = await Promise.all(reviewsDataPromises);
-      const newThumbnails = {};
-      const fetchedTitles = new Set();
-      let thumbnailCount = 0;
-
-      for (const userBooksData of resolvedReviewsData) {
-        for (const userBookData of userBooksData) {
-          if (thumbnailCount >= 5) {
-            break;
+      const userBooksData = await Promise.all(
+        userBooksSnapshot.docs.map(async (doc) => {
+          const userBookData = doc.data();
+          const review = reviewsData.find(
+            (review: { id: string; bookID: string }) =>
+              review.bookID === userBookData.bookID
+          );
+          const book = (await fetchBookBasedOnBookID(userBookData.bookID)) as {
+            isbn?: string;
+            title?: string;
+          };
+          // console.log('book', book);
+          let thumbnail;
+          try {
+            thumbnail = await fetchThumbnailByISBN(book?.isbn);
+          } catch (error) {
+            thumbnail = await fetchThumbnailByTitle(book?.title);
           }
+          return {
+            ...userBookData,
+            review,
+            user: userData,
+            book,
+            thumbnail,
+          };
+        })
+      );
 
-          if (!fetchedTitles.has(userBookData.book.title)) {
-            newThumbnails[userBookData.book.title] = userBookData.thumbnail;
-            fetchedTitles.add(userBookData.book.title);
-            thumbnailCount++;
-          }
-        }
+      // console.log('userBooksData', userBooksData);
+      return userBooksData;
+    });
 
+    const resolvedReviewsData = await Promise.all(reviewsDataPromises);
+    const newThumbnails = {};
+    const fetchedTitles = new Set();
+    let thumbnailCount = 0;
+
+    for (const userBooksData of resolvedReviewsData) {
+      for (const userBookData of userBooksData) {
         if (thumbnailCount >= 5) {
           break;
         }
-      }
-      //   console.log('newThumbnails', newThumbnails);
-      setThumbnails(newThumbnails);
-      setReviewsData(resolvedReviewsData);
-    };
-    fetchReviewsForGroupMembers();
-  }, [selectedGroup]);
 
-  const handleLeaveGroup = async (groupId) => {
-    <LeaveGroup groupId={groupId} />;
+        if (!fetchedTitles.has(userBookData.book.title)) {
+          newThumbnails[userBookData.book.title] = userBookData.thumbnail;
+          fetchedTitles.add(userBookData.book.title);
+          thumbnailCount++;
+        }
+      }
+
+      if (thumbnailCount >= 5) {
+        break;
+      }
+    }
+    //   console.log('newThumbnails', newThumbnails);
+    setThumbnails(newThumbnails);
+    setReviewsData(resolvedReviewsData);
   };
 
   if (groups.length === 0 && !loading) {
@@ -239,54 +228,12 @@ const GroupsPage: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader className='header-padding-text'>
-        {/* <IonToolbar> */}
-        {/* {groups.length !== 1 && <IonTitle>My Groups</IonTitle>}
-        {groups.length === 1 && <IonTitle>{groups[0]?.name}</IonTitle>} */}
-        {/* <div className='header-container-groups'> */}
-        {/* <IonButtons
-          className='button-padding'
-          // slot='end'
-          onClick={(e) => setShowPopover({ open: true, event: e.nativeEvent })}
-        >
-          <IonIcon
-            slot='icon-only'
-            icon={ellipsisHorizontalCircleOutline}
-          ></IonIcon>
-        </IonButtons>
-
-        <IonPopover
-          isOpen={showPopover.open}
-          event={showPopover.event}
-          onDidDismiss={() => setShowPopover({ open: false, event: undefined })}
-        >
-          <IonList>
-            <IonItem
-              onClick={() => handleAddMemberClick(selectedGroup.groupId)}
-            >
-              <IonIcon slot='end' icon={personAdd}></IonIcon>
-              <IonLabel>Add Member</IonLabel>
-            </IonItem>
-
-            <IonItem onClick={handleCreateGroup}>
-              <IonIcon slot='end' icon={add}></IonIcon>
-              <IonLabel>Create Group</IonLabel>
-            </IonItem>
-
-            <IonItem onClick={() => handleLeaveGroup(selectedGroup.groupId)}>
-              <IonIcon slot='end' icon={exit}></IonIcon>
-              <IonLabel>Leave Group</IonLabel>
-            </IonItem>
-          </IonList>
-        </IonPopover> */}
-        {/* </div> */}
-        {/* </IonToolbar> */}
-      </IonHeader>
+      <IonHeader className='header-padding-text'></IonHeader>
       <IonContent>
-        {groups.length === 0 && <h1 className='h1-padding-left'>My Groups</h1>}
-        {/* {groups.length === 1 && (
+        {groups.length > 1 && <h1 className='h1-padding-left'>My Groups</h1>}
+        {groups.length === 1 && (
           <h1 className='h1-padding-left'>{groups[0]?.name}</h1>
-        )} */}
+        )}
         {groups.length > 1 && (
           <IonSegment scrollable className='segment-groups'>
             {groups.map((group, index) => (
@@ -294,6 +241,7 @@ const GroupsPage: React.FC = () => {
                 // value={selectedGroup?.id}
                 key={index}
                 onClick={() => setSelectedGroup(group)}
+                // value={selectedGroup[0]}
               >
                 <IonLabel>{group.name}</IonLabel>
               </IonSegmentButton>

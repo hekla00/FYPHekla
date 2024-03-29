@@ -17,14 +17,16 @@ const GroupCreationPage = ({ userUid }) => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot='start'>
-            <IonBackButton defaultHref='/my/groups' />
-          </IonButtons>
-          <IonTitle>Create Group</IonTitle>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton defaultHref='/my/groups' />
+        </IonButtons>
+
+        {/* <IonTitle>Create Group</IonTitle> */}
+        {/* </IonToolbar> */}
       </IonHeader>
+      <div style={{ height: '20px' }}></div>
       <IonContent>
         <GroupCreationForm firestore={firestore} setGroupId={setGroupId} />
       </IonContent>

@@ -92,6 +92,7 @@ ion-header {
 .header-padding-text {
   padding-top: 60px;
   height: 60px;
+  /* z-index: 1; */
   /* padding-top: 50px; */
   /* padding-left: -40px; */
   /* padding-bottom: 40px; */
