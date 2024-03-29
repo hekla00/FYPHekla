@@ -366,9 +366,9 @@ const GroupsPage: React.FC = () => {
                     >
                       {userBookData.thumbnail ? (
                         <img src={userBookData.thumbnail} />
-                      ) : (
-                        <IonIcon icon={book} />
-                      )}
+                      ) : null
+                      // <IonIcon icon={book} />
+                      }
                     </div>
                   </div>
                 ))

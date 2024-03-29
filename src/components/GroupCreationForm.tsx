@@ -33,10 +33,7 @@ const GroupCreationForm: React.FC<GroupCreationFormProps> = ({
   firestore,
   setGroupId,
 }) => {
-  // const auth = useAuth().userID;
   const userUid = useAuth().userID;
-  // const auth = useAuth();
-  // const currentUser = firebase.auth().currentUser;
   const [groupName, setGroupName] = useState('');
   const [userIds, setUserIds] = useState(userUid ? [userUid] : []);
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -47,30 +44,7 @@ const GroupCreationForm: React.FC<GroupCreationFormProps> = ({
   const [showToast, setShowToast] = useState(false);
   const [toastColor, setToastColor] = useState('');
   const currentUserId = firebase.auth().currentUser?.uid;
-  // console.log('emails:', emails);
-  // console.log('auth group:', auth);
-  // console.log('Current user ID:', currentUser?.uid);
-  // const createGroup = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const groupRef = await firestore.collection('groups').add({
-  //       groupName: groupName,
-  //       members: userIds.filter(Boolean),
-  //     });
-  //     await groupRef.update({ groupId: groupRef.id });
-  //     setGroupId(groupRef.id);
-  //     setMessage('Group created successfully!');
-  //     setToastColor('success');
-  //     setShowToast(true);
-  //     history.push('/my/groups');
-  //   } catch (error) {
-  //     console.error('Error creating group:', error);
-  //     setMessage('Error creating group. Please try again.');
-  //     setToastColor('danger');
-  //     setShowToast(true);
-  //   }
-  //   setIsLoading(false);
-  // };
+
   const createGroup = async () => {
     console.log('createGroup function called');
     setIsLoading(true);

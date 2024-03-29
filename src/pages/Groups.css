@@ -43,7 +43,7 @@
 } */
 .thumbnail {
   display: inline-block;
-  flex: 1 0 auto;
+  flex: 0 0 auto;
   max-width: 40%;
 }
 
@@ -57,6 +57,7 @@
 .thumbnail-container {
   display: flex;
   /* justify-content: space-between; */
+  justify-content: flex-start;
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(155, 155, 155, 0.7) transparent;
