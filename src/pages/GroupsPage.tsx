@@ -1,8 +1,6 @@
 import {
   IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
   IonRow,
   IonCol,
   IonLabel,
@@ -12,20 +10,14 @@ import {
   IonIcon,
   IonCard,
   IonCardTitle,
-  IonGrid,
-  IonText,
   IonSegment,
   IonSegmentButton,
   IonFabList,
   IonItem,
-  IonAvatar,
   IonList,
   IonListHeader,
   IonRouterLink,
   IonCardContent,
-  IonButtons,
-  IonPopover,
-  IonButton,
 } from '@ionic/react';
 import { Redirect } from 'react-router';
 import { useHistory } from 'react-router-dom';
@@ -41,7 +33,6 @@ import {
   chevronUpCircle,
   star,
   starOutline,
-  book,
   person,
   personCircle,
 } from 'ionicons/icons';

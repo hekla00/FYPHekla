@@ -77,7 +77,7 @@ const BookPage: React.FC = () => {
   // from book display
   const userSpecificData = (location.state as { userSpecificData?: any })
     ?.userSpecificData;
-
+  console.log('bookpage user', userSpecificData);
   const [showPopover, setShowPopover] = useState<{
     open: boolean;
     event: Event | undefined;
@@ -300,7 +300,10 @@ const BookPage: React.FC = () => {
           <IonCardContent className='IonCardContent'>
             {/* {book?.location || bookFromLocation?.location}
              */}
-            {userSpecificData?.location || bookLocation}
+            {userSpecificData?.location ||
+              bookLocation ||
+              bookFromLocation?.location ||
+              book?.location}
           </IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>

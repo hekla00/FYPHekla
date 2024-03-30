@@ -13,34 +13,35 @@ import {
   IonTitle,
   IonContent,
 } from '@ionic/react';
-import { fetchLoanDetails } from '../functions/UserHelper';
+import {
+  fetchLoanDetails,
+  fetchAllUserBooks,
+  fetchUserSpecificInfo,
+  fetchAllUserBooksLoans,
+} from '../functions/UserHelper';
 
 const LoanBorrowTracking: React.FC = () => {
   const [books, setBooks] = useState([]);
-
+  const currentUserId = firebase.auth().currentUser?.uid;
+  const [isLoading, setIsLoading] = useState(false);
+  const [allBooks, setAllBooks] = useState([]);
+  const [loanDetails, setLoanDetails] = useState([]);
   useEffect(() => {
-    const fetchBooks = async () => {
-      const currentUserId = await firebase.auth().currentUser?.uid;
-      if (currentUserId) {
-        const loanSnapshot = await db
-          .collection('bookLoans')
-          .where('userID', '==', currentUserId)
-          .get();
-        const books = [];
-        for (const doc of loanSnapshot.docs) {
-          const bookSnapshot = await db
-            .collection('books')
-            .doc(doc.data().bookID)
-            .get();
-          books.push(bookSnapshot.data());
-        }
-        setBooks(books);
-      }
-    };
-
-    fetchBooks();
+    fetchAllUserBooksLoans(setIsLoading, setAllBooks);
   }, []);
+  useEffect(() => {
+    if (!isLoading && allBooks.length > 0) {
+      const fetchLoans = async () => {
+        const loansPromises = allBooks.map((book) =>
+          fetchLoanDetails(book.id, firebase.auth().currentUser?.uid)
+        );
+        const loans = await Promise.all(loansPromises);
+        setLoanDetails(loans);
+      };
 
+      fetchLoans();
+    }
+  }, [isLoading, allBooks]);
   return (
     <IonPage>
       <IonHeader className='header-padding-text'>
@@ -53,7 +54,7 @@ const LoanBorrowTracking: React.FC = () => {
       </IonHeader>
       <IonContent className='ion-padding'>
         <h1 className='h1-padding-left'>Loan Tracking</h1>
-        {books.map((book, index) => (
+        {allBooks.map((book, index) => (
           <BookDisplay key={index} book={book} />
         ))}
       </IonContent>

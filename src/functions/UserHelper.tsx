@@ -269,3 +269,46 @@ export const returnBook = async (bookID, userID, onReturn) => {
     onReturn();
   }
 };
+
+export const fetchAllUserBooksLoans = async (setIsLoading, setAllBooks) => {
+  setIsLoading(true);
+  try {
+    const db = firebase.firestore();
+    const userId = firebase.auth().currentUser?.uid;
+    console.log('userId lib', userId);
+    if (!userId) {
+      console.error('No user is currently logged in.');
+      return;
+    }
+
+    // Fetch bookLoans documents for the current user
+    const loanSnapshot = await db
+      .collection('bookLoans')
+      .where('userID', '==', userId)
+      .get();
+
+    // Extract book IDs from the bookLoans documents
+    const bookIds = loanSnapshot.docs.map((doc) => doc.data().bookID);
+    console.log('bookIds:', bookIds);
+
+    // Fetch books documents for the extracted book IDs
+    const booksPromises = bookIds.map((ID) =>
+      db.collection('books').doc(ID).get()
+    );
+    const booksSnapshots = await Promise.all(booksPromises);
+
+    // Extract book data from the books documents
+    // Important to define the id of the book otherwise it will be undefined and the book will not be displayed
+    const allBooks = booksSnapshots.map((snapshot) => ({
+      id: snapshot.id,
+      ...snapshot.data(),
+    }));
+    console.log('allBooks:', allBooks);
+
+    setAllBooks(allBooks as any[]);
+  } catch (error) {
+    console.error('Error fetching all books:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};

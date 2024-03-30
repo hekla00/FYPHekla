@@ -74,6 +74,7 @@ const BookDisplay = ({ book }) => {
     };
 
     userSpecificData();
+    console.log('bookdisplay userSpecificData', userSpecificData);
   }, [bookID, userID]);
 
   useEffect(() => {
