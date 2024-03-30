@@ -12,7 +12,7 @@ import { person, trashBin } from 'ionicons/icons';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
-const UserSearchAndAdd = ({ onUserAdd }) => {
+const UserSearchAndAdd = ({ onUserAdd, currentUserId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
@@ -64,6 +64,7 @@ const UserSearchAndAdd = ({ onUserAdd }) => {
         id: doc.id,
         ...doc.data(),
       }));
+      resultsData = resultsData.filter((user) => user.id !== currentUserId);
     }
 
     setSearchResults(resultsData);

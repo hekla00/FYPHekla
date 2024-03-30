@@ -18,6 +18,7 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({
   const [showSearchResults, setShowSearchResults] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [members, setMembers] = useState<string[]>([]);
+  const currentUserId = firebase.auth().currentUser?.uid;
 
   useEffect(() => {
     const fetchGroupMembers = async () => {
@@ -97,6 +98,7 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({
                   }
                   setIsAdding(false);
                 }}
+                currentUserId={currentUserId}
               />
             )}
           </IonCol>
