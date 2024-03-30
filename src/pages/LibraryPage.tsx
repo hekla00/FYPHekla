@@ -50,6 +50,10 @@ const LibraryPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loans, setLoans] = useState([]);
+  const [isLoaned, setIsLoaned] = useState(false);
+  const [showLoanedFilter, setShowLoanedFilter] = useState(false);
+
   const db = firebase.firestore();
 
   const handleSegmentChange = (event: CustomEvent) => {
@@ -197,30 +201,59 @@ const LibraryPage: React.FC = () => {
     console.log('searchQuery:', searchQuery);
     const currentUserId = firebase.auth().currentUser?.uid; // Get the current user's ID
     const nonNullBooks = allBooks.filter((book) => book !== null);
-    const filteredBooks = nonNullBooks
-      .filter(
-        (book) =>
-          (book &&
+
+    const fetchLoanedStatus = async (bookId) => {
+      const loanSnapshot = await db
+        .collection('bookLoans')
+        .where('bookID', '==', bookId)
+        .get();
+
+      if (!loanSnapshot.empty) {
+        const loanData = loanSnapshot.docs[0].data();
+        return loanData ? loanData.loaned : false;
+      } else {
+        return false;
+      }
+    };
+
+    const filterAndSetBooks = async () => {
+      const filteredBooks = [];
+      for (let book of nonNullBooks) {
+        const loaned = await fetchLoanedStatus(book.id);
+        if (
+          (isLoaned === null || loaned === isLoaned) &&
+          ((book &&
             book.title &&
             book.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
             book.categories) ||
-          (book.categories == null &&
-            (selectedLocation.length > 0
-              ? selectedLocation.includes(book.location)
-              : true)) ||
-          (selectedLocation == null &&
-            (selectedTag.length > 0
-              ? book.tags.some((tag) => selectedTag.includes(tag))
-              : true)) ||
-          selectedTag == null
-      )
-      .map((book) => ({
-        ...book,
-        isOwnedByCurrentUser: book.owner === currentUserId,
-      }));
+            (book.categories == null &&
+              (selectedLocation.length > 0
+                ? selectedLocation.includes(book.location)
+                : true)) ||
+            (selectedLocation == null &&
+              (selectedTag.length > 0
+                ? book.tags.some((tag) => selectedTag.includes(tag))
+                : true)) ||
+            selectedTag == null)
+        ) {
+          filteredBooks.push({
+            ...book,
+            isOwnedByCurrentUser: book.owner === currentUserId,
+          });
+        }
+      }
+      setFilteredBooks(filteredBooks);
+    };
 
-    setFilteredBooks(filteredBooks);
-  }, [allBooks, selectedLocation, selectedCategory, selectedTag, searchQuery]);
+    filterAndSetBooks();
+  }, [
+    allBooks,
+    selectedLocation,
+    selectedCategory,
+    selectedTag,
+    searchQuery,
+    isLoaned,
+  ]);
 
   const handleFilterClick = (filter: string, value: string) => {
     setSelectedFilter(filter);
@@ -503,6 +536,50 @@ const LibraryPage: React.FC = () => {
                 </IonList>
               )}
             </IonList>
+            <IonItem
+              button
+              onClick={() => setShowLoanedFilter(!showLoanedFilter)}
+            >
+              Loaned
+            </IonItem>
+            {showLoanedFilter && (
+              <IonList>
+                <IonItem>
+                  <IonCheckbox
+                    aria-label='all'
+                    slot='start'
+                    value={null}
+                    checked={isLoaned === null}
+                    onIonChange={() => setIsLoaned(null)}
+                  />
+                  <IonLabel>All</IonLabel>
+                </IonItem>
+                <IonItem>
+                  <IonCheckbox
+                    aria-label='loaned'
+                    slot='start'
+                    value={true}
+                    checked={isLoaned === true}
+                    onIonChange={(e) =>
+                      setIsLoaned(e.detail.checked ? true : null)
+                    }
+                  />
+                  <IonLabel>Loaned</IonLabel>
+                </IonItem>
+                <IonItem>
+                  <IonCheckbox
+                    aria-label='notLoaned'
+                    slot='start'
+                    value={false}
+                    checked={isLoaned === false}
+                    onIonChange={(e) =>
+                      setIsLoaned(e.detail.checked ? false : null)
+                    }
+                  />
+                  <IonLabel>Not Loaned</IonLabel>
+                </IonItem>
+              </IonList>
+            )}
           </IonPopover>
         </div>
         {isLoading ? (
