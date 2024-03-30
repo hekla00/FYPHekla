@@ -36,15 +36,16 @@ const AccountPage: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Account</IonTitle>
-          <IonButtons slot='start'>
-            <IonBackButton defaultHref='/my/settings' />
-          </IonButtons>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        {/* <IonTitle>Account</IonTitle> */}
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton defaultHref='/my/settings' />
+        </IonButtons>
+        {/* </IonToolbar> */}
       </IonHeader>
-      <IonContent>
+      <IonContent className='ion-padding'>
+        <h1>Accont</h1>
         <div>
           <IonText>First Name: {userInfo?.firstName}</IonText>
         </div>

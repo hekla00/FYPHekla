@@ -14,15 +14,14 @@ import {
 const PrivacyPage: React.FC = () => {
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Privacy & Security</IonTitle>
-          <IonButtons slot='start'>
-            <IonBackButton defaultHref='/my/settings' />
-          </IonButtons>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton defaultHref='/my/settings' />
+        </IonButtons>
       </IonHeader>
+      <div style={{ height: '20px' }}></div>
       <IonContent>
+        <h1 className='h1-padding-left'>Privacy & Security</h1>
         <IonCard>
           <IonCardHeader>
             <IonTitle>Privacy Policy</IonTitle>

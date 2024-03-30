@@ -67,12 +67,17 @@ const BookPage: React.FC = () => {
   const [rating, setRating] = useState(0);
   const location = useLocation();
   const [userOwnsBook, setUserOwnsBook] = useState(false);
+  const [loanDetails, setLoanDetails] = useState([]);
+  // From groups page or book display
+  const bookLocation = (location.state as { location?: string })?.location;
+  const bookTags = (location.state as { tags?: string[] })?.tags;
   const thumbnail = (location.state as { thumbnail?: string })?.thumbnail;
   const bookFromLocation = (location.state as { book?: typeof book })?.book;
-  const [loanDetails, setLoanDetails] = useState([]);
-
+  const bookEdition = (location.state as { edition?: string })?.edition;
+  // from book display
   const userSpecificData = (location.state as { userSpecificData?: any })
     ?.userSpecificData;
+
   const [showPopover, setShowPopover] = useState<{
     open: boolean;
     event: Event | undefined;
@@ -81,7 +86,8 @@ const BookPage: React.FC = () => {
     event: undefined,
   });
   const [showToast, setShowToast] = useState(false);
-  const purchaseDate = new Date(userSpecificData?.purchaseDate);
+
+  // Formatting date from firebase
   let year;
   let formattedDate;
   if (book?.releaseDate instanceof firebase.firestore.Timestamp) {
@@ -142,6 +148,7 @@ const BookPage: React.FC = () => {
       console.log('No user is signed in');
     }
   }, [id]);
+  console.log(userSpecificData?.location);
 
   return (
     <IonPage>
@@ -293,7 +300,7 @@ const BookPage: React.FC = () => {
           <IonCardContent className='IonCardContent'>
             {/* {book?.location || bookFromLocation?.location}
              */}
-            {userSpecificData?.location}
+            {userSpecificData?.location || bookLocation}
           </IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>
@@ -301,7 +308,7 @@ const BookPage: React.FC = () => {
           <IonCardContent className='IonCardContent'>
             {/* {book?.tags || bookFromLocation?.tags}
              */}
-            {userSpecificData?.tags}
+            {userSpecificData?.tags || bookTags}
           </IonCardContent>
         </IonCard>
         {userOwnsBook && notes ? (
@@ -357,7 +364,7 @@ const BookPage: React.FC = () => {
           <IonCardHeader className='IonCardHeader'>Edition</IonCardHeader>
           <IonCardContent className='IonCardContent'>
             {/* {book?.edition || bookFromLocation?.edition} */}
-            {userSpecificData?.edition}
+            {userSpecificData?.edition || bookEdition}
           </IonCardContent>
         </IonCard>
         <IonCard className='IonCard'>

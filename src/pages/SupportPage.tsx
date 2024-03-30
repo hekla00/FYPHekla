@@ -14,21 +14,22 @@ import {
 const SupportPage: React.FC = () => {
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Help & Support</IonTitle>
-          <IonButtons slot='start'>
-            <IonBackButton defaultHref='/my/settings' />
-          </IonButtons>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        {/* <IonToolbar> */}
+        {/* <IonTitle>Help & Support</IonTitle> */}
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton defaultHref='/my/settings' />
+        </IonButtons>
+        {/* </IonToolbar> */}
       </IonHeader>
+      <div style={{ height: '20px' }}></div>
       <IonContent>
+        <h1 className='h1-padding-left'>Help & Support</h1>
         <IonCard>
           <IonCardHeader>
             <IonTitle>FAQs</IonTitle>
           </IonCardHeader>
           <IonCardContent>
-            <p>FAQs go here.</p>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
               diam tellus, vehicula ac auctor nec, consequat vel ex. Cras ornare
@@ -45,7 +46,6 @@ const SupportPage: React.FC = () => {
             <IonTitle>Contact Us</IonTitle>
           </IonCardHeader>
           <IonCardContent>
-            <p>Contact information goes here.</p>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
               diam tellus, vehicula ac auctor nec, consequat vel ex. Cras ornare

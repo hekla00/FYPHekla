@@ -53,7 +53,7 @@ const SettingsPage: React.FC = () => {
           </IonItem>
         </IonList>
         <IonButton
-          color={'medium'}
+          color={'primary'}
           expand='block'
           onClick={() => auth.signOut()}
         >

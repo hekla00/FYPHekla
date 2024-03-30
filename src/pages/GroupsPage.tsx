@@ -31,6 +31,7 @@ import { Redirect } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import firebase from 'firebase/app';
+import { fetchUserSpecificInfo } from '../functions/UserHelper';
 import LeaveGroup from '../components/LeaveGroup';
 import 'firebase/auth';
 import 'firebase/firestore';
@@ -170,18 +171,28 @@ const GroupsPage: React.FC = () => {
             title?: string;
           };
           // console.log('book', book);
+          const userSpecificInfo = await fetchUserSpecificInfo(
+            userBookData.bookID,
+            userBookData.userID
+          );
           let thumbnail;
           try {
             thumbnail = await fetchThumbnailByISBN(book?.isbn);
           } catch (error) {
             thumbnail = await fetchThumbnailByTitle(book?.title);
           }
+          console.log(userSpecificInfo);
           return {
             ...userBookData,
             review,
             user: userData,
             book,
             thumbnail,
+            // ...userSpecificInfo,
+            location: userSpecificInfo?.location,
+            tags: userSpecificInfo?.tags,
+            purchaseDate: userSpecificInfo?.purchaseDate,
+            edition: userSpecificInfo?.edition,
           };
         })
       );
@@ -364,10 +375,11 @@ const GroupsPage: React.FC = () => {
                       }
                       key={userBookData.book.title}
                     >
-                      {userBookData.thumbnail ? (
-                        <img src={userBookData.thumbnail} />
-                      ) : null
-                      // <IonIcon icon={book} />
+                      {
+                        userBookData.thumbnail ? (
+                          <img src={userBookData.thumbnail} />
+                        ) : null
+                        // <IonIcon icon={book} />
                       }
                     </div>
                   </div>

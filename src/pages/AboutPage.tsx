@@ -14,21 +14,19 @@ import {
 const AboutPage: React.FC = () => {
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>About Us</IonTitle>
-          <IonButtons slot='start'>
-            <IonBackButton defaultHref='/my/settings' />
-          </IonButtons>
-        </IonToolbar>
+      <IonHeader className='header-padding-text'>
+        <IonButtons className='button-padding' slot='start'>
+          <IonBackButton defaultHref='/my/settings' />
+        </IonButtons>
       </IonHeader>
+      <div style={{ height: '20px' }}></div>
       <IonContent>
+        <h1 className='h1-padding-left'>About Us</h1>
         <IonCard>
           <IonCardHeader>
             <IonTitle>Our Story</IonTitle>
           </IonCardHeader>
           <IonCardContent>
-            <p>Our story goes here.</p>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
               diam tellus, vehicula ac auctor nec, consequat vel ex. Cras ornare
@@ -45,7 +43,6 @@ const AboutPage: React.FC = () => {
             <IonTitle>Our Mission</IonTitle>
           </IonCardHeader>
           <IonCardContent>
-            <p>Our mission goes here.</p>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
               diam tellus, vehicula ac auctor nec, consequat vel ex. Cras ornare
