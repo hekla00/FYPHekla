@@ -6,8 +6,6 @@ import {
   IonTabs,
   setupIonicReact,
   IonLabel,
-  IonActionSheet,
-  IonButton,
 } from '@ionic/react';
 import { Route, Redirect } from 'react-router-dom';
 import {
@@ -24,6 +22,7 @@ import InsideLibrary from './pages/InsideLibrary';
 import BookPage from './pages/BookPage';
 import { useAuth } from './authentication';
 import SettingsPage from './pages/SettingsPage';
+import SingleGroupPage from './pages/SingleGroupPage';
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
 
@@ -126,6 +125,8 @@ const AppTabs: React.FC = () => {
           component={InsideGroupsPage}
           exact={true}
         />
+        <Route path='/my/oneGroup' component={SingleGroupPage} exact={true} />
+        <Route path='/my/oneGroup/:groupId' component={SingleGroupPage} />
         <Route
           path='/my/insideGroupsTwo/:id'
           component={InsideGroupsPageTwo}

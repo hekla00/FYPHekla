@@ -27,6 +27,26 @@ export const fetchMembersData = async (selectedGroup, setMembersData) => {
   //   console.log('membersData:', membersData);
   setMembersData(membersData);
 };
+export const fetchMembersDataforGroup = async (groups, setMembersData) => {
+  if (!groups || !groups.members) {
+    console.error('Group or group.members is undefined');
+    return;
+  }
+
+  // Fetch user data for each member
+  const membersDataPromises = groups.members.map((memberId) =>
+    db.collection('publicUsers').doc(memberId).get()
+  );
+  const membersSnapshots = await Promise.all(membersDataPromises);
+
+  // Map over the snapshots to get the user data
+  const membersData = membersSnapshots.map((snapshot) => ({
+    id: snapshot.id,
+    ...snapshot.data(),
+  }));
+
+  setMembersData(membersData);
+};
 
 export const fetchGroup = async (groupId, setGroup, setLoading) => {
   const doc = await db.collection('groups').doc(groupId).get();

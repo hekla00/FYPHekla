@@ -1,8 +1,6 @@
 import {
   IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
   IonRow,
   IonCol,
   IonLabel,
@@ -12,58 +10,52 @@ import {
   IonIcon,
   IonCard,
   IonCardTitle,
-  IonGrid,
-  IonText,
-  IonSegment,
-  IonSegmentButton,
   IonFabList,
   IonItem,
-  IonAvatar,
   IonList,
   IonListHeader,
   IonRouterLink,
   IonCardContent,
-  IonButtons,
-  IonPopover,
-  IonButton,
 } from '@ionic/react';
-import { Redirect } from 'react-router';
-import { useHistory } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import firebase from 'firebase/app';
-import { fetchUserSpecificInfo } from '../functions/UserHelper';
-import LeaveGroup from '../components/LeaveGroup';
-import 'firebase/auth';
-import 'firebase/firestore';
 import {
   add,
   personAdd,
   chevronUpCircle,
   star,
   starOutline,
-  book,
   person,
   personCircle,
 } from 'ionicons/icons';
-import { fetchMembersData } from '../functions/GroupsHelper';
+import {
+  getUsersBooks,
+  fetchGroup,
+  fetchMembersDataforGroup,
+} from '../functions/GroupsHelper';
 import { fetchBookBasedOnBookID } from '../functions/BooksHelper';
 import {
   fetchThumbnailByISBN,
   fetchThumbnailByTitle,
 } from '../functions/APIHelper';
+import { useHistory, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import firebase from 'firebase/app';
+import { fetchUserSpecificInfo } from '../functions/UserHelper';
+import LeaveGroup from '../components/LeaveGroup';
+import 'firebase/auth';
+import 'firebase/firestore';
 
-const GroupsPage: React.FC = () => {
-  const [groups, setGroups] = useState([]);
-  const currentUserId = firebase.auth().currentUser?.uid;
-  // console.log('currentUserId', currentUserId);
+const SingleGroupPage: React.FC = () => {
+  const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [membersData, setMembersData] = useState([]);
   const [reviewsData, setReviewsData] = useState([]);
   const [thumbnails, setThumbnails] = useState({});
-  const [selectedGroup, setSelectedGroup] = useState(groups[0]);
-  // console.log('selectedGroup', selectedGroup);
+  const { groupId } = useParams<{ groupId: string }>();
+  //   console.log('SingleGroupPage is being rendered');
+  //   console.log('Group ID:', groupId);
   const db = firebase.firestore();
   const history = useHistory();
+  //   const groupName = groups[0].name;
   const [showPopover, setShowPopover] = useState<{
     open: boolean;
     event: Event | undefined;
@@ -71,72 +63,29 @@ const GroupsPage: React.FC = () => {
     open: false,
     event: undefined,
   });
+
   const handleCreateGroup = () => {
     history.push('/my/groupcreation');
   };
 
   const handleAddMemberClick = (groupId) => {
     setShowPopover({ open: false, event: undefined });
-    // const groupId = useParams().groupId;
-    const group = groups.find((group) => group.id === groupId);
-    if (group) {
-      history.push(`/my/addmember/${group.id}`);
+    if (groupId) {
+      history.push(`/my/addmember/${groupId}`);
     } else {
       console.log('No group selected');
     }
   };
 
   useEffect(() => {
-    if (groups.length === 1) {
-      setSelectedGroup(groups[0]);
-      fetchMembersData(groups[0], setMembersData);
-    }
-  }, [groups]);
+    fetchGroup(groupId, setGroup, setLoading);
+    console.log('fetchGroup has been called');
+  }, []);
+  console.log('group info', group);
   useEffect(() => {
-    const fetchGroups = async () => {
-      const db = firebase.firestore();
-      // console.log('currentUserId', currentUserId);
-      db.collection('groups')
-        .where('members', 'array-contains', currentUserId)
-        .get()
-        .then((snapshot) => {
-          const groups = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          // console.log('groups', groups);
-          setGroups(groups);
-          // console.log('groups after', groups);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error fetching groups:', error);
-        });
-    };
-    fetchGroups();
-  }, [groups]);
+    fetchMembersDataforGroup(group, setMembersData);
+  }, [group, groupId]);
 
-  useEffect(() => {
-    // console.log(selectedGroup);
-    if (selectedGroup) {
-      fetchMembersData(selectedGroup, setMembersData);
-    }
-  }, [selectedGroup]);
-
-  useEffect(() => {
-    if (membersData) {
-      fetchReviewsForGroupMembers();
-    }
-  }, [membersData]);
-
-  const getUsersBooks = async (memberId) => {
-    const userBooks = await db
-      .collection('userBooks')
-      .where('userID', '==', memberId)
-      .limit(3)
-      .get();
-    return userBooks;
-  };
   const fetchReviewsForGroupMembers = async () => {
     // if (selectedGroup) {
     const reviewsDataPromises = membersData.map(async (member) => {
@@ -226,57 +175,19 @@ const GroupsPage: React.FC = () => {
     //   console.log('newThumbnails', newThumbnails);
     setThumbnails(newThumbnails);
     setReviewsData(resolvedReviewsData);
+    // console.log('rdata', reviewsData);
   };
-
-  const handleInsideGroup = (groupId: string) => {
-    history.push({
-      pathname: `/my/oneGroup/${groupId}`,
-      state: { groupId: groupId },
-    });
-  };
-
-  if (groups.length === 0 && !loading) {
-    console.log('Redirecting to /my/groupcreation');
-    return <Redirect to='/my/groupcreation' />;
-  } else if (groups.length === 1 && !loading) {
-    console.log('Redirecting to one group page');
-    return (
-      <Redirect
-        to={{
-          pathname: `/my/oneGroup/${groups[0].id}`,
-          state: {
-            groupId: groups[0].id,
-            name: groups[0].name,
-            group: groups[0],
-          },
-        }}
-      />
-    );
-  }
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    if (membersData) {
+      fetchReviewsForGroupMembers();
+    }
+  }, [membersData]);
 
   return (
     <IonPage>
       <IonHeader className='header-padding-text'></IonHeader>
       <IonContent>
-        {groups.length > 1 && <h1 className='h1-padding-left'>My Groups</h1>}
-        {groups.length > 1 && (
-          <IonSegment scrollable className='segment-groups'>
-            {groups.map((group, index) => (
-              <IonSegmentButton
-                // value={selectedGroup?.id}
-                key={index}
-                onClick={() => setSelectedGroup(group)}
-                // value={selectedGroup[0]}
-              >
-                <IonLabel>{group.name}</IonLabel>
-              </IonSegmentButton>
-            ))}
-          </IonSegment>
-        )}
+        <h1 className='h1-padding-left'>{group?.name}</h1>
 
         <IonRow>
           <IonCol>
@@ -358,13 +269,10 @@ const GroupsPage: React.FC = () => {
                 {/* Display the members */}
                 {membersData.map((member, index) => (
                   <IonItem key={index}>
-                    {/* <IonAvatar slot='start'> */}
                     <IonIcon
                       icon={personCircle}
                       className='icon-spacing'
                     ></IonIcon>
-                    {/* <img src={member.profile || '/placeholder1.jpg'} /> */}
-                    {/* </IonAvatar> */}
                     <IonLabel className='label-spacing'>
                       {member.email}
                     </IonLabel>
@@ -411,20 +319,18 @@ const GroupsPage: React.FC = () => {
             <IonIcon icon={chevronUpCircle}></IonIcon>
           </IonFabButton>
           <IonFabList side='top'>
-            <IonFabButton
-              onClick={() => handleAddMemberClick(selectedGroup?.groupId)}
-            >
+            <IonFabButton onClick={() => handleAddMemberClick(groupId)}>
               <IonIcon icon={personAdd}></IonIcon>
             </IonFabButton>
             <IonFabButton onClick={handleCreateGroup}>
               <IonIcon icon={add}></IonIcon>
             </IonFabButton>
             {/* <IonFabButton
-              onClick={() => handleLeaveGroup(selectedGroup.groupId)}
-            >
-              <IonIcon icon={exit}></IonIcon>
-            </IonFabButton> */}
-            <LeaveGroup groupId={selectedGroup?.groupId} />
+                  onClick={() => handleLeaveGroup(selectedGroup.groupId)}
+                >
+                  <IonIcon icon={exit}></IonIcon>
+                </IonFabButton> */}
+            <LeaveGroup groupId={groupId} />
           </IonFabList>
         </IonFab>
       </IonContent>
@@ -432,4 +338,4 @@ const GroupsPage: React.FC = () => {
   );
 };
 
-export default GroupsPage;
+export default SingleGroupPage;
