@@ -150,6 +150,13 @@ const BookPage: React.FC = () => {
   }, [id]);
   console.log(userSpecificData?.location);
 
+  const handleEdit = () => {
+    history.push({
+      pathname: `/my/edit/${book.id}`,
+      state: { book: book },
+    });
+  };
+
   return (
     <IonPage>
       <IonHeader className='header-padding-text'>
@@ -199,6 +206,7 @@ const BookPage: React.FC = () => {
           onDidDismiss={() => setShowPopover({ open: false, event: undefined })}
         >
           <IonList>
+            {/* <IonItem onClick={handleEdit}> */}
             <IonItem>
               <IonIcon slot='end' icon={pencil}></IonIcon>
               <IonLabel>Edit Book</IonLabel>

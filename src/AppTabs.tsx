@@ -61,6 +61,7 @@ import AccountPage from './pages/AccountPage';
 import PrivacyPage from './pages/PrivacyPage';
 import SupportPage from './pages/SupportPage';
 import AboutPage from './pages/AboutPage';
+import EditPage from './pages/EditPage';
 setupIonicReact();
 
 const AppTabs: React.FC = () => {
@@ -152,6 +153,7 @@ const AppTabs: React.FC = () => {
           exact={true}
         />
         <Route path='/my/add' component={AddBookPage} exact />
+        <Route path='/my/edit/:bookID' component={EditPage} exact />
         <Route path='/my/search' component={SearchPage} exact />
         <Route exact path='/' render={() => <Redirect to='/my/home' />} />
       </IonRouterOutlet>

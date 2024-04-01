@@ -39,7 +39,6 @@ const LibraryPage: React.FC = () => {
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState([]);
-  const [selectedTag, setSelectedTag] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [showLocations, setShowLocations] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
@@ -51,8 +50,8 @@ const LibraryPage: React.FC = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loans, setLoans] = useState([]);
-  const [isLoaned, setIsLoaned] = useState(false);
-  const [showLoanedFilter, setShowLoanedFilter] = useState(false);
+  const [isLoaned, setIsLoaned] = useState(null);
+  const [showLoanedFilter, setShowLoanedFilter] = useState(null);
 
   const db = firebase.firestore();
 
@@ -104,85 +103,57 @@ const LibraryPage: React.FC = () => {
     }
   };
 
+  // const fetchTags = async () => {
+  //   const userBooksCollection = db.collection('userBooks');
+  //   const snapshot = await userBooksCollection.get();
+  //   const tags = snapshot.docs
+  //     .map((doc) => {
+  //       const data = doc.data();
+  //       return data.tags;
+  //     })
+  //     .flat()
+  //     .filter((tag) => tag);
+  //   const uniqueTags = [...new Set(tags)];
+  //   setTags(uniqueTags);
+  // };
+  const [tagObjects, setTagObjects] = useState([]);
+
   const fetchTags = async () => {
-    try {
-      const userId = firebase.auth().currentUser?.uid;
-      if (!userId) {
-        console.error('No user is currently logged in.');
-        return;
-      }
-
-      // Fetch userBooks and books documents for the current user
-      const userBooksSnapshot = await db
-        .collection('userBooks')
-        .where('userID', '==', userId)
-        .get();
-
-      const booksSnapshot = await db.collection('books').get();
-
-      // Create a map of books by their id
-      const booksById = {};
-      booksSnapshot.docs.forEach((doc) => {
-        booksById[doc.id] = doc.data();
-      });
-
-      // Extract tags from the userBooks documents and match them with the books
-      const tags = {};
-      userBooksSnapshot.docs.forEach((doc) => {
+    const userBooksCollection = db.collection('userBooks');
+    const snapshot = await userBooksCollection.get();
+    const tags = snapshot.docs
+      .map((doc) => {
         const data = doc.data();
-        if (data.tags) {
-          const tag = typeof data.tags === 'string' ? data.tags : undefined;
-          if (tag) {
-            if (!tags[tag]) {
-              tags[tag] = [];
-            }
-            // Match the userBook with the corresponding book
-            const book = booksById[data.bookId];
-            if (book) {
-              tags[tag].push(book);
-            }
-          }
-        }
-      });
-
-      setTags(Object.values(tags));
-    } catch (error) {
-      console.error('Error fetching tags:', error);
-    }
+        const tagsArray = Array.isArray(data.tags) ? data.tags : [data.tags];
+        return tagsArray.map((tag) => ({ tag, bookID: data.bookID }));
+      })
+      .flat()
+      .filter((tag) => tag.tag);
+    const uniqueTags = [...new Set(tags.map((tag) => tag.tag))];
+    setTags(uniqueTags);
+    setTagObjects(tags);
   };
+
+  useEffect(() => {
+    fetchTags();
+  }, [selectedTags]);
 
   const fetchLocations = async () => {
-    try {
-      const userId = firebase.auth().currentUser?.uid;
-      if (!userId) {
-        console.error('No user is currently logged in.');
-        return;
-      }
-
-      // Fetch userBooks documents for the current user
-      const userBooksSnapshot = await db
-        .collection('userBooks')
-        .where('userID', '==', userId)
-        .get();
-
-      // Extract locations from the userBooks documents
-      const locations = {};
-      userBooksSnapshot.docs.forEach((doc) => {
+    const userBooksCollection = db.collection('userBooks');
+    const snapshot = await userBooksCollection.get();
+    const locations = snapshot.docs
+      .map((doc) => {
         const data = doc.data();
-        const bookLocation = data.location || 'Undefined';
-
-        if (!locations[bookLocation]) {
-          locations[bookLocation] = [];
-        }
-        locations[bookLocation].push(data);
-      });
-
-      setLocations(Object.values(locations));
-    } catch (error) {
-      console.error('Error fetching locations:', error);
-    }
+        return { location: data.location, bookID: data.bookID };
+      })
+      .filter((location) => location.location);
+    const uniqueLocations = [...new Set(locations)];
+    setLocations(uniqueLocations);
   };
 
+  useEffect(() => {
+    fetchLocations();
+  }, [selectedLocation]);
   useEffect(() => {
     if (selectedSegment === 'mine') {
       fetchAllUserBooks(setIsLoading, setAllBooks);
@@ -192,14 +163,13 @@ const LibraryPage: React.FC = () => {
   }, [setIsLoading, setAllBooks, selectedSegment]);
 
   useEffect(() => {
-    fetchLocations();
     fetchCategories();
     fetchTags();
-  }, [selectedLocation, selectedCategory, selectedTag]);
+  }, [selectedCategory, selectedTags]);
 
   useEffect(() => {
     console.log('searchQuery:', searchQuery);
-    const currentUserId = firebase.auth().currentUser?.uid; // Get the current user's ID
+    const currentUserId = firebase.auth().currentUser?.uid;
     const nonNullBooks = allBooks.filter((book) => book !== null);
 
     const fetchLoanedStatus = async (bookId) => {
@@ -217,24 +187,59 @@ const LibraryPage: React.FC = () => {
     };
 
     const filterAndSetBooks = async () => {
+      const loanedStatuses = await Promise.all(
+        nonNullBooks.map((book) => fetchLoanedStatus(book.id))
+      );
       const filteredBooks = [];
-      for (let book of nonNullBooks) {
-        const loaned = await fetchLoanedStatus(book.id);
+      for (let i = 0; i < nonNullBooks.length; i++) {
+        const book = nonNullBooks[i];
+        const loaned = loanedStatuses[i];
+        const locationData = locations.find(
+          (location) => location.bookID === book.id
+        );
+        console.log('Book ID:', book.id);
+        locations.forEach((location) => {
+          console.log('Location bookID:', location.bookID);
+        });
+        console.log('Locations:', locations);
+        // console.log('Book ID:', book.id);
+        const bookLocation = locationData ? locationData.location : null;
+        console.log('Selected locations:', selectedLocation);
+        console.log('Book location:', bookLocation);
+        const tagData = tagObjects.filter(
+          (tagObject) => tagObject.bookID === book.id
+        );
+        const bookTags = tagData
+          ? tagData.map((tagObject) => tagObject.tag)
+          : [];
+
+        // const tagData = tags.find((tags) => tags.bookID === book.id);
+        console.log('tags', tags);
+        tags.forEach((tag) => {
+          console.log('tag book ID', tag.bookID);
+        });
+        // const bookTags = tagData ? tagData.map((tag) => tag.tag) : [];
+        console.log('selected tag', selectedTags);
+        console.log('tagData', tagData);
+
+        const isLoanedCondition = isLoaned === null || loaned === isLoaned;
+        const searchQueryCondition =
+          book.title &&
+          book.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const locationCondition =
+          selectedLocation.length > 0
+            ? selectedLocation.includes(bookLocation)
+            : true;
+        const tagCondition =
+          selectedTags.length > 0
+            ? selectedTags.some((tag) => bookTags.includes(tag))
+            : true;
+
         if (
-          (isLoaned === null || loaned === isLoaned) &&
-          ((book &&
-            book.title &&
-            book.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            book.categories) ||
-            (book.categories == null &&
-              (selectedLocation.length > 0
-                ? selectedLocation.includes(book.location)
-                : true)) ||
-            (selectedLocation == null &&
-              (selectedTag.length > 0
-                ? book.tags.some((tag) => selectedTag.includes(tag))
-                : true)) ||
-            selectedTag == null)
+          isLoanedCondition &&
+          searchQueryCondition &&
+          locationCondition &&
+          tagCondition
         ) {
           filteredBooks.push({
             ...book,
@@ -250,7 +255,7 @@ const LibraryPage: React.FC = () => {
     allBooks,
     selectedLocation,
     selectedCategory,
-    selectedTag,
+    selectedTags,
     searchQuery,
     isLoaned,
   ]);
@@ -263,13 +268,17 @@ const LibraryPage: React.FC = () => {
 
   const handleLocationChange = (location) => {
     setIsLoading(true);
-    setSelectedLocation((prevLocations) =>
-      prevLocations.includes(location)
+    setSelectedLocation((prevLocations) => {
+      const newLocation = prevLocations.includes(location)
         ? prevLocations.filter((l) => l !== location)
-        : [...prevLocations, location]
-    );
-    setIsLoading(false);
+        : [...prevLocations, location];
+      return newLocation;
+    });
   };
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [selectedLocation]);
 
   const handleCategoryChange = (category) => {
     setIsLoading(true);
@@ -295,28 +304,19 @@ const LibraryPage: React.FC = () => {
   const handleTagChange = (tag) => {
     setIsLoading(true);
     setSelectedTags((prevTags) => {
-      const newTags = prevTags.includes(tag)
+      return prevTags.includes(tag)
         ? prevTags.filter((t) => t !== tag)
         : [...prevTags, tag];
-
-      const filteredBooks = allBooks.filter((book) =>
-        book.tags ? newTags.every((tag) => book.tags.includes(tag)) : false
-      );
-
-      setFilteredBooks(filteredBooks);
-
-      return newTags;
     });
-    setIsLoading(false);
   };
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [selectedTags]);
 
   // Group identical categories together
   const allCategories = Array.from(
     new Set(allBooks.flatMap((book) => book.categories || []))
-  );
-
-  const allTags = Array.from(
-    new Set(allBooks.flatMap((book) => book.tags || []))
   );
 
   useEffect(() => {
@@ -356,11 +356,7 @@ const LibraryPage: React.FC = () => {
   };
   return (
     <IonPage>
-      <IonHeader className='header-padding'>
-        {/* <IonToolbar>
-          <IonTitle slot='start'>Library</IonTitle>
-        </IonToolbar> */}
-      </IonHeader>
+      <IonHeader className='header-padding'></IonHeader>
       <IonContent className='ion-padding'>
         <IonSegment
           value={selectedSegment}
@@ -399,8 +395,8 @@ const LibraryPage: React.FC = () => {
                     (selectedLocation.length > 0
                       ? selectedLocation.includes(book.location)
                       : true) &&
-                    (selectedTag.length > 0
-                      ? book.tags.some((tag) => selectedTag.includes(tag))
+                    (selectedTags.length > 0
+                      ? book.tags.some((tag) => selectedTags.includes(tag))
                       : true) &&
                     book.title.toLowerCase().includes(term.toLowerCase())
                 );
@@ -434,18 +430,20 @@ const LibraryPage: React.FC = () => {
               </IonItem>
               {showLocations && (
                 <IonList>
-                  {Object.keys(locations).map((location, index) => (
+                  {locations.map((locationObj, index) => (
                     <IonItem key={index}>
                       <IonCheckbox
-                        aria-label={location}
+                        aria-label={locationObj.location}
                         slot='start'
-                        value={location}
-                        checked={selectedLocation.includes(location)}
+                        value={locationObj.location}
+                        checked={selectedLocation.includes(
+                          locationObj.location
+                        )}
                         onIonChange={(e) =>
-                          handleLocationChange(e.detail.value)
+                          handleLocationChange(locationObj.location)
                         }
                       />
-                      <IonLabel>{location}</IonLabel>
+                      <IonLabel>{locationObj.location}</IonLabel>
                     </IonItem>
                   ))}
                 </IonList>
@@ -456,26 +454,6 @@ const LibraryPage: React.FC = () => {
               >
                 Genre
               </IonItem>
-              {/* {showCategories && (
-                <IonList>
-                  {allBooks.map((book, index) =>
-                    allCategories.map((category, index) => (
-                      <IonItem key={index}>
-                        <IonCheckbox
-                          aria-label='category'
-                          slot='start'
-                          value={category}
-                          checked={selectedCategories.includes(category)}
-                          onIonChange={(e) =>
-                            handleCategoryChange(e.detail.value)
-                          }
-                        />
-                        <IonLabel>{category}</IonLabel>
-                      </IonItem>
-                    ))
-                  )}
-                </IonList>
-              )} */}
               {showCategories && (
                 <IonList>
                   {allCategories.map((category, index) => (
@@ -497,38 +475,16 @@ const LibraryPage: React.FC = () => {
               <IonItem button onClick={() => setShowTags(!showTags)}>
                 Tags
               </IonItem>
-              {/* {showTags && (
-                <IonList>
-                  {allBooks.map((book, index) =>
-                    book.tags
-                      ? book.tags.map((tag, index) => (
-                          <IonItem key={index}>
-                            <IonCheckbox
-                              aria-label='tag'
-                              slot='start'
-                              value={tag}
-                              checked={selectedTags.includes(tag)}
-                              onIonChange={(e) =>
-                                handleTagChange(e.detail.value)
-                              }
-                            />
-                            <IonLabel>{tag}</IonLabel>
-                          </IonItem>
-                        ))
-                      : null
-                  )}
-                </IonList>
-              )} */}
               {showTags && (
                 <IonList>
-                  {allTags.map((tag, index) => (
+                  {tags.map((tag, index) => (
                     <IonItem key={index}>
                       <IonCheckbox
                         aria-label='tag'
                         slot='start'
                         value={tag}
                         checked={selectedTags.includes(tag)}
-                        onIonChange={(e) => handleTagChange(e.detail.value)}
+                        onIonChange={(e) => handleTagChange(tag)}
                       />
                       <IonLabel>{tag}</IonLabel>
                     </IonItem>
