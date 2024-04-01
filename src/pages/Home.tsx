@@ -4,8 +4,6 @@ import {
   IonCardTitle,
   IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
   IonContent,
   IonGrid,
   IonRow,
@@ -15,6 +13,8 @@ import {
   IonBadge,
   IonSpinner,
   IonListHeader,
+  IonRefresher,
+  IonRefresherContent,
 } from '@ionic/react';
 import './Home.css';
 import { book, people, list, calendarClearSharp } from 'ionicons/icons';
@@ -62,14 +62,23 @@ const Home: React.FC = () => {
     history.push(`/my/bookRecommendation/view/${book.id}`, { book });
   };
 
+  const doRefresh = async (event) => {
+    fetchNumBooks(setNumBooks);
+    fetchNumGroups(setNumGroups);
+    fetchNumBooksInWishlist(setNumBooksInWishlist);
+    fetchNumLoans(setNumLoaned);
+    await getBooks();
+
+    event.detail.complete();
+  };
+
   return (
     <IonPage>
-      <IonHeader className='header-padding'>
-        {/* <IonToolbar>
-          <IonTitle>Home</IonTitle>
-        </IonToolbar> */}
-      </IonHeader>
+      <IonHeader className='header-padding'></IonHeader>
       <IonContent>
+        <IonRefresher slot='fixed' onIonRefresh={doRefresh}>
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
         <h1 className='h1-name'>LibraryVault</h1>
         <IonGrid>
           <IonRow>

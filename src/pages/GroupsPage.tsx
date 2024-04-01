@@ -18,6 +18,8 @@ import {
   IonListHeader,
   IonRouterLink,
   IonCardContent,
+  IonRefresher,
+  IonRefresherContent,
 } from '@ionic/react';
 import { Redirect } from 'react-router';
 import { useHistory } from 'react-router-dom';
@@ -217,13 +219,6 @@ const GroupsPage: React.FC = () => {
     //   console.log('newThumbnails', newThumbnails);
     setThumbnails(newThumbnails);
     setReviewsData(resolvedReviewsData);
-  };
-
-  const handleInsideGroup = (groupId: string) => {
-    history.push({
-      pathname: `/my/oneGroup/${groupId}`,
-      state: { groupId: groupId },
-    });
   };
 
   if (groups.length === 0 && !loading) {

@@ -13,8 +13,10 @@ import {
   IonListHeader,
   IonCheckbox,
   IonSpinner,
+  IonRefresher,
+  IonRefresherContent,
 } from '@ionic/react';
-import { filter, filterCircleOutline } from 'ionicons/icons';
+import { filterCircleOutline } from 'ionicons/icons';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import { IonSearchbar } from '@ionic/react';
@@ -49,10 +51,9 @@ const LibraryPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loans, setLoans] = useState([]);
   const [isLoaned, setIsLoaned] = useState(null);
+  const [tagObjects, setTagObjects] = useState([]);
   const [showLoanedFilter, setShowLoanedFilter] = useState(null);
-
   const db = firebase.firestore();
 
   const handleSegmentChange = (event: CustomEvent) => {
@@ -102,21 +103,6 @@ const LibraryPage: React.FC = () => {
       console.error('Error fetching categories:', error);
     }
   };
-
-  // const fetchTags = async () => {
-  //   const userBooksCollection = db.collection('userBooks');
-  //   const snapshot = await userBooksCollection.get();
-  //   const tags = snapshot.docs
-  //     .map((doc) => {
-  //       const data = doc.data();
-  //       return data.tags;
-  //     })
-  //     .flat()
-  //     .filter((tag) => tag);
-  //   const uniqueTags = [...new Set(tags)];
-  //   setTags(uniqueTags);
-  // };
-  const [tagObjects, setTagObjects] = useState([]);
 
   const fetchTags = async () => {
     const userBooksCollection = db.collection('userBooks');
@@ -354,10 +340,22 @@ const LibraryPage: React.FC = () => {
 
     // setFilteredBooks(groupBooks);
   };
+
+  const doRefresh = async (event) => {
+    if (selectedSegment === 'mine') {
+      fetchAllUserBooks(setIsLoading, setAllBooks);
+    } else if (selectedSegment === 'all') {
+      fetchAllUserAndGroupBooks(setIsLoading, setAllBooks);
+    }
+    event.detail.complete();
+  };
   return (
     <IonPage>
       <IonHeader className='header-padding'></IonHeader>
       <IonContent className='ion-padding'>
+        <IonRefresher slot='fixed' onIonRefresh={doRefresh}>
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
         <IonSegment
           value={selectedSegment}
           onIonChange={handleSegmentChange}
