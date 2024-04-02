@@ -15,6 +15,8 @@ import {
   IonList,
   IonListHeader,
   IonRouterLink,
+  IonRefresher,
+  IonRefresherContent,
   IonCardContent,
 } from '@ionic/react';
 import {
@@ -101,6 +103,7 @@ const SingleGroupPage: React.FC = () => {
         const reviewsSnapshot = await db
           .collection('bookReviews')
           .where('bookID', 'in', reviewIDs)
+          .where('userID', '==', member.id)
           .get();
         reviewsData = reviewsSnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -183,10 +186,20 @@ const SingleGroupPage: React.FC = () => {
     }
   }, [membersData]);
 
+  const doRefresh = async (event) => {
+    await fetchGroup(groupId, setGroup, setLoading);
+    await fetchMembersDataforGroup(group, setMembersData);
+    await fetchReviewsForGroupMembers();
+    event.detail.complete();
+  };
+
   return (
     <IonPage>
       <IonHeader className='header-padding-text'></IonHeader>
       <IonContent>
+        <IonRefresher slot='fixed' onIonRefresh={doRefresh}>
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
         <h1 className='h1-padding-left'>{group?.name}</h1>
 
         <IonRow>

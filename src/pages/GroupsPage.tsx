@@ -48,13 +48,11 @@ import {
 const GroupsPage: React.FC = () => {
   const [groups, setGroups] = useState([]);
   const currentUserId = firebase.auth().currentUser?.uid;
-  // console.log('currentUserId', currentUserId);
   const [loading, setLoading] = useState(true);
   const [membersData, setMembersData] = useState([]);
   const [reviewsData, setReviewsData] = useState([]);
   const [thumbnails, setThumbnails] = useState({});
   const [selectedGroup, setSelectedGroup] = useState(groups[0]);
-  // console.log('selectedGroup', selectedGroup);
   const db = firebase.firestore();
   const history = useHistory();
   const [showPopover, setShowPopover] = useState<{
@@ -64,13 +62,13 @@ const GroupsPage: React.FC = () => {
     open: false,
     event: undefined,
   });
+
   const handleCreateGroup = () => {
     history.push('/my/groupcreation');
   };
 
   const handleAddMemberClick = (groupId) => {
     setShowPopover({ open: false, event: undefined });
-    // const groupId = useParams().groupId;
     const group = groups.find((group) => group.id === groupId);
     if (group) {
       history.push(`/my/addmember/${group.id}`);
@@ -85,32 +83,29 @@ const GroupsPage: React.FC = () => {
       fetchMembersData(groups[0], setMembersData);
     }
   }, [groups]);
+
+  const fetchGroups = async () => {
+    const db = firebase.firestore();
+    db.collection('groups')
+      .where('members', 'array-contains', currentUserId)
+      .get()
+      .then((snapshot) => {
+        const groups = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setGroups(groups);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching groups:', error);
+      });
+  };
   useEffect(() => {
-    const fetchGroups = async () => {
-      const db = firebase.firestore();
-      // console.log('currentUserId', currentUserId);
-      db.collection('groups')
-        .where('members', 'array-contains', currentUserId)
-        .get()
-        .then((snapshot) => {
-          const groups = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          // console.log('groups', groups);
-          setGroups(groups);
-          // console.log('groups after', groups);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error fetching groups:', error);
-        });
-    };
     fetchGroups();
   }, [groups]);
 
   useEffect(() => {
-    // console.log(selectedGroup);
     if (selectedGroup) {
       fetchMembersData(selectedGroup, setMembersData);
     }
@@ -131,7 +126,6 @@ const GroupsPage: React.FC = () => {
     return userBooks;
   };
   const fetchReviewsForGroupMembers = async () => {
-    // if (selectedGroup) {
     const reviewsDataPromises = membersData.map(async (member) => {
       const userBooksSnapshot = await getUsersBooks(member.id);
       const userID = member.id;
@@ -144,7 +138,9 @@ const GroupsPage: React.FC = () => {
       if (reviewIDs.length > 0) {
         const reviewsSnapshot = await db
           .collection('bookReviews')
+
           .where('bookID', 'in', reviewIDs)
+          .where('userID', '==', member.id)
           .get();
         reviewsData = reviewsSnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -163,7 +159,6 @@ const GroupsPage: React.FC = () => {
             isbn?: string;
             title?: string;
           };
-          // console.log('book', book);
           const userSpecificInfo = await fetchUserSpecificInfo(
             userBookData.bookID,
             userBookData.userID
@@ -181,7 +176,6 @@ const GroupsPage: React.FC = () => {
             user: userData,
             book,
             thumbnail,
-            // ...userSpecificInfo,
             location: userSpecificInfo?.location,
             tags: userSpecificInfo?.tags,
             purchaseDate: userSpecificInfo?.purchaseDate,
@@ -189,8 +183,6 @@ const GroupsPage: React.FC = () => {
           };
         })
       );
-
-      // console.log('userBooksData', userBooksData);
       return userBooksData;
     });
 
@@ -205,7 +197,7 @@ const GroupsPage: React.FC = () => {
           break;
         }
 
-        if (!fetchedTitles.has(userBookData.book.title)) {
+        if (userBookData.book && !fetchedTitles.has(userBookData.book.title)) {
           newThumbnails[userBookData.book.title] = userBookData.thumbnail;
           fetchedTitles.add(userBookData.book.title);
           thumbnailCount++;
@@ -216,7 +208,6 @@ const GroupsPage: React.FC = () => {
         break;
       }
     }
-    //   console.log('newThumbnails', newThumbnails);
     setThumbnails(newThumbnails);
     setReviewsData(resolvedReviewsData);
   };
@@ -244,26 +235,37 @@ const GroupsPage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
+  const doRefresh = async (event) => {
+    await fetchGroups();
+    // if (selectedGroup) {
+    await fetchMembersData(selectedGroup, setMembersData);
+    // }
+    // if (membersData) {
+    // await fetchReviewsForGroupMembers();
+    // }
+    event.detail.complete();
+  };
+
   return (
     <IonPage>
       <IonHeader className='header-padding-text'></IonHeader>
       <IonContent>
+        <IonRefresher slot='fixed' onIonRefresh={doRefresh}>
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
         {groups.length > 1 && <h1 className='h1-padding-left'>My Groups</h1>}
         {groups.length > 1 && (
           <IonSegment scrollable className='segment-groups'>
             {groups.map((group, index) => (
               <IonSegmentButton
-                // value={selectedGroup?.id}
                 key={index}
                 onClick={() => setSelectedGroup(group)}
-                // value={selectedGroup[0]}
               >
                 <IonLabel>{group.name}</IonLabel>
               </IonSegmentButton>
             ))}
           </IonSegment>
         )}
-
         <IonRow>
           <IonCol>
             <IonListHeader>
@@ -344,13 +346,10 @@ const GroupsPage: React.FC = () => {
                 {/* Display the members */}
                 {membersData.map((member, index) => (
                   <IonItem key={index}>
-                    {/* <IonAvatar slot='start'> */}
                     <IonIcon
                       icon={personCircle}
                       className='icon-spacing'
                     ></IonIcon>
-                    {/* <img src={member.profile || '/placeholder1.jpg'} /> */}
-                    {/* </IonAvatar> */}
                     <IonLabel className='label-spacing'>
                       {member.email}
                     </IonLabel>
@@ -367,24 +366,25 @@ const GroupsPage: React.FC = () => {
             </IonListHeader>
 
             <div className='thumbnail-container'>
-              {reviewsData.map((userBooksData) =>
-                userBooksData.map((userBookData) => (
-                  <div key={userBookData.book.title} className='thumbnail'>
+              {reviewsData.map((userBooksData, outerIndex) =>
+                userBooksData.map((userBookData, innerIndex) => (
+                  <div
+                    key={`${outerIndex}-${innerIndex}`}
+                    className='thumbnail'
+                  >
                     <div
-                      onClick={() =>
-                        history.push(
-                          `/my/books/view/${userBookData.book.id}`,
-                          userBookData
-                        )
-                      }
-                      key={userBookData.book.title}
+                      onClick={() => {
+                        if (userBookData.book) {
+                          history.push(
+                            `/my/books/view/${userBookData.book.id}`,
+                            userBookData
+                          );
+                        }
+                      }}
                     >
-                      {
-                        userBookData.thumbnail ? (
-                          <img src={userBookData.thumbnail} />
-                        ) : null
-                        // <IonIcon icon={book} />
-                      }
+                      {userBookData.thumbnail ? (
+                        <img src={userBookData.thumbnail} />
+                      ) : null}
                     </div>
                   </div>
                 ))
@@ -405,11 +405,6 @@ const GroupsPage: React.FC = () => {
             <IonFabButton onClick={handleCreateGroup}>
               <IonIcon icon={add}></IonIcon>
             </IonFabButton>
-            {/* <IonFabButton
-              onClick={() => handleLeaveGroup(selectedGroup.groupId)}
-            >
-              <IonIcon icon={exit}></IonIcon>
-            </IonFabButton> */}
             <LeaveGroup groupId={selectedGroup?.groupId} />
           </IonFabList>
         </IonFab>

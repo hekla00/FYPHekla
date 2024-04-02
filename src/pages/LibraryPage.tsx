@@ -28,7 +28,7 @@ import BookDisplay from '../components/BookDisplay';
 import { fetchSelectedGroupBooks } from '../functions/UserHelper';
 
 const LibraryPage: React.FC = () => {
-  const [selectedSegment, setSelectedSegment] = useState<string>('all');
+  const [selectedSegment, setSelectedSegment] = useState<string>('mine');
   const [locations, setLocations] = useState([]);
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
@@ -361,11 +361,11 @@ const LibraryPage: React.FC = () => {
           onIonChange={handleSegmentChange}
           scrollable
         >
-          <IonSegmentButton value='all'>
-            <IonLabel>All</IonLabel>
-          </IonSegmentButton>
           <IonSegmentButton value='mine'>
             <IonLabel>My Books</IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton value='all'>
+            <IonLabel>All</IonLabel>
           </IonSegmentButton>
           {groups.map((group, index) => (
             <IonSegmentButton

@@ -44,15 +44,15 @@ export const handleDelete = async (bookId, history) => {
     }
   });
   // Reference to the book in the books collection
-  const bookRef = firestore.collection('books').doc(bookId);
+  // const bookRef = firestore.collection('books').doc(bookId);
 
-  // Delete the book from the books collection
-  try {
-    await bookRef.delete();
-    console.log('Book successfully deleted from books collection');
-  } catch (error) {
-    console.error('Error deleting book from books collection: ', error);
-  }
+  // // Delete the book from the books collection
+  // try {
+  //   await bookRef.delete();
+  //   console.log('Book successfully deleted from books collection');
+  // } catch (error) {
+  //   console.error('Error deleting book from books collection: ', error);
+  // }
 
   const booksReviewsQuery = firestore
     .collection('bookReviews')

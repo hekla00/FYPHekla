@@ -148,7 +148,7 @@ const BookPage: React.FC = () => {
       console.log('No user is signed in');
     }
   }, [id]);
-  console.log(userSpecificData?.location);
+  // console.log(userSpecificData?.location);
 
   const handleEdit = () => {
     history.push({
@@ -207,10 +207,10 @@ const BookPage: React.FC = () => {
         >
           <IonList>
             {/* <IonItem onClick={handleEdit}> */}
-            <IonItem>
+            {/* <IonItem>
               <IonIcon slot='end' icon={pencil}></IonIcon>
               <IonLabel>Edit Book</IonLabel>
-            </IonItem>
+            </IonItem> */}
             <IonItem onClick={() => setShowReviewModal(true)}>
               <IonIcon slot='end' icon={add}></IonIcon>
               <IonLabel>Edit Review</IonLabel>
