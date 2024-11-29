@@ -175,6 +175,10 @@ This feature was originally a secondary objective but was moved to a core object
 ### LOGIN PAGE
 The **Login Page** is the first screen users see when opening the app. Here, they can log in using their email and password. If the user doesn't have an account, they can click the **bold register** text to be redirected to the registration page.
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/LoginPage.png" alt="Login Page" width="25%" />
+</div>
+
 ---
 
 ### REGISTER PAGE
@@ -185,6 +189,10 @@ On the **Register Page**, the user is presented with a form to create a new acco
 - **Password**
 
 If the user already has an account, they can click the **bold log in** text to be redirected to the login page. *(See Use Case 6)*
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/RegisterPage.png" alt="Register Page" width="25%" />
+</div>
 
 ---
 
@@ -198,6 +206,10 @@ The **Home Page** displays four boxes with library statistics that are clickable
 
 At the bottom, there are **random book recommendations**. Only book covers are displayed, but users can click them to be redirected to the **Book Information Page**. *(See Use Case 4)*
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/HomePage.png" alt="Home Page" width="25%" />
+</div>
+
 ---
 
 ### WISHLIST PAGE
@@ -210,6 +222,11 @@ The **Wishlist Page** shows all books currently in the user's wishlist. Users ca
 - Description
 - A button to **remove the book from their wishlist**. *(See Use Case 8)*
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/WishlistPageOne.png" alt="Wishlist Page" width="25%" />
+  <img src="images/readmeimages/WishlistPageTwo.png" alt="Wishlist Page" width="25%" />
+</div>
+
 ---
 
 ### LOANING A BOOK
@@ -219,10 +236,20 @@ To **loan a book**, the user navigates to the book they want to loan out and sel
 
 The loan details are visible on the **Book Information Page** or **Loan Tracking Page** after confirming. *(See Use Case 3)*
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/LoaningaBookOne.png" alt="Loaning a Book" width="25%" />
+  <img src="images/readmeimages/LoaningaBookTwo.png" alt="Loaning a Book" width="25%" />
+  <img src="images/readmeimages/LoaningaBookThree.png" alt="Loaning a Book" width="25%" />
+</div>
+
 ---
 
 ### LOAN TRACKING PAGE
 The **Loan Tracking Page** displays all books that have been or are currently being loaned out. Clicking on a book takes the user to its **Book Information Page**. *(See Use Case 3)*
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/LoanTracking.png" alt="Loan Tracking" width="25%" />
+</div>
 
 ---
 
@@ -235,6 +262,12 @@ The **Book Recommendations Page** shows random book recommendations. When users 
 - Number of Pages
 - Description
 - A button to **add the book to their wishlist**. *(See Use Cases 4 & 8)*
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/BookRecomOne.png" alt="Book Recommentations" width="25%" />
+  <img src="images/readmeimages/BookRecomTwo.png" alt="Book Recommentations" width="25%" />
+  <img src="images/readmeimages/BookRecomThree.png" alt="Book Recommentations" width="25%" />
+</div>
 
 ---
 
@@ -249,6 +282,12 @@ There is a **search bar** at the top of the page, and next to it is an **icon** 
 - **Tags** (currently broken)
 - A future feature will allow filtering books based on whether they are loaned out or not. *(See Use Cases 2 & 7)*
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/LibraryPageOne.png" alt="Library Page" width="25%" />
+  <img src="images/readmeimages/LibraryPageTwo.png" alt="Library Page" width="25%" />
+  <img src="images/readmeimages/LibraryPageThree.png" alt="Library Page" width="25%" />
+</div>
+
 ---
 
 ### BOOK INFORMATION PAGE
@@ -262,6 +301,12 @@ When the user owns the book, they are shown:
 
 *(See Use Case 5)*
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/BookInfoPageUserOwnsBookOne.png" alt="Book Info Page User Owns Book" width="25%" />
+  <img src="images/readmeimages/BookInfoPageUserOwnsBookTwo.png" alt="Book Info Page User Owns Book" width="25%" />
+  <img src="images/readmeimages/BookInfoPageUserOwnsBookThree.png" alt="Book Info Page User Owns Book" width="25%" />
+</div>
+
 #### USER DOES NOT OWN THE BOOK
 If the user does not own the book but it is shared with them, they can view the book details but will not have options to:
 - Edit details
@@ -269,6 +314,10 @@ If the user does not own the book but it is shared with them, they can view the 
 - Delete the book
 
 However, they may be able to **add a review and rating**, but only the owner can manage the book. *(See Use Case 7)*
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/BookInfoPageUserDoesNotOwnBook.png" alt="Book Info Page User Does Not Own Book" width="25%" />
+</div>
 
 ---
 
@@ -279,13 +328,43 @@ When the user selects a book from their library, they can choose to **add a revi
 
 After submission, the **Book Information Page** will display the rating, review, and private notes. Only the owner can view their private notes. *(See Use Case 5)*
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/ReviewRatingOne.png" alt="Review Rating" width="25%" />
+  <img src="images/readmeimages/ReviewRatingTwo.png" alt="Review Rating" width="25%" />
+  <img src="images/readmeimages/ReviewRatingThree.png" alt="Review Rating" width="25%" />
+</div>
+
 ---
 
 ### ADDING A BOOK TO LIBRARY OPTIONS
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/AddBookOptions.png" alt="Add Book Options" width="25%" />
+</div>
+
 When the user clicks the **Add** button in the toolbar, they are presented with three options to add a book:
 1. **Manually Insert**: Users fill in book details such as ISBN, title, author, purchase date, location, and tags. They can also add additional information like description, genre, pages, etc.
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/AddBookInfoTwo.png" alt="Add Book Info Manually" width="25%" />
+  <img src="images/readmeimages/AddBookInfoThree.png" alt="Add Book Info Manually" width="25%" />
+</div>
+
 2. **Search Option**: Users can search for a book by title, author, or ISBN. After selecting a book, they are redirected to the "Manually Insert" page, where most of the fields are populated by the API. The user only fills in location, purchase date, and tags.
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/SearchOptionsOne.png" alt="Search Options" width="25%" />
+  <img src="images/readmeimages/SearchoptionsTwo.png" alt="Search Options" width="25%" />
+  <img src="images/readmeimages/SearchOptionsThree.png" alt="Search Options" width="25%" />
+</div>
+
 3. **Barcode Scanner Option**: Similar to the search option, but users scan the barcode instead of typing in the information. The API populates the details, and the user fills in missing information. *(See Use Case 1)*
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/BarcodeOne.png" alt="Barcode" width="25%" />
+  <img src="images/readmeimages/BarcodeTwo.png" alt="Barcode" width="25%" />
+  <img src="images/readmeimages/BarcodeThree.png" alt="Barcode" width="25%" />
+</div>
 
 ---
 
@@ -298,12 +377,25 @@ The **Groups Page** renders differently based on the user's group membership:
 - The page displays **recently added books** by group members.
 - Users can leave a group, create a new group, or add new members.
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/UserInMoreThanOneGroupOne.png" alt="User in More than One Group" width="25%" />
+  <img src="images/readmeimages/UserInMoreThanOneGroupTwo.png" alt="User in More than One Group" width="25%" />
+</div>
+
 #### USER IN ONE GROUP
 - Displays the group name at the top.
 - The rest of the page is the same as the multi-group view.
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/UserinOneGroup.png" alt="User in One Group" width="25%" />
+</div>
+
 #### USER IN NO GROUP
 - Users can create a new group, but **joining a group** is not currently possible. This feature is planned for future releases.
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/UserinNoGroup.png" alt="User in No Group" width="25%" />
+</div>
 
 ---
 
@@ -312,10 +404,20 @@ To **add a member** to a group:
 - In the group page, select the **add person** icon.
 - Search for the user's email and add them to the group.
 
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/AddMemberOne.png" alt="Add Memeber" width="25%" />
+  <img src="images/readmeimages/AddMemberTwo.png" alt="Add Memeber" width="25%" />
+  <img src="images/readmeimages/AddMemberThree.png" alt="Add Memeber" width="25%" />
+</div>
+
 ---
 
 ### LEAVE A GROUP
 To **leave a group**, users can click on the option to leave, and they will be prompted with a confirmation message.
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/LeaveGroup.png" alt="Leave Group" width="25%" />
+</div>
 
 ---
 
@@ -327,6 +429,10 @@ The **Settings Page** contains sections for:
 - **About Pages**
 
 Currently, these sections contain placeholder information. Users can also **log out** from this page.
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="images/readmeimages/Settings.png" alt="Settings" width="25%" />
+</div>
 
 ---
 
